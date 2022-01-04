@@ -9,9 +9,14 @@ namespace TemperaturesPlus
 {
     static class TemperatureUtility
     {
-        static float GetTemperatureForCell(IntVec3 cell, Map map)
+        public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
+
+        public static float GetAverageAdjacentTemperatures(this IntVec3 cell, Map map)
         {
-            return GenTemperature.GetTemperatureForCell(cell, map);
+            float sum = 0;
+            foreach (IntVec3 c in cell.AdjacentCells())
+                sum += map.TemperatureInfo().GetTemperatureForCell(c);
+            return sum / 4;
         }
     }
 }
