@@ -1,22 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Verse;
+﻿using Verse;
 
 namespace TemperaturesPlus
 {
+    enum CellMaterialType
+    {
+        Air = 0,
+        Rock,
+        Structure
+    };
+
     static class TemperatureUtility
     {
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
-        public static float GetAverageAdjacentTemperatures(this IntVec3 cell, Map map)
+        internal static CellMaterialType GetMaterialType(this IntVec3 cell, Map map)
         {
-            float sum = 0;
-            foreach (IntVec3 c in cell.AdjacentCells())
-                sum += map.TemperatureInfo().GetTemperatureForCell(c);
-            return sum / 4;
+            if (!cell.InBounds(map))
+                return CellMaterialType.Air;
+            if (cell.GetFirstMineable(map) != null)
+                return CellMaterialType.Rock;
+            Building building;
+            if ((building = cell.GetFirstBuilding(map)) != null && building.def.defName == "Wall")
+                return CellMaterialType.Structure;
+            return CellMaterialType.Air;
+        }
+
+        public static float GetHeatConductivity(this IntVec3 cell, Map map)
+        {
+            switch (cell.GetMaterialType(map))
+            {
+                case CellMaterialType.Rock:
+                case CellMaterialType.Structure:
+                    return 10;
+
+                default:
+                    return 1;
+            }
+        }
+
+        /// <summary>
+        /// Returns volumetric heat capacity for a cell
+        /// </summary>
+        public static float GetHeatCapacity(this IntVec3 cell, Map map)
+        {
+            switch (cell.GetMaterialType(map))
+            {
+                case CellMaterialType.Rock:
+                    return 3000000;
+
+                case CellMaterialType.Structure:
+                    return 1000000;
+
+                default:
+                    return 10000;
+            }
         }
     }
 }
