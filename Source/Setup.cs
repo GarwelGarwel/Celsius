@@ -11,11 +11,11 @@ using Verse;
 namespace TemperaturesPlus
 {
     [StaticConstructorOnStartup]
-    public static class HarmonyManager
+    public static class Setup
     {
         static Harmony harmony;
 
-        static HarmonyManager()
+        static Setup()
         {
             Harmony.DEBUG = Prefs.DevMode;
 
@@ -23,7 +23,7 @@ namespace TemperaturesPlus
                 return;
 
             harmony = new Harmony("Garwel.TemperaturesPlus");
-            Type type = typeof(HarmonyManager);
+            Type type = typeof(Setup);
 
             void LogPatchError(string methodName) => LogUtility.Log($"Error patching {methodName}.", LogLevel.Error);
 
