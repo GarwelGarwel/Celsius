@@ -12,8 +12,9 @@ namespace TemperaturesPlus
     {
         const int ticksPerUpdate = 250;
         const int secondsPerUpdate = 3600 * ticksPerUpdate / 2500;
-        const float heatPushEffect = ticksPerUpdate / 2;
-        const float outdoorEffect = 3;
+        const float convectionEffect = 1;
+        const float heatPushEffect = ticksPerUpdate * 10;
+        const float defaultTempEffect = 3;
 
         float[,] temperatures;
 
@@ -26,7 +27,13 @@ namespace TemperaturesPlus
             temperatures = new float[map.Size.x, map.Size.z];
             for (int i = 0; i < temperatures.GetLength(0); i++)
                 for (int j = 0; j < temperatures.GetLength(1); j++)
-                    temperatures[i, j] = new IntVec3(i, 0, j).GetTemperature(map);
+                {
+                    IntVec3 cell = new IntVec3(i, 0, j);
+                    Room room = cell.GetRoom(map);
+                    if (room != null)
+                        temperatures[i, j] = room.TempTracker.Temperature;
+                    else TryGetDefaultTemperatureForCell(cell, out temperatures[i, j]);
+                }
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
 
@@ -56,12 +63,7 @@ namespace TemperaturesPlus
         float HeatPushFromCell(IntVec3 cell)
         {
             CompProperties_HeatPusher heatPusher = cell.GetFirstBuilding(map)?.GetComp<CompHeatPusher>()?.Props;
-            if (heatPusher == null)
-                return 0;
-            float temp = GetTemperatureForCell(cell);
-            if (temp > heatPusher.heatPushMinTemperature + 20 && temp < heatPusher.heatPushMaxTemperature - 20)
-                return heatPusher.heatPerSecond;
-            return 0;
+            return heatPusher != null ? heatPusher.heatPerSecond : 0;
         }
 
         public override void MapComponentTick()
@@ -76,31 +78,55 @@ namespace TemperaturesPlus
                 {
                     IntVec3 cell = new IntVec3(i, 0, j);
                     float lerpFactor = Mathf.Exp(-secondsPerUpdate * cell.GetHeatConductivity(map) / cell.GetHeatCapacity(map));
+
+                    // Diffusion
                     float weightedAvg = GetWeightedAverageTemperatureAroundCell(cell);
                     newTemperatures[i, j] = Mathf.Lerp(weightedAvg, GetTemperatureForCell(cell), lerpFactor);
-                    float outdoorLerpFactor = Mathf.Pow(lerpFactor, outdoorEffect);
-                    if (!cell.Roofed(map))
-                        newTemperatures[i, j] = Mathf.Lerp(map.mapTemperature.OutdoorTemp, newTemperatures[i, j], outdoorLerpFactor);
+                    if (Prefs.DevMode && cell == UI.MouseCell())
+                        LogUtility.Log($"{CellInfo(cell)} Weighted average temp: {weightedAvg:F1}. Diffusion lerp factor: {lerpFactor}.\nNeighbours:\n{cell.AdjacentCells().Select(c => CellInfo(c)).ToLineList("- ")}");
+
+                    // Convection (for air only)
+                    if (cell.GetMaterialType(map) == CellMaterialType.Air)
+                    {
+                        float nearbyAirTemp = 0;
+                        int airCells = 0;
+                        foreach (IntVec3 c in cell.AdjacentCells().Where(c => c.GetMaterialType(map) == CellMaterialType.Air))
+                        {
+                            nearbyAirTemp += GetTemperatureForCell(c);
+                            airCells++;
+                        }
+                        if (airCells > 0)
+                        {
+                            newTemperatures[i, j] = Mathf.Lerp(nearbyAirTemp / airCells, newTemperatures[i, j], Mathf.Pow(lerpFactor, airCells * convectionEffect));
+                            if (Prefs.DevMode && cell == UI.MouseCell())
+                                LogUtility.Log($"Nearby air cells: {airCells}. Average air temp: {nearbyAirTemp / airCells:F1}. Convection lerp factor: {Mathf.Pow(lerpFactor, airCells * convectionEffect)}");
+                        }
+                    }
+
+                    // Heat push or pull
+                    if (TryGetDefaultTemperatureForCell(cell, out float defaultTemperature))
+                        newTemperatures[i, j] = Mathf.Lerp(defaultTemperature, newTemperatures[i, j], Mathf.Pow(lerpFactor, defaultTempEffect));
                     float heatPush = HeatPushFromCell(cell);
                     newTemperatures[i, j] += heatPush * heatPushEffect / cell.GetHeatCapacity(map);
-                    if (Prefs.DevMode && cell == UI.MouseCell())
-                        LogUtility.Log($"{CellInfo(cell)} Weighted average temp: {weightedAvg:F1}. Lerp factor: {lerpFactor}. Diff with outside temp: {newTemperatures[i, j] - map.mapTemperature.OutdoorTemp:F1}. Heat push: {heatPush}.\nNeighbours:\n{cell.AdjacentCells().Select(c => CellInfo(c)).ToLineList("- ")}");
+                    if (heatPush != 0 && Prefs.DevMode && cell == UI.MouseCell())
+                        LogUtility.Log($"Heat push: {heatPush}.");
                 }
 
             temperatures = (float[,])newTemperatures.Clone();
         }
 
-        public float GetTemperatureForCell(IntVec3 cell)
+        public bool TryGetDefaultTemperatureForCell(IntVec3 cell, out float temperature)
         {
-            if (cell.InBounds(map))
-                return temperatures[cell.x, cell.z];
-            return map.mapTemperature.OutdoorTemp;
+            if (cell.GetFirstMineable(map) != null)
+            {
+                temperature = TemperatureTuning.DeepUndergroundTemperature;
+                return true;
+            }
+            temperature = map.mapTemperature.OutdoorTemp;
+            return !cell.InBounds(map) || (!cell.Roofed(map) && cell.GetMaterialType(map) == CellMaterialType.Air);
         }
 
-        public void SetTemperatureForCell(IntVec3 cell, float temperature)
-        {
-            if (cell.InBounds(map))
-                temperatures[cell.x, cell.z] = temperature;
-        }
+        public float GetTemperatureForCell(IntVec3 cell) =>
+            cell.InBounds(map) && temperatures != null ? temperatures[cell.x, cell.z] : map.mapTemperature.OutdoorTemp;
     }
 }

@@ -13,6 +13,14 @@ namespace TemperaturesPlus
     {
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
+        public static float GetTemperatureForCell(this IntVec3 cell, Map map)
+        {
+            TemperatureInfo tempInfo = map.TemperatureInfo();
+            if (tempInfo == null)
+                return map.mapTemperature.OutdoorTemp;
+            return tempInfo.GetTemperatureForCell(cell);
+        }
+
         internal static CellMaterialType GetMaterialType(this IntVec3 cell, Map map)
         {
             if (!cell.InBounds(map))
@@ -20,7 +28,7 @@ namespace TemperaturesPlus
             if (cell.GetFirstMineable(map) != null)
                 return CellMaterialType.Rock;
             Building building;
-            if ((building = cell.GetFirstBuilding(map)) != null && building.def.defName == "Wall")
+            if ((building = cell.GetFirstBuilding(map)) != null && building.def.holdsRoof)
                 return CellMaterialType.Structure;
             return CellMaterialType.Air;
         }
@@ -30,8 +38,10 @@ namespace TemperaturesPlus
             switch (cell.GetMaterialType(map))
             {
                 case CellMaterialType.Rock:
-                case CellMaterialType.Structure:
                     return 10;
+
+                case CellMaterialType.Structure:
+                    return 4;
 
                 default:
                     return 1;
@@ -49,7 +59,7 @@ namespace TemperaturesPlus
                     return 3000000;
 
                 case CellMaterialType.Structure:
-                    return 1000000;
+                    return 100000;
 
                 default:
                     return 10000;
