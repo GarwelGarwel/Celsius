@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<StatDef>
+		<defName>HeatCapacity</defName>
+		<label>heat capacity</label>
+		<description>How slowly the object changes its temperature.</description>
+		<category>Basics</category>
+		<workerClass>TemperaturesPlus.StatWorker_HeatCapacity</workerClass>
+		<showOnPawns>false</showOnPawns>
+		<defaultBaseValue>0</defaultBaseValue>
+		<minValue>0</minValue>
+		<showOnDefaultValue>false</showOnDefaultValue>
+		<toStringStyle>FloatOne</toStringStyle>
+		<minifiedThingInherits>true</minifiedThingInherits>
+		<displayPriorityInCategory>1400</displayPriorityInCategory>
+	</StatDef>
+
+</Defs>

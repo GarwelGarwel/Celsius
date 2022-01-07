@@ -17,8 +17,7 @@ namespace TemperaturesPlus
 
         static Setup()
         {
-            Harmony.DEBUG = Prefs.DevMode;
-
+            // Setting up Harmony
             if (harmony != null)
                 return;
 
@@ -47,14 +46,25 @@ namespace TemperaturesPlus
             harmony.Patch(
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
                 postfix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
-            LogUtility.Log($"Initialization complete.");
+            LogUtility.Log($"Harmony initialization complete.");
+
+            // Adding CompThermal to all applicable Things
+            int patched = 0;
+            foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where(def => CompThermal.ShouldApplyTo(def)))
+            {
+                CompProperties cp = new CompProperties(typeof(CompThermal));
+                def.comps.Add(cp);
+                patched++;
+            }
+            LogUtility.Log($"{patched.ToStringCached()} ThingDefs patched.");
+
         }
 
         public static bool GenTemperature_TryGetDirectAirTemperatureForCell(ref bool __result, IntVec3 c, Map map, out float temperature)
         {
             temperature = TemperatureUtility.GetTemperatureForCell(c, map);
-            if (c == UI.MouseCell())
-                LogUtility.Log($"Air temperature for {c} @ {map}: {temperature.ToStringTemperature()}.");
+            //if (c == UI.MouseCell())
+            //    LogUtility.Log($"Air temperature for {c} @ {map}: {temperature.ToStringTemperature()}.");
             __result = true;
             return false;
         }
@@ -70,8 +80,8 @@ namespace TemperaturesPlus
                 return;
             }
             __result = __instance.Cells.Average(cell => temperatureInfo.GetTemperatureForCell(cell));
-            if (UI.MouseCell().GetRoom(__instance.Map) == __instance && Find.TickManager.TicksGame % 150 == 0)
-                LogUtility.Log($"Room temperature for {__instance.ID} ({__instance.CellCount} cells): {__result:F1}. Vanilla result: {oldResult:F1}.");
+            //if (UI.MouseCell().GetRoom(__instance.Map) == __instance && Find.TickManager.TicksGame % 150 == 0)
+            //    LogUtility.Log($"Room temperature for {__instance.ID} ({__instance.CellCount} cells): {__result:F1}. Vanilla result: {oldResult:F1}.");
         }
     }
 }

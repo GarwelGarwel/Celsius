@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System.Linq;
+using Verse;
 
 namespace TemperaturesPlus
 {
@@ -33,15 +34,18 @@ namespace TemperaturesPlus
             return CellMaterialType.Air;
         }
 
-        public static float GetHeatConductivity(this IntVec3 cell, Map map)
+        public static float GetHeatConductivity(this IntVec3 cell, Map map, bool convection = false)
         {
             switch (cell.GetMaterialType(map))
             {
+                case CellMaterialType.Air:
+                    return convection ? 0.3f : 0.03f;
+
                 case CellMaterialType.Rock:
-                    return 10;
+                    return 2;
 
                 case CellMaterialType.Structure:
-                    return 4;
+                    return 0.1f;
 
                 default:
                     return 1;
@@ -49,7 +53,7 @@ namespace TemperaturesPlus
         }
 
         /// <summary>
-        /// Returns volumetric heat capacity for a cell
+        /// Returns heat capacity for a cell
         /// </summary>
         public static float GetHeatCapacity(this IntVec3 cell, Map map)
         {
@@ -64,6 +68,17 @@ namespace TemperaturesPlus
                 default:
                     return 10000;
             }
+        }
+
+        public static float GetTemperature(this Thing thing)
+        {
+            CompThermal comp = thing.TryGetComp<CompThermal>();
+            return comp != null ? comp.temperature : thing.Position.GetTemperatureForCell(thing.Map);
+        }
+
+        public static float GetSpecificHeatCapacity(this Thing thing)
+        {
+            return 1000;
         }
     }
 }

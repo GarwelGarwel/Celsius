@@ -1,8 +1,8 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
@@ -12,9 +12,9 @@ namespace TemperaturesPlus
     {
         const int ticksPerUpdate = 250;
         const int secondsPerUpdate = 3600 * ticksPerUpdate / 2500;
-        const float convectionEffect = 1;
         const float heatPushEffect = ticksPerUpdate * 10;
-        const float defaultTempEffect = 3;
+        const float defaultTempEffect = 1;
+        const float thingTempEffect = 1;
 
         float[,] temperatures;
 
@@ -66,6 +66,8 @@ namespace TemperaturesPlus
             return heatPusher != null ? heatPusher.heatPerSecond : 0;
         }
 
+
+
         public override void MapComponentTick()
         {
             if (Find.TickManager.TicksGame % ticksPerUpdate != 0)
@@ -77,39 +79,62 @@ namespace TemperaturesPlus
                 for (int j = 0; j < map.Size.z; j++)
                 {
                     IntVec3 cell = new IntVec3(i, 0, j);
-                    float lerpFactor = Mathf.Exp(-secondsPerUpdate * cell.GetHeatConductivity(map) / cell.GetHeatCapacity(map));
+                    float capacity = cell.GetHeatCapacity(map);
+                    float conductivity = cell.GetHeatConductivity(map);
 
-                    // Diffusion
-                    float weightedAvg = GetWeightedAverageTemperatureAroundCell(cell);
-                    newTemperatures[i, j] = Mathf.Lerp(weightedAvg, GetTemperatureForCell(cell), lerpFactor);
+                    //float lerpFactor = Mathf.Exp(-secondsPerUpdate * cell.GetHeatConductivity(map) / cell.GetHeatCapacity(map));
+
+                    // Diffusion & convection
+                    float adjacentTemp = GetWeightedAverageTemperatureAroundCell(cell);
+                    float adjacentCapacity = cell.AdjacentCells().Sum(c => c.GetHeatCapacity(map));
+                    float finalTemp = GenMath.WeightedAverage(newTemperatures[i, j], capacity, adjacentTemp, adjacentCapacity);
+                    bool isAir = cell.GetMaterialType(map) == CellMaterialType.Air;
+                    float totalConductivity = (cell.AdjacentCells().Average(c => c.GetHeatConductivity(map, isAir && c.GetMaterialType(map) == CellMaterialType.Air)) + cell.GetHeatConductivity(map)) / 2;
+                    float lerpFactor = Mathf.Pow(1 - (adjacentCapacity + capacity) * totalConductivity / (adjacentCapacity * capacity), secondsPerUpdate);
+                    newTemperatures[i, j] = Mathf.Lerp(adjacentTemp, GetTemperatureForCell(cell), lerpFactor);
                     if (Prefs.DevMode && cell == UI.MouseCell())
-                        LogUtility.Log($"{CellInfo(cell)} Weighted average temp: {weightedAvg:F1}. Diffusion lerp factor: {lerpFactor}.\nNeighbours:\n{cell.AdjacentCells().Select(c => CellInfo(c)).ToLineList("- ")}");
+                        LogUtility.Log($"{CellInfo(cell)} Environment temperature: {adjacentTemp:F1}. Projected final temperature: {finalTemp:F1}. Diffusion lerp factor: {lerpFactor:P2}.\nNeighbours:\n{cell.AdjacentCells().Select(c => CellInfo(c)).ToLineList("- ")}");
 
-                    // Convection (for air only)
-                    if (cell.GetMaterialType(map) == CellMaterialType.Air)
-                    {
-                        float nearbyAirTemp = 0;
-                        int airCells = 0;
-                        foreach (IntVec3 c in cell.AdjacentCells().Where(c => c.GetMaterialType(map) == CellMaterialType.Air))
-                        {
-                            nearbyAirTemp += GetTemperatureForCell(c);
-                            airCells++;
-                        }
-                        if (airCells > 0)
-                        {
-                            newTemperatures[i, j] = Mathf.Lerp(nearbyAirTemp / airCells, newTemperatures[i, j], Mathf.Pow(lerpFactor, airCells * convectionEffect));
-                            if (Prefs.DevMode && cell == UI.MouseCell())
-                                LogUtility.Log($"Nearby air cells: {airCells}. Average air temp: {nearbyAirTemp / airCells:F1}. Convection lerp factor: {Mathf.Pow(lerpFactor, airCells * convectionEffect)}");
-                        }
-                    }
+                    //// Convection (for air only)
+                    //if (cell.GetMaterialType(map) == CellMaterialType.Air)
+                    //{
+                    //    float nearbyAirTemp = 0;
+                    //    int airCells = 0;
+                    //    foreach (IntVec3 c in cell.AdjacentCells().Where(c => c.GetMaterialType(map) == CellMaterialType.Air))
+                    //    {
+                    //        nearbyAirTemp += GetTemperatureForCell(c);
+                    //        airCells++;
+                    //    }
+                    //    if (airCells > 0)
+                    //    {
+                    //        newTemperatures[i, j] = Mathf.Lerp(nearbyAirTemp / airCells, newTemperatures[i, j], Mathf.Pow(lerpFactor, airCells * convectionEffect));
+                    //        if (Prefs.DevMode && cell == UI.MouseCell())
+                    //            LogUtility.Log($"Nearby air cells: {airCells}. Average air temp: {nearbyAirTemp / airCells:F1}. Convection lerp factor: {Mathf.Pow(lerpFactor, airCells * convectionEffect)}");
+                    //    }
+                    //}
+
+                    // Default environment temperature
+                    if (TryGetDefaultTemperatureForCell(cell, out float defaultTemperature))
+                        newTemperatures[i, j] = Mathf.Lerp(defaultTemperature, newTemperatures[i, j], Mathf.Exp(-secondsPerUpdate * cell.GetHeatConductivity(map, isAir) / capacity * defaultTempEffect));
 
                     // Heat push or pull
-                    if (TryGetDefaultTemperatureForCell(cell, out float defaultTemperature))
-                        newTemperatures[i, j] = Mathf.Lerp(defaultTemperature, newTemperatures[i, j], Mathf.Pow(lerpFactor, defaultTempEffect));
                     float heatPush = HeatPushFromCell(cell);
-                    newTemperatures[i, j] += heatPush * heatPushEffect / cell.GetHeatCapacity(map);
+                    newTemperatures[i, j] += heatPush * heatPushEffect / capacity;
                     if (heatPush != 0 && Prefs.DevMode && cell == UI.MouseCell())
                         LogUtility.Log($"Heat push: {heatPush}.");
+
+                    // Things in cell
+                    foreach (Thing thing in cell.GetThingList(map).OfType<ThingWithComps>().Where(thing => thing.def.HasComp(typeof(CompThermal))))
+                    {
+                        CompThermal compThermal = thing.TryGetComp<CompThermal>();
+                        float thingCapacity = thing.GetStatValue(DefOf.HeatCapacity);
+                        finalTemp = GenMath.WeightedAverage(newTemperatures[i, j], cell.GetHeatCapacity(map), compThermal.temperature, thingCapacity);
+                        lerpFactor = Mathf.Pow(1 - (thingCapacity + capacity) * conductivity / (thingCapacity * capacity), secondsPerUpdate * thingTempEffect);
+                        if (Prefs.DevMode && cell == UI.MouseCell())
+                            LogUtility.Log($"{thing.def.defName} has temperature {compThermal.temperature:F1} and heat capacity {thingCapacity}. Projected final temperature: {finalTemp:F1}. Lerp factor: {lerpFactor}.");
+                        compThermal.temperature = Mathf.Lerp(finalTemp, compThermal.temperature, lerpFactor);
+                        newTemperatures[i, j] = Mathf.Lerp(finalTemp, newTemperatures[i, j], lerpFactor);
+                    }
                 }
 
             temperatures = (float[,])newTemperatures.Clone();
