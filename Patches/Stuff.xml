@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!--Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Sandstone" or defName="SmoothedSandstone"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<cellInteraction>Integrated</cellInteraction>
+				<heatCapacity>2200000</heatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Granite" or defName="SmoothedGranite"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<cellInteraction>Integrated</cellInteraction>
+				<heatCapacity>2550000</heatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Limestone" or defName="SmoothedLimestone"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<cellInteraction>Integrated</cellInteraction>
+				<heatCapacity>2250000</heatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Slate" or defName="SmoothedSlate"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<cellInteraction>Integrated</cellInteraction>
+				<heatCapacity>2250000</heatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Marble" or defName="SmoothedMarble"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<cellInteraction>Integrated</cellInteraction>
+				<heatCapacity>2000000</heatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationConditional">
+		<xpath>Defs/ThingDef[thingClass="Mineable"]/modExtensions/li[@Class="TemperaturesPlus.ThermalModExtension"]</xpath>
+		<nomatch Class="PatchOperationAddModExtension">
+			<value>
+				<li Class="TemperaturesPlus.ThermalModExtension">
+					<cellInteraction>Integrated</cellInteraction>
+					<heatCapacity>3000000</heatCapacity>
+				</li>
+			</value>
+		</nomatch>
+	</Operation-->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<replacesAirProperties>true</replacesAirProperties>
+				<heatCapacity>2200000</heatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- Pure stuff: Basics -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Silver"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>233</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Gold"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>129</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Steel"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>466</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Plasteel"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>932</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="WoodLog"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>1700</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Uranium"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>116</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Jade"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>509</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- Stone blocks -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="BlocksSandstone"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>835</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="BlocksGranite"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>790</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="BlocksLimestone"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>835</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="BlocksSlate"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThermalModExtension">
+				<specificHeatCapacity>835</specificHeatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>
