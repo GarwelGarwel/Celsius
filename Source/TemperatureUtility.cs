@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using RimWorld;
+using System.Linq;
 using Verse;
 
 namespace TemperaturesPlus
@@ -14,6 +15,13 @@ namespace TemperaturesPlus
     {
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
+        public static ThingThermalProperties AirProperties = new ThingThermalProperties()
+        {
+            replacesAirProperties = true,
+            heatCapacity = 1200,
+            conductivity = 0.03f
+        };
+
         public static float GetTemperatureForCell(this IntVec3 cell, Map map)
         {
             TemperatureInfo tempInfo = map.TemperatureInfo();
@@ -22,63 +30,38 @@ namespace TemperaturesPlus
             return tempInfo.GetTemperatureForCell(cell);
         }
 
-        internal static CellMaterialType GetMaterialType(this IntVec3 cell, Map map)
+        public static ThingThermalProperties GetThermalProperties(this IntVec3 cell, Map map)
         {
-            if (!cell.InBounds(map))
-                return CellMaterialType.Air;
-            if (cell.GetFirstMineable(map) != null)
-                return CellMaterialType.Rock;
-            Building building;
-            if ((building = cell.GetFirstBuilding(map)) != null && building.def.holdsRoof)
-                return CellMaterialType.Structure;
-            return CellMaterialType.Air;
+            ThingThermalProperties thermalProps = null;
+            if (cell.InBounds(map))
+                thermalProps = cell.GetThingList(map)
+                    .Select(thing => thing.TryGetComp<CompThermal>()?.ThermalProperties)
+                    .FirstOrDefault(props => props != null && props.replacesAirProperties);
+            return thermalProps ?? AirProperties;
         }
 
-        public static float GetHeatConductivity(this IntVec3 cell, Map map, bool convection = false)
-        {
-            switch (cell.GetMaterialType(map))
-            {
-                case CellMaterialType.Air:
-                    return convection ? 0.3f : 0.03f;
+        public static ThingThermalProperties GetThermalProperties(Thing thing) => thing.TryGetComp<CompThermal>()?.ThermalProperties ?? new ThingThermalProperties();
 
-                case CellMaterialType.Rock:
-                    return 2;
-
-                case CellMaterialType.Structure:
-                    return 0.1f;
-
-                default:
-                    return 1;
-            }
-        }
+        internal static bool IsAir(this IntVec3 cell, Map map) => cell.GetThermalProperties(map) == AirProperties;
 
         /// <summary>
         /// Returns heat capacity for a cell
         /// </summary>
-        public static float GetHeatCapacity(this IntVec3 cell, Map map)
+        public static float GetHeatCapacity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).heatCapacity;
+
+        public static float GetHeatConductivity(this IntVec3 cell, Map map, bool convection = false)
         {
-            switch (cell.GetMaterialType(map))
-            {
-                case CellMaterialType.Rock:
-                    return 3000000;
-
-                case CellMaterialType.Structure:
-                    return 100000;
-
-                default:
-                    return 10000;
-            }
+            ThingThermalProperties modEx = cell.GetThermalProperties(map);
+            return convection ? modEx.conductivity * TemperaturesPlus.TemperatureInfo.convectionConductivityEffect : modEx.conductivity;
         }
 
         public static float GetTemperature(this Thing thing)
         {
             CompThermal comp = thing.TryGetComp<CompThermal>();
-            return comp != null ? comp.temperature : thing.Position.GetTemperatureForCell(thing.Map);
+            return comp != null && comp.ThermalProperties.heatCapacity > 0 ? comp.temperature : thing.Position.GetTemperatureForCell(thing.Map);
         }
 
-        public static float GetSpecificHeatCapacity(this Thing thing)
-        {
-            return 1000;
-        }
+        public static ThingDef GetUnderlyingStuff(this Thing thing) =>
+            thing.def.IsStuff ? thing.def : thing.Stuff ?? thing.def.defaultStuff;
     }
 }

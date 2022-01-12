@@ -3,9 +3,6 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 
 namespace TemperaturesPlus
@@ -63,8 +60,6 @@ namespace TemperaturesPlus
         public static bool GenTemperature_TryGetDirectAirTemperatureForCell(ref bool __result, IntVec3 c, Map map, out float temperature)
         {
             temperature = TemperatureUtility.GetTemperatureForCell(c, map);
-            //if (c == UI.MouseCell())
-            //    LogUtility.Log($"Air temperature for {c} @ {map}: {temperature.ToStringTemperature()}.");
             __result = true;
             return false;
         }
@@ -80,8 +75,6 @@ namespace TemperaturesPlus
                 return;
             }
             __result = __instance.Cells.Average(cell => temperatureInfo.GetTemperatureForCell(cell));
-            //if (UI.MouseCell().GetRoom(__instance.Map) == __instance && Find.TickManager.TicksGame % 150 == 0)
-            //    LogUtility.Log($"Room temperature for {__instance.ID} ({__instance.CellCount} cells): {__result:F1}. Vanilla result: {oldResult:F1}.");
         }
     }
 }

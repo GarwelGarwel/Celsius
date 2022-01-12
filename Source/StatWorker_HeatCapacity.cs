@@ -7,13 +7,11 @@ namespace TemperaturesPlus
     {
         public override float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
         {
-            Thing thing = req.Thing as ThingWithComps;
-            if (thing == null || thing.def.category != ThingCategory.Item)
-                return 0;
-            return thing.GetStatValue(StatDefOf.Mass) * thing.GetSpecificHeatCapacity() * thing.stackCount; // Replace with more accurate specific heat capacity
+            CompThermal compThermal = req.Thing?.TryGetComp<CompThermal>();
+            return compThermal != null ? compThermal.ThermalProperties.heatCapacity : 0;
         }
 
-        public override bool IsDisabledFor(Thing thing) =>
-            !(thing is ThingWithComps) || thing.def.category != ThingCategory.Item;
+        public override string ValueToString(float val, bool finalized, ToStringNumberSense numberSense = ToStringNumberSense.Absolute) =>
+            $"{base.ValueToString(val, finalized, numberSense)} J/C";
     }
 }

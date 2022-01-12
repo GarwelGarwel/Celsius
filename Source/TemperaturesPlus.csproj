@@ -64,8 +64,9 @@
     <Compile Include="LogUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatWorker_HeatCapacity.cs" />
+    <Compile Include="StuffThermalProperties.cs" />
     <Compile Include="TemperatureInfo.cs" />
-    <Compile Include="ThermalModExtension.cs" />
+    <Compile Include="ThingThermalProperties.cs" />
     <Compile Include="TemperatureUtility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
