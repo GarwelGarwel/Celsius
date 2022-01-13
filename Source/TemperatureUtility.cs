@@ -15,13 +15,6 @@ namespace TemperaturesPlus
     {
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
-        public static ThingThermalProperties AirProperties = new ThingThermalProperties()
-        {
-            replacesAirProperties = true,
-            heatCapacity = 1200,
-            conductivity = 0.03f
-        };
-
         public static float GetTemperatureForCell(this IntVec3 cell, Map map)
         {
             TemperatureInfo tempInfo = map.TemperatureInfo();
@@ -37,12 +30,12 @@ namespace TemperaturesPlus
                 thermalProps = cell.GetThingList(map)
                     .Select(thing => thing.TryGetComp<CompThermal>()?.ThermalProperties)
                     .FirstOrDefault(props => props != null && props.replacesAirProperties);
-            return thermalProps ?? AirProperties;
+            return thermalProps ?? ThingThermalProperties.Air;
         }
 
         public static ThingThermalProperties GetThermalProperties(Thing thing) => thing.TryGetComp<CompThermal>()?.ThermalProperties ?? new ThingThermalProperties();
 
-        internal static bool IsAir(this IntVec3 cell, Map map) => cell.GetThermalProperties(map) == AirProperties;
+        internal static bool IsAir(this IntVec3 cell, Map map) => cell.GetThermalProperties(map) == ThingThermalProperties.Air;
 
         /// <summary>
         /// Returns heat capacity for a cell
@@ -61,7 +54,6 @@ namespace TemperaturesPlus
             return comp != null && comp.ThermalProperties.heatCapacity > 0 ? comp.temperature : thing.Position.GetTemperatureForCell(thing.Map);
         }
 
-        public static ThingDef GetUnderlyingStuff(this Thing thing) =>
-            thing.def.IsStuff ? thing.def : thing.Stuff ?? thing.def.defaultStuff;
+        public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
     }
 }

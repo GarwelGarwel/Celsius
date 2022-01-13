@@ -6,6 +6,19 @@ namespace TemperaturesPlus
     {
         public static readonly ThingThermalProperties Empty = new ThingThermalProperties();
 
+        public static readonly ThingThermalProperties Air = new ThingThermalProperties()
+        {
+            replacesAirProperties = true,
+            heatCapacity = 1200,
+            conductivity = 0.03f
+        };
+
+        public static readonly ThingThermalProperties Meat = new ThingThermalProperties()
+        {
+            heatCapacity = 100,
+            conductivity = 0.5f
+        };
+
         public bool replacesAirProperties;
         public float mass;
         public float heatCapacity;
@@ -24,6 +37,7 @@ namespace TemperaturesPlus
             conductivity = copyFrom.conductivity;
         }
 
-        public override string ToString() => $"Mass: {mass}. Heat capacity: {heatCapacity}. Conductivity: {conductivity}.{(replacesAirProperties ? " Replaces air properties." : "")}";
+        public override string ToString() =>
+            $"Mass: {mass.ToStringMass()}. Heat capacity: {heatCapacity} J/kg/C. Conductivity: {conductivity} J/kg.{(replacesAirProperties ? " Replaces air properties." : "")}";
     }
 }

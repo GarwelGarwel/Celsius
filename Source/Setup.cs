@@ -42,19 +42,23 @@ namespace TemperaturesPlus
                 prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_TryGetDirectAirTemperatureForCell")));
             harmony.Patch(
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
-                postfix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
+                prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
+            harmony.Patch(
+              AccessTools.PropertyGetter(typeof(Thing), "AmbientTemperature"),
+              prefix: new HarmonyMethod(type.GetMethod("Thing_AmbientTemperature_get")));
             LogUtility.Log($"Harmony initialization complete.");
 
             // Adding CompThermal to all applicable Things
-            int patched = 0;
             foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where(def => CompThermal.ShouldApplyTo(def)))
             {
-                CompProperties cp = new CompProperties(typeof(CompThermal));
-                def.comps.Add(cp);
-                patched++;
+                if (def.IsMeat)
+                {
+                    if (def.modExtensions == null)
+                        def.modExtensions = new List<DefModExtension>();
+                    def.modExtensions.Add(ThingThermalProperties.Meat);
+                }
+                def.comps.Add(new CompProperties(typeof(CompThermal)));
             }
-            LogUtility.Log($"{patched.ToStringCached()} ThingDefs patched.");
-
         }
 
         public static bool GenTemperature_TryGetDirectAirTemperatureForCell(ref bool __result, IntVec3 c, Map map, out float temperature)
@@ -64,17 +68,26 @@ namespace TemperaturesPlus
             return false;
         }
 
-        // Can change to prefix when tested enough
-        public static void Room_Temperature_get(ref float __result, Room __instance)
+        public static bool Room_Temperature_get(ref float __result, Room __instance)
         {
             float oldResult = __result;
             TemperatureInfo temperatureInfo = __instance.Map.TemperatureInfo();
             if (temperatureInfo == null)
             {
                 LogUtility.Log($"TemperatureInfo unavailable for {__instance?.Map}.", LogLevel.Error);
-                return;
+                return true;
             }
             __result = __instance.Cells.Average(cell => temperatureInfo.GetTemperatureForCell(cell));
+            return false;
+        }
+
+        public static bool Thing_AmbientTemperature_get(ref float __result, Thing __instance)
+        {
+            CompThermal comp = __instance.TryGetComp<CompThermal>();
+            if (comp == null || !__instance.Spawned || !comp.HasTemperature)
+                return true;
+            __result = comp.temperature;
+            return false;
         }
     }
 }

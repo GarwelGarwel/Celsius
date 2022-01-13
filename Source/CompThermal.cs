@@ -23,7 +23,7 @@ namespace TemperaturesPlus
                     return thermalProps;
 
                 thermalProps = new ThingThermalProperties(parent.def.GetModExtension<ThingThermalProperties>());
-                StuffThermalProperties stuffProps = parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>();
+                StuffThermalProperties stuffProps = parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>();
                 if (stuffProps != null)
                 {
                     if (thermalProps.mass == 0)
@@ -45,7 +45,13 @@ namespace TemperaturesPlus
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
-            if (temperature == 0 && HasTemperature)
+            //if (temperature == 0 && HasTemperature)
+                temperature = parent.Position.GetTemperatureForCell(parent.Map);
+        }
+
+        public override void Initialize(CompProperties props)
+        {
+            if (temperature == 0 && parent.Spawned && HasTemperature)
                 temperature = parent.Position.GetTemperatureForCell(parent.Map);
         }
 
