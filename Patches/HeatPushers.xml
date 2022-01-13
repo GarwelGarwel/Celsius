@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="PatchOperationSequence">
+		<success>Always</success>
+		<operations>
+			<li Class="PatchOperationTest">
+				<xpath>/Defs/ThingDef[defName="SteamGeyser"]/comps</xpath>
+				<success>Invert</success>
+			</li>
+			<li Class="PatchOperationAdd">
+				<xpath>/Defs/ThingDef[defName="SteamGeyser"]</xpath>
+				<value>
+					<comps/>
+				</value>
+			</li>
+		</operations>
+	</Operation>
+	<Operation Class="PatchOperationAdd">
+		<xpath>/Defs/ThingDef[defName="SteamGeyser"]/comps</xpath>
+		<value>
+			<li Class="CompProperties_HeatPusher">
+				<compClass>CompHeatPusher</compClass>
+				<heatPerSecond>5</heatPerSecond>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>
