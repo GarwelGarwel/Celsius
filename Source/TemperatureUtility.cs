@@ -15,6 +15,7 @@ namespace TemperaturesPlus
     static class TemperatureUtility
     {
         const float FireHeatPush = 15;
+        const float PawnHeatPush = 0.2f;
 
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
@@ -60,6 +61,8 @@ namespace TemperaturesPlus
             CompHeatPusher heatPusher = thing.TryGetComp<CompHeatPusher>();
             if (heatPusher != null)
                 return heatPusher.Props.heatPerSecond;
+            if (thing is Pawn pawn && !pawn.Dead && !pawn.RaceProps.Insect)
+                return pawn.BodySize * PawnHeatPush;
             if (thing is Fire)
                 return FireHeatPush;
             return 0;
