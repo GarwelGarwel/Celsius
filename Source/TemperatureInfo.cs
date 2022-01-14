@@ -91,11 +91,10 @@ namespace TemperaturesPlus
                     ThingThermalProperties cellProps = cell.GetThermalProperties(map);
                     bool isAir = cell.IsAir(map);
                     float change = 0;
-
-                    // Diffusion & convection
-
                     if (log)
                         LogUtility.Log(CellInfo(cell));
+
+                    // Diffusion & convection
                     foreach (IntVec3 neighbour in cell.AdjacentCells())
                     {
                         if (log)
@@ -118,20 +117,19 @@ namespace TemperaturesPlus
                     float fireSize = 0;
 
                     // Things in cell
-                    foreach (ThingWithComps thing in cell.GetThingList(map).OfType<ThingWithComps>())
+                    foreach (Thing thing in cell.GetThingList(map))
                     {
                         // Heat pushers (fire, heaters, coolers, geysers etc.)
-                        CompHeatPusher heatPusher = thing.GetComp<CompHeatPusher>();
-                        if (heatPusher != null)
+                        float heatPush = thing.GetHeatPush();//heatPusher.Props.heatPerSecond;
+                        if (heatPush != 0)
                         {
-                            float heatPush = heatPusher.Props.heatPerSecond;
                             change += heatPush * heatPushEffect * ticksPerUpdate / cellProps.heatCapacity;
-                            if (log && heatPush != 0)
+                            if (log)
                                 LogUtility.Log($"Heat push: {heatPush}.");
                         }
 
                         // Updating temperature of fully simulated things
-                        CompThermal compThermal = thing.GetComp<CompThermal>();
+                        CompThermal compThermal = thing.TryGetComp<CompThermal>();
                         if (compThermal != null && compThermal.HasTemperature)
                         {
                             (float, float) tempChange = TemperatureUtility.TemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, newTemperatures[i, j], cellProps, false, log);
@@ -188,6 +186,23 @@ namespace TemperaturesPlus
         {
             if (cell.InBounds(map) && temperatures != null)
                 temperatures[cell.x, cell.z] = temperature;
+        }
+
+        public float GetIgnitionTemperatureForCell(IntVec3 cell)
+        {
+            float min = 10000;
+            foreach (Thing thing in cell.GetThingList(map))
+            {
+                if (thing.FireBulwark)
+                    return 10000;
+                if (thing.GetStatValue(StatDefOf.Flammability) > 0)
+                {
+                    float ignitionTemperature = thing.GetStatValue(DefOf.IgnitionTemperature);
+                    if (ignitionTemperature > minIgnitionTemperature)
+                        min = Mathf.Min(min, ignitionTemperature);
+                }
+            }
+            return min;
         }
     }
 }

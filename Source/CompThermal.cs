@@ -40,25 +40,6 @@ namespace TemperaturesPlus
         internal static bool ShouldApplyTo(ThingDef thingDef) =>
             thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Building;
 
-        //public override void CompTick()
-        //{
-        //    if (!parent.IsHashIntervalTick(TemperatureInfo.ticksPerUpdate))
-        //        return;
-        //    bool log = Prefs.DevMode && UI.MouseCell() == parent.Position;
-        //    if (log)
-        //        LogUtility.Log($"CompTickRare for {parent}. Has temperature: {HasTemperature.ToStringYesNo()}. Spawned: {parent.Spawned.ToStringYesNo()}. Ticker type: {parent.def.tickerType}.");
-        //    if (HasTemperature && parent.Spawned)
-        //    {
-        //        float cellTemp = parent.Position.GetTemperatureForCell(parent.Map);
-        //        ThingThermalProperties cellProps = parent.Position.GetThermalProperties(parent.Map);
-        //        (float, float) tempChange = TemperatureUtility.TemperatureChangeMutual(temperature, ThermalProperties, cellTemp, cellProps, false, log);
-        //        if (log)
-        //            LogUtility.Log($"(Tick {Find.TickManager.TicksGame}) {parent} has temperature {temperature:F1}C and heat capacity {ThermalProperties.heatCapacity}. Thing temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
-        //        temperature += tempChange.Item1;
-        //        parent.Map.TemperatureInfo().SetTempteratureForCell(parent.Position, cellTemp + tempChange.Item2);
-        //    }
-        //}
-
         public override string CompInspectStringExtra() =>
             ThermalProperties.heatCapacity > 0 ? $"Temperature: {temperature.ToStringTemperature()}\nHeat capacity: {ThermalProperties.heatCapacity:N0}\nStuff: {parent.GetUnderlyingStuff()?.LabelCap ?? "N/A"} (x{thermalProps.mass.ToStringMass()})" : "";
 

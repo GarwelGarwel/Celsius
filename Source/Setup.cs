@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace TemperaturesPlus
@@ -46,6 +47,9 @@ namespace TemperaturesPlus
             harmony.Patch(
               AccessTools.PropertyGetter(typeof(Thing), "AmbientTemperature"),
               prefix: new HarmonyMethod(type.GetMethod("Thing_AmbientTemperature_get")));
+            harmony.Patch(
+                AccessTools.Method($"Verse.AttachableThing:Destroy"),
+                prefix: new HarmonyMethod(type.GetMethod($"AttachableThing_Destroy")));
             LogUtility.Log($"Harmony initialization complete.");
 
             // Adding CompThermal to all applicable Things
@@ -88,6 +92,26 @@ namespace TemperaturesPlus
                 return true;
             __result = comp.temperature;
             return false;
+        }
+
+        public static void AttachableThing_Destroy(AttachableThing __instance)
+        {
+            LogUtility.Log($"AttachableThing_Destroy({__instance})");
+            if (__instance is Fire)
+            {
+                TemperatureInfo temperatureInfo = __instance.Map?.TemperatureInfo();
+                if (temperatureInfo != null)
+                {
+                    float temperature = temperatureInfo.GetIgnitionTemperatureForCell(__instance.Position);
+                    LogUtility.Log($"Setting temperature at {__instance.Position} to {temperature:F0}C...");
+                    temperatureInfo.SetTempteratureForCell(__instance.Position, Mathf.Min(temperatureInfo.GetTemperatureForCell(__instance.Position), temperature));
+                    foreach (CompThermal compThermal in __instance.Position.GetThingList(__instance.Map)
+                        .OfType<ThingWithComps>()
+                        .Select(thing => thing.GetComp<CompThermal>())
+                        .Where(comp => comp != null && comp.HasTemperature))
+                        compThermal.temperature = Mathf.Min(compThermal.temperature, temperature);
+                }
+            }
         }
     }
 }
