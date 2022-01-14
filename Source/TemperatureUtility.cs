@@ -14,6 +14,8 @@ namespace TemperaturesPlus
 
     static class TemperatureUtility
     {
+        const float FireHeatPush = 15;
+
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
         public static float GetTemperatureForCell(this IntVec3 cell, Map map)
@@ -53,6 +55,16 @@ namespace TemperaturesPlus
         {
             CompThermal comp = thing.TryGetComp<CompThermal>();
             return comp != null && comp.ThermalProperties.heatCapacity > 0 ? comp.temperature : thing.Position.GetTemperatureForCell(thing.Map);
+        }
+
+        public static float GetHeatPush(this Thing thing)
+        {
+            CompHeatPusher heatPusher = thing.TryGetComp<CompHeatPusher>();
+            if (heatPusher != null)
+                return heatPusher.Props.heatPerSecond;
+            if (thing is Fire)
+                return FireHeatPush;
+            return 0;
         }
 
         public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;

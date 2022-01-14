@@ -2,28 +2,27 @@
 
 <Patch>
 
-	<Operation Class="PatchOperationSequence">
-		<success>Always</success>
-		<operations>
-			<li Class="PatchOperationTest">
-				<xpath>/Defs/ThingDef[defName="SteamGeyser"]/comps</xpath>
-				<success>Invert</success>
-			</li>
-			<li Class="PatchOperationAdd">
-				<xpath>/Defs/ThingDef[defName="SteamGeyser"]</xpath>
-				<value>
-					<comps/>
-				</value>
-			</li>
-		</operations>
-	</Operation>
-	<Operation Class="PatchOperationAdd">
-		<xpath>/Defs/ThingDef[defName="SteamGeyser"]/comps</xpath>
+	<!--Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>/Defs/ThingDef[defName="Fire"]</xpath>
 		<value>
-			<li Class="CompProperties_HeatPusher">
-				<compClass>CompHeatPusher</compClass>
-				<heatPerSecond>5</heatPerSecond>
-			</li>
+			<comps>
+				<li Class="CompProperties_HeatPusher">
+					<compClass>CompHeatPusher</compClass>
+					<heatPerSecond>15</heatPerSecond>
+				</li>
+			</comps>
+		</value>
+	</Operation-->
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>/Defs/ThingDef[defName="SteamGeyser"]</xpath>
+		<value>
+			<comps>
+				<li Class="CompProperties_HeatPusher">
+					<compClass>CompHeatPusher</compClass>
+					<heatPerSecond>5</heatPerSecond>
+				</li>
+			</comps>
 		</value>
 	</Operation>
 
