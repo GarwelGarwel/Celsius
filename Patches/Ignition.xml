@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[defName="WoodLog"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>300</IgnitionTemperature>
+			</statBases>
+			<stuffProps>
+				<statOffsets>
+					<IgnitionTemperature>300</IgnitionTemperature>
+				</statOffsets>
+			</stuffProps>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[defName="Cloth"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>250</IgnitionTemperature>
+			</statBases>
+			<stuffProps>
+				<statOffsets>
+					<IgnitionTemperature>250</IgnitionTemperature>
+				</statOffsets>
+			</stuffProps>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[defName="Synthread"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>575</IgnitionTemperature>
+			</statBases>
+			<stuffProps>
+				<statOffsets>
+					<IgnitionTemperature>575</IgnitionTemperature>
+				</statOffsets>
+			</stuffProps>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[@Name="WoolBase"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>600</IgnitionTemperature>
+			</statBases>
+			<stuffProps>
+				<statOffsets>
+					<IgnitionTemperature>600</IgnitionTemperature>
+				</statOffsets>
+			</stuffProps>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[@Name="LeatherBase"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>200</IgnitionTemperature>
+			</statBases>
+			<stuffProps>
+				<statOffsets>
+					<IgnitionTemperature>200</IgnitionTemperature>
+				</statOffsets>
+			</stuffProps>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[@Name="PlantBaseNonEdible"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>300</IgnitionTemperature>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="Chemfuel"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>250</IgnitionTemperature>
+		</value>
+	</Operation>
+
+</Patch>

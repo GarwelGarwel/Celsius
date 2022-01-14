@@ -11,5 +11,6 @@ namespace TemperaturesPlus
     public static class DefOf
     {
         public static StatDef HeatCapacity;
+        public static StatDef IgnitionTemperature;
     }
 }

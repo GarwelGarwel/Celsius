@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <Defs>
 
 	<StatDef>
@@ -8,12 +9,25 @@
 		<category>Basics</category>
 		<workerClass>TemperaturesPlus.StatWorker_HeatCapacity</workerClass>
 		<showOnPawns>false</showOnPawns>
-		<defaultBaseValue>0</defaultBaseValue>
-		<minValue>0</minValue>
 		<showOnDefaultValue>false</showOnDefaultValue>
+		<displayPriorityInCategory>1400</displayPriorityInCategory>
 		<toStringStyle>Integer</toStringStyle>
 		<minifiedThingInherits>true</minifiedThingInherits>
-		<displayPriorityInCategory>1400</displayPriorityInCategory>
+		<defaultBaseValue>0</defaultBaseValue>
+		<minValue>0</minValue>
+	</StatDef>
+
+	<StatDef>
+		<defName>IgnitionTemperature</defName>
+		<label>autoignition temperature</label>
+		<description>Minimum temperature when this thing ignites.</description>
+		<category>BasicsNonPawn</category>
+		<showOnPawns>false</showOnPawns>
+		<displayPriorityInCategory>1300</displayPriorityInCategory>
+		<toStringStyle>Temperature</toStringStyle>
+		<minifiedThingInherits>true</minifiedThingInherits>
+		<defaultBaseValue>0</defaultBaseValue>
+		<minValue>0</minValue>
 	</StatDef>
 
 </Defs>

@@ -8,13 +8,14 @@ namespace TemperaturesPlus
 {
     public class TemperatureInfo : MapComponent
     {
-        const int ticksPerUpdate = 250;
-        const int secondsPerUpdate = 3600 * ticksPerUpdate / 2500;
+        public const int ticksPerUpdate = 250;
+        public const int secondsPerUpdate = 3600 * ticksPerUpdate / 2500;
         public const float convectionConductivityEffect = 100;
         const float heatPushEffect = 10;
         const float defaultTempEffect = 0.1f;
         const float thingTempEffect = 1;
         const float minTempDifferenceForUpdate = 0.05f;
+        const float minIgnitionTemperature = 0;
 
         float[,] temperatures;
 
@@ -71,21 +72,6 @@ namespace TemperaturesPlus
             return props;
         }
 
-        static float GetConvectionFactor(bool convection) => convection ? convectionConductivityEffect : 1;
-
-        float TemperatureChange(float oldTemp, ThingThermalProperties targetProps, float neighbourTemp, ThingThermalProperties neighbourProps, bool convection, bool log = false)
-        {
-            float finalTemp = GenMath.WeightedAverage(oldTemp, targetProps.heatCapacity, neighbourTemp, neighbourProps.heatCapacity);
-            float conductivity = Mathf.Sqrt(targetProps.conductivity * neighbourProps.conductivity * GetConvectionFactor(convection));
-            float lerpFactor = 1 - Mathf.Pow(1 - conductivity / targetProps.heatCapacity, secondsPerUpdate);
-            if (log)
-            {
-                LogUtility.Log($"- Neighbour: t = {neighbourTemp:F1}C, capacity = {neighbourProps.heatCapacity}, conductivity = {neighbourProps.conductivity}, convection = {convection}");
-                LogUtility.Log($"- Final temperature: {finalTemp:F1}C. Overall conductivity: {conductivity:F1}. Lerp factor: {lerpFactor:P1}.");
-            }
-            return lerpFactor * (finalTemp - oldTemp);
-        }
-
         public override void MapComponentTick()
         {
             if (Find.TickManager.TicksGame % ticksPerUpdate != 0)
@@ -102,14 +88,11 @@ namespace TemperaturesPlus
                 {
                     IntVec3 cell = new IntVec3(i, 0, j);
                     log = Prefs.DevMode && cell == UI.MouseCell();
-                    ThingThermalProperties cellThermalProperties = cell.GetThermalProperties(map);
+                    ThingThermalProperties cellProps = cell.GetThermalProperties(map);
+                    bool isAir = cell.IsAir(map);
                     float change = 0;
-                    //float capacity = cellThermalProperties.heatCapacity;
-                    //float conductivity = cellThermalProperties.conductivity;
 
                     // Diffusion & convection
-                    bool isAir = cell.IsAir(map);
-                    //List<IntVec3> neighbours = cell.AdjacentCells().ToList();
 
                     if (log)
                         LogUtility.Log(CellInfo(cell));
@@ -117,7 +100,7 @@ namespace TemperaturesPlus
                     {
                         if (log)
                             LogUtility.Log($"Calculating for neighbour {neighbour}");
-                        float resultTemp = TemperatureChange(newTemperatures[i, j], cellThermalProperties, GetTemperatureForCell(neighbour), neighbour.GetThermalProperties(map), isAir && neighbour.IsAir(map), log);
+                        float resultTemp = TemperatureUtility.TemperatureChange(newTemperatures[i, j], cellProps, GetTemperatureForCell(neighbour), neighbour.GetThermalProperties(map), isAir && neighbour.IsAir(map), log);
                         change += resultTemp;
                         if (log)
                             LogUtility.Log($"Temperature change: {resultTemp:F2}C");
@@ -128,32 +111,52 @@ namespace TemperaturesPlus
                     {
                         if (log)
                             LogUtility.Log($"Cell's environment temperature is {environmentTemperature:F1}C.");
-                        change += TemperatureChange(newTemperatures[i, j], cellThermalProperties, environmentTemperature, cellThermalProperties, isAir, log);
+                        change += TemperatureUtility.TemperatureChange(newTemperatures[i, j], cellProps, environmentTemperature, cellProps, isAir, log);
                     }
+
+                    bool canIgnite = true;
+                    float fireSize = 0;
 
                     // Things in cell
                     foreach (ThingWithComps thing in cell.GetThingList(map).OfType<ThingWithComps>())
                     {
+                        // Heat pushers (fire, heaters, coolers, geysers etc.)
                         CompHeatPusher heatPusher = thing.GetComp<CompHeatPusher>();
                         if (heatPusher != null)
                         {
                             float heatPush = heatPusher.Props.heatPerSecond;
-                            change += heatPush * heatPushEffect * ticksPerUpdate / cellThermalProperties.heatCapacity;
+                            change += heatPush * heatPushEffect * ticksPerUpdate / cellProps.heatCapacity;
                             if (log && heatPush != 0)
                                 LogUtility.Log($"Heat push: {heatPush}.");
                         }
 
+                        // Updating temperature of fully simulated things
                         CompThermal compThermal = thing.GetComp<CompThermal>();
                         if (compThermal != null && compThermal.HasTemperature)
                         {
-                            float resultTemp = TemperatureChange(compThermal.temperature, compThermal.ThermalProperties, newTemperatures[i, j], cellThermalProperties, false, log);
-                            float resultTemp2 = TemperatureChange(newTemperatures[i, j], cellThermalProperties, compThermal.temperature, compThermal.ThermalProperties, false, log);
+                            (float, float) tempChange = TemperatureUtility.TemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, newTemperatures[i, j], cellProps, false, log);
                             if (log)
-                                LogUtility.Log($"{thing.def.defName} has temperature {compThermal.temperature:F1}C and heat capacity {compThermal.ThermalProperties.heatCapacity}. Thing temp change: {resultTemp:F1}C. Cell temp change: {resultTemp2:F1}C.");
-                            compThermal.temperature += resultTemp;
-                            newTemperatures[i, j] += resultTemp2;
+                                LogUtility.Log($"(Tick {Find.TickManager.TicksGame}) {thing} has temperature {compThermal.temperature:F1}C and heat capacity {compThermal.ThermalProperties.heatCapacity}. Thing temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
+                            compThermal.temperature += tempChange.Item1;
+                            newTemperatures[i, j] += tempChange.Item2;
+                        }
+
+                        // Autoignition
+                        if (thing.FireBulwark)
+                            canIgnite = false;
+                        else
+                        {
+                            float ignitionTemp = thing.GetStatValue(DefOf.IgnitionTemperature);
+                            if (canIgnite && ignitionTemp > minIgnitionTemperature && thing.GetTemperature() >= thing.GetStatValue(DefOf.IgnitionTemperature))
+                            {
+                                LogUtility.Log($"{thing} spontaneously ignites at {thing.GetTemperature():F1}C! Ignition temperature is {ignitionTemp:F0}C.");
+                                fireSize += 0.1f * thing.GetStatValue(StatDefOf.Flammability);
+                            }
                         }
                     }
+
+                    if (canIgnite && fireSize > 0)
+                        FireUtility.TryStartFireIn(cell, map, fireSize);
 
                     newTemperatures[i, j] += change;
                 }
@@ -180,5 +183,11 @@ namespace TemperaturesPlus
 
         public float GetTemperatureForCell(IntVec3 cell) =>
             cell.InBounds(map) && temperatures != null ? temperatures[cell.x, cell.z] : map.mapTemperature.OutdoorTemp;
+
+        public void SetTempteratureForCell(IntVec3 cell, float temperature)
+        {
+            if (cell.InBounds(map) && temperatures != null)
+                temperatures[cell.x, cell.z] = temperature;
+        }
     }
 }
