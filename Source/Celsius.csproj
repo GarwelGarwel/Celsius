@@ -7,8 +7,8 @@
     <ProjectGuid>{2569AD03-99C3-4DD0-A471-7403E9704BD9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TemperaturesPlus</RootNamespace>
-    <AssemblyName>TemperaturesPlus</AssemblyName>
+    <RootNamespace>Celsius</RootNamespace>
+    <AssemblyName>Celsius</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
