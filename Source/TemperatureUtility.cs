@@ -5,19 +5,11 @@ using Verse;
 
 namespace TemperaturesPlus
 {
-    enum CellMaterialType
-    {
-        Air = 0,
-        Rock,
-        Structure
-    };
-
     static class TemperatureUtility
     {
-        const float FireHeatPush = 15;
-        const float PawnHeatPush = 0.2f;
         public const float TemperatureChangePrecision = 0.01f;
         public const float MinFreezingTemperature = -3;
+        public const float convectionConductivityEffect = 10;
 
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
@@ -55,39 +47,74 @@ namespace TemperaturesPlus
             return room.Cells.Average(cell => temperatureInfo.GetTemperatureForCell(cell));
         }
 
-        internal static float TemperatureChange(float oldTemp, ThingThermalProperties targetProps, float neighbourTemp, ThingThermalProperties neighbourProps, float convectionFactor, bool log = false)
+        #endregion TEMPERATURE
+
+        #region DIFFUSION
+
+        static float airConductivity = ThingThermalProperties.Air.conductivity * convectionConductivityEffect;
+
+        static float airLerpFactor = 1 - Mathf.Pow(1 - airConductivity / ThingThermalProperties.Air.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+
+        internal static float DiffusionTemperatureChangeSingle(float oldTemp, ThingThermalProperties targetProps, float neighbourTemp, ThingThermalProperties neighbourProps, bool log = false)
         {
             if (Mathf.Abs(oldTemp - neighbourTemp) < TemperatureChangePrecision)
                 return 0;
             float finalTemp = GenMath.WeightedAverage(oldTemp, targetProps.heatCapacity, neighbourTemp, neighbourProps.heatCapacity);
-            float conductivity = Mathf.Sqrt(targetProps.conductivity * neighbourProps.conductivity * convectionFactor);
-            float lerpFactor = 1 - Mathf.Pow(1 - conductivity / targetProps.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+            float conductivity, lerpFactor;
+            if (targetProps == ThingThermalProperties.Air && neighbourProps == ThingThermalProperties.Air)
+            {
+                conductivity = airConductivity;
+                lerpFactor = airLerpFactor;
+            }
+            else
+            {
+                conductivity = Mathf.Sqrt(targetProps.conductivity * neighbourProps.conductivity);
+                lerpFactor = 1 - Mathf.Pow(1 - conductivity / targetProps.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+            }
+
             if (log)
             {
-                LogUtility.Log($"- Neighbour: t = {neighbourTemp:F1}C, capacity = {neighbourProps.heatCapacity}, conductivity = {neighbourProps.conductivity}, convection factor = {convectionFactor:F1}");
+                LogUtility.Log($"- Neighbour: t = {neighbourTemp:F1}C, capacity = {neighbourProps.heatCapacity}, conductivity = {neighbourProps.conductivity}");
                 LogUtility.Log($"- Final temperature: {finalTemp:F1}C. Overall conductivity: {conductivity:F1}. Lerp factor: {lerpFactor:P1}.");
             }
+
             return lerpFactor * (finalTemp - oldTemp);
         }
 
-        internal static (float, float) TemperatureChangeMutual(float temp1, ThingThermalProperties props1, float temp2, ThingThermalProperties props2, float convectionFactor, bool log = false)
+        internal static (float, float) DiffusionTemperatureChangeMutual(float temp1, ThingThermalProperties props1, float temp2, ThingThermalProperties props2, bool log = false)
         {
             if (Mathf.Abs(temp1 - temp2) < TemperatureChangePrecision)
                 return (0, 0);
             float finalTemp = GenMath.WeightedAverage(temp1, props1.heatCapacity, temp2, props2.heatCapacity);
-            float conductivity = Mathf.Sqrt(props1.conductivity * props2.conductivity * convectionFactor);
-            float lerpFactor1 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
-            float lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+            float conductivity, lerpFactor1, lerpFactor2;
+            if (props1 == ThingThermalProperties.Air && props2 == ThingThermalProperties.Air)
+            {
+                conductivity = airConductivity;
+                lerpFactor1 = lerpFactor2 = airLerpFactor;
+            }
+            else if (props1 == props2)
+            {
+                LogUtility.Log($"Both objects have the same thermal props: {props1}");
+                conductivity = props1.conductivity;
+                lerpFactor1 = lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+            }
+            else
+            {
+                conductivity = Mathf.Sqrt(props1.conductivity * props2.conductivity);
+                lerpFactor1 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+                lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+            }
+
             if (log)
             {
-                LogUtility.Log($"- Object 1: t = {temp1:F1}C, capacity = {props1.heatCapacity}, conductivity = {props1.conductivity}, convection = {convectionFactor:F1}");
+                LogUtility.Log($"- Object 1: t = {temp1:F1}C, capacity = {props1.heatCapacity}, conductivity = {props1.conductivity}");
                 LogUtility.Log($"- Object 2: t = {temp2:F1}C, capacity = {props2.heatCapacity}, conductivity = {props2.conductivity}");
                 LogUtility.Log($"- Final temperature: {finalTemp:F1}C. Overall conductivity: {conductivity:F1}. Lerp factor 1: {lerpFactor1:P1}. Lerp factor 2: {lerpFactor2:P1}.");
             }
             return (lerpFactor1 * (finalTemp - temp1), lerpFactor2 * (finalTemp - temp2));
         }
 
-        #endregion TEMPERATURE
+        #endregion DIFFUSION
 
         #region THERMAL PROPERTIES
 
@@ -108,11 +135,7 @@ namespace TemperaturesPlus
         /// </summary>
         public static float GetHeatCapacity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).heatCapacity;
 
-        public static float GetHeatConductivity(this IntVec3 cell, Map map, bool convection = false)
-        {
-            ThingThermalProperties modEx = cell.GetThermalProperties(map);
-            return convection ? modEx.conductivity * TemperaturesPlus.TemperatureInfo.convectionConductivityEffect : modEx.conductivity;
-        }
+        public static float GetHeatConductivity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).conductivity;
 
         public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
@@ -146,36 +169,10 @@ namespace TemperaturesPlus
 
         #region HEAT PUSH
 
-        static bool Active(this Thing thing)
-        {
-            CompRefuelable refuelable = thing.TryGetComp<CompRefuelable>();
-            if (refuelable != null && !refuelable.HasFuel)
-                return false;
-            CompPowerTrader powerTrader = thing.TryGetComp<CompPowerTrader>();
-            if (powerTrader != null && !powerTrader.PowerOn)
-                return false;
-            CompFlickable flickable = thing.TryGetComp<CompFlickable>();
-            if (flickable != null && !flickable.SwitchIsOn)
-                return false;
-            CompBreakdownable breakdownable = thing.TryGetComp<CompBreakdownable>();
-            if (breakdownable != null && breakdownable.BrokenDown)
-                return false;
-            return true;
-        }
-
-        public static float GetSpecialHeatPush(this Thing thing)
-        {
-            if (thing is Pawn pawn && !pawn.Dead && !pawn.RaceProps.Insect)
-                return pawn.BodySize * PawnHeatPush;
-            if (thing is Fire)
-                return FireHeatPush;
-            return 0;
-        }
-
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
             if (UI.MouseCell() == cell)
-                LogUtility.Log($"(Tick {Find.TickManager.TicksGame}) Pushing {energy} heat at {cell}.");
+                LogUtility.Log($"Pushing {energy} heat at {cell}.");
             TemperatureInfo temperatureInfo = map.TemperatureInfo();
             if (temperatureInfo == null)
             {

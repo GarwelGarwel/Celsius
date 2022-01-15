@@ -9,11 +9,9 @@ namespace TemperaturesPlus
     public class TemperatureInfo : MapComponent
     {
         public const int ticksPerUpdate = 250;
+        const int updateTickOffset = 18;
         public const int secondsPerUpdate = 3600 * ticksPerUpdate / 2500;
-        public const float convectionConductivityEffect = 100;
         public const float HeatPushEffect = 5;
-        const float defaultTempEffect = 0.1f;
-        const float thingTempEffect = 1;
         const float minIgnitionTemperature = 100;
 
         float[,] temperatures;
@@ -39,6 +37,8 @@ namespace TemperaturesPlus
                     if (room != null)
                         temperatures[i, j] = room.TempTracker.Temperature;
                     else TryGetEnvironmentTemperatureForCell(cell, out temperatures[i, j]);
+                    if (cell.HasTerrainTemperature(map))
+                        terrainTemperatures[i, j] = temperatures[i, j];
                 }
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
@@ -67,19 +67,9 @@ namespace TemperaturesPlus
         string CellInfo(IntVec3 cell) =>
             $"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.";
 
-        ThingThermalProperties NeighboursProps(IntVec3 cell)
-        {
-            ThingThermalProperties props = new ThingThermalProperties() { replacesAirProperties = true };
-            bool isAir = cell.IsAir(map);
-            List<IntVec3> neighbours = cell.AdjacentCells().ToList();
-            props.heatCapacity = neighbours.Sum(c => c.GetHeatCapacity(map));
-            props.conductivity = neighbours.Sum(c => c.GetHeatConductivity(map, isAir && c.IsAir(map)));
-            return props;
-        }
-
         public override void MapComponentTick()
         {
-            if (Find.TickManager.TicksGame % ticksPerUpdate != 0)
+            if (Find.TickManager.TicksGame % ticksPerUpdate != updateTickOffset)
                 return;
 
             if (Prefs.DevMode)
@@ -94,33 +84,40 @@ namespace TemperaturesPlus
                     IntVec3 cell = new IntVec3(x, 0, z);
                     log = Prefs.DevMode && cell == mouseCell;
                     ThingThermalProperties cellProps = cell.GetThermalProperties(map);
-                    bool isAir = cell.IsAir(map);
                     float change = 0;
                     if (log)
                         LogUtility.Log(CellInfo(cell));
 
                     // Diffusion & convection
-                    foreach (IntVec3 neighbour in cell.AdjacentCells())
-                        change += TemperatureUtility.TemperatureChange(
-                            newTemperatures[x, z],
+                    void DiffusionWithNeighbour(IntVec3 neighbour)
+                    {
+                        (float, float) changes = TemperatureUtility.DiffusionTemperatureChangeMutual(
+                            temperatures[x, z],
                             cellProps,
                             GetTemperatureForCell(neighbour),
-                            neighbour.GetThermalProperties(map),
-                            isAir && neighbour.IsAir(map) ? convectionConductivityEffect : 1,
-                            log);
+                            neighbour.GetThermalProperties(map));
+                        change += changes.Item1;
+                        if (neighbour.InBounds(map))
+                            newTemperatures[neighbour.x, neighbour.z] += changes.Item2;
+                    }
+
+                    DiffusionWithNeighbour(cell + IntVec3.East);
+                    DiffusionWithNeighbour(cell + IntVec3.North);
+                    if (x == 0)
+                        DiffusionWithNeighbour(cell + IntVec3.West);
+                    if (z == 0)
+                        DiffusionWithNeighbour(cell + IntVec3.South);
 
                     // Default environment temperature
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
-                        change += TemperatureUtility.TemperatureChange(newTemperatures[x, z], cellProps, environmentTemperature, cellProps, isAir ? convectionConductivityEffect : 1, log);
+                        change += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], cellProps, environmentTemperature, cellProps);
 
                     // Terrain temperature
                     TerrainDef terrain = cell.GetTerrain(map);
                     ThingThermalProperties terrainProps = terrain.GetModExtension<ThingThermalProperties>();
                     if (terrainProps != null && terrainProps.heatCapacity > 0)
                     {
-                        if (log)
-                            LogUtility.Log($"Terrain {terrain}. {terrainProps} Temperature: {GetTerrainTemperature(cell):F1}C.");
-                        (float, float) tempChange = TemperatureUtility.TemperatureChangeMutual(GetTerrainTemperature(cell), terrainProps, newTemperatures[x, z], cellProps, 1, log);
+                        (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(GetTerrainTemperature(cell), terrainProps, newTemperatures[x, z], cellProps);
                         if (log)
                             LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
                         terrainTemperatures[x, z] += tempChange.Item1;
@@ -129,7 +126,8 @@ namespace TemperaturesPlus
                         // Freezing and melting
                         if (terrain.IsWater && terrainTemperatures[x, z] < terrain.FreezingPoint())
                         {
-                            LogUtility.Log($"{terrain} freezes at {cell} (t = {terrainTemperatures[x, z]:F1}C)");
+                            if (log)
+                                LogUtility.Log($"{terrain} freezes at {cell} (t = {terrainTemperatures[x, z]:F1}C)");
                             map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
                             map.terrainGrid.SetUnderTerrain(cell, terrain);
                         }
@@ -140,7 +138,8 @@ namespace TemperaturesPlus
                             {
                                 if (map.terrainGrid.UnderTerrainAt(cell) == null)
                                     map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
-                                LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName} (t = {terrainTemperatures[x, z]:F1}C)");
+                                if (log)
+                                    LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName} (t = {terrainTemperatures[x, z]:F1}C)");
                                 map.terrainGrid.RemoveTopLayer(cell, false);
                             }
                         }
@@ -160,7 +159,7 @@ namespace TemperaturesPlus
                         if (compThermal != null && compThermal.HasTemperature)
                         {
                             temperature = compThermal.temperature;
-                            (float, float) tempChange = TemperatureUtility.TemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, newTemperatures[x, z], cellProps, 1, log);
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, newTemperatures[x, z], cellProps, log);
                             if (log)
                                 LogUtility.Log($"{thing} has temperature {compThermal.temperature:F1}C and heat capacity {compThermal.ThermalProperties.heatCapacity}. Thing temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
                             compThermal.temperature += tempChange.Item1;
@@ -212,7 +211,7 @@ namespace TemperaturesPlus
             cell.InBounds(map) && temperatures != null ? temperatures[cell.x, cell.z] : map.mapTemperature.OutdoorTemp;
 
         public float GetTerrainTemperature(IntVec3 cell) =>
-          cell.InBounds(map) && terrainTemperatures != null && cell.HasTerrainTemperature(map) ? terrainTemperatures[cell.x, cell.z] : GetTemperatureForCell(cell);
+            cell.InBounds(map) && terrainTemperatures != null && cell.HasTerrainTemperature(map) ? terrainTemperatures[cell.x, cell.z] : GetTemperatureForCell(cell);
 
         public void SetTempteratureForCell(IntVec3 cell, float temperature)
         {

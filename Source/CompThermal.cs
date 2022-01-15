@@ -5,7 +5,7 @@ namespace TemperaturesPlus
 {
     public class CompThermal : ThingComp
     {
-        public float temperature;
+        public float temperature = -9999;
         ThingThermalProperties thermalProps;
 
         float Mass => parent.def.EverHaulable ? parent.GetStatValue(StatDefOf.Mass) : parent.def.CostStuffCount;
@@ -46,7 +46,7 @@ namespace TemperaturesPlus
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
-            if (!respawningAfterLoad && HasTemperature)
+            if (HasTemperature && temperature < -2000)
                 parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
         }
 
