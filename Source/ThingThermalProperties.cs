@@ -38,6 +38,6 @@ namespace TemperaturesPlus
         }
 
         public override string ToString() =>
-            $"Mass: {mass.ToStringMass()}. Heat capacity: {heatCapacity} J/kg/C. Conductivity: {conductivity} J/kg.{(replacesAirProperties ? " Replaces air properties." : "")}";
+            $"Mass: {mass.ToStringMass()}. Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} J/s.{(replacesAirProperties ? " Replaces air properties." : "")}";
     }
 }

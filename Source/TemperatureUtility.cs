@@ -17,6 +17,7 @@ namespace TemperaturesPlus
         const float FireHeatPush = 15;
         const float PawnHeatPush = 0.2f;
         const float TemperatureChangePrecision = 0.01f;
+        public const float MinFreezingTemperature = -3;
 
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
@@ -39,6 +40,28 @@ namespace TemperaturesPlus
         }
 
         internal static bool IsAir(this IntVec3 cell, Map map) => cell.GetThermalProperties(map) == ThingThermalProperties.Air;
+
+        public static ThingThermalProperties GetTerrainThermalProperties(this IntVec3 cell, Map map) =>
+            cell.GetTerrain(map).GetModExtension<ThingThermalProperties>() ?? ThingThermalProperties.Empty;
+
+        public static bool HasTerrainTemperature(this IntVec3 cell, Map map) => cell.GetTerrainThermalProperties(map).heatCapacity > 0;
+
+        public static float FreezingPoint(this TerrainDef water)
+        {
+            switch (water.defName)
+            {
+                case "WaterOceanDeep":
+                case "WaterOceanShallow":
+                    return -2;
+
+                case "WaterMovingChestDeep":
+                    return -3;
+
+                case "WaterMovingShallow":
+                    return -2;
+            }
+            return 0;
+        }
 
         /// <summary>
         /// Returns heat capacity for a cell

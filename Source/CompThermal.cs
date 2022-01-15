@@ -45,7 +45,6 @@ namespace TemperaturesPlus
         {
             if (!respawningAfterLoad && HasTemperature)
                 parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
-                //temperature = parent.Map.mapTemperature.OutdoorTemp;
         }
 
         public override void PreAbsorbStack(Thing otherStack, int count)
