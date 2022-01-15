@@ -63,6 +63,7 @@
     <Compile Include="Setup.cs" />
     <Compile Include="LogUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatWorker_HeatConductivity.cs" />
     <Compile Include="StatWorker_HeatCapacity.cs" />
     <Compile Include="StuffThermalProperties.cs" />
     <Compile Include="TemperatureInfo.cs" />
