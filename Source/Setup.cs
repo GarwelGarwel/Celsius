@@ -7,7 +7,7 @@ using UnityEngine;
 using Verse;
 using static RimWorld.ColonistBar;
 
-namespace TemperaturesPlus
+namespace Celsius
 {
     /// <summary>
     /// Harmony patches and Defs preparation on game startup
@@ -23,7 +23,7 @@ namespace TemperaturesPlus
             if (harmony != null)
                 return;
 
-            harmony = new Harmony("Garwel.TemperaturesPlus");
+            harmony = new Harmony("Garwel.Celsius");
             Type type = typeof(Setup);
 
             harmony.Patch(

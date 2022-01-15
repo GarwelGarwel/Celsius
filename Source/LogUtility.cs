@@ -1,6 +1,6 @@
 ﻿using Verse;
 
-namespace TemperaturesPlus
+namespace Celsius
 {
     enum LogLevel
     {

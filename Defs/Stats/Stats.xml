@@ -7,7 +7,7 @@
 		<label>heat capacity</label>
 		<description>How slowly the object changes its temperature.</description>
 		<category>Basics</category>
-		<workerClass>TemperaturesPlus.StatWorker_HeatCapacity</workerClass>
+		<workerClass>Celsius.StatWorker_HeatCapacity</workerClass>
 		<forInformationOnly>true</forInformationOnly>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
@@ -24,7 +24,7 @@
 		<label>heat conductivity</label>
 		<description>How much energy the object exchanges with surrounding air.</description>
 		<category>Basics</category>
-		<workerClass>TemperaturesPlus.StatWorker_HeatConductivity</workerClass>
+		<workerClass>Celsius.StatWorker_HeatConductivity</workerClass>
 		<forInformationOnly>true</forInformationOnly>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>

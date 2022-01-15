@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace TemperaturesPlus
+namespace Celsius
 {
     public class TemperatureInfo : MapComponent
     {

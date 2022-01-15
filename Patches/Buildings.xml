@@ -7,7 +7,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
 				<heatCapacity>2200000</heatCapacity>
 				<conductivity>2.5</conductivity>
@@ -18,7 +18,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
 				<mass>8</mass>
 			</li>
@@ -28,7 +28,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
 				<mass>20</mass>
 			</li>
@@ -38,7 +38,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[defName="Vent"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
 				<heatCapacity>9300</heatCapacity>
 				<conductivity>20</conductivity>

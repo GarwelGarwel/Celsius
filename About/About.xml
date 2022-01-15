@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ModMetaData>
-	<name>Temperatures+</name>
+	<name>Celsius</name>
 	<author>Garwel</author>
-	<url>https://github.com/GarwelGarwel/TemperaturesPlus</url>
-	<packageId>Garwel.TemperaturesPlus</packageId>
+	<url>https://github.com/GarwelGarwel/Celsius</url>
+	<packageId>Garwel.Celsius</packageId>
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
-	<description>Adds realistic thermodynamics to the game. Heat (and cold) are transferred from one cell to another according to properties of respected materials.</description>
+	<description>Adds realistic simulation of thermodynamics to the game.
+	
+	Main features:
+	
+	- Temperature is tracked and accurately represented for every map cell (instead of room-wide as in vanilla). For instance, air near fire is warmer; caves provide naturally stable temperature etc.
+	
+	- Certain items and buildings have their own temperature that gradually changes with surrounding air.
+	
+	- Water freezes and ice melts.
+	
+	- Highly flammable things may spontaneously ignite when it gets extremely hot.
+	
+	Celsius opens up many new challenges and ways to play RimWorld. You can warm your colonists by the campfire outside, melt ice sheets or unleash deadly firestorms on your enemies.
+	
+	The mod is pretty well optimized for performace and shouldn't visibly slow down the game. Still, you may disable or tweak almost any part of it to your liking.
+	</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>
@@ -16,9 +31,16 @@
 			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
 			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
 		</li>
+		<li>
+			<packageId>imranfish.xmlextensions</packageId>
+			<displayName>XML Extensions</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/2574315206</steamWorkshopUrl>
+			<downloadUrl>https://github.com/15adhami/XmlExtensions/releases/latest</downloadUrl>
+		</li>
 	</modDependencies>
 	<loadAfter>
 		<li>brrainz.harmony</li>
 		<li>Ludeon.RimWorld</li>
+		<li>imranfish.xmlextensions</li>
 	</loadAfter>
 </ModMetaData>

@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using Verse;
 
-namespace TemperaturesPlus
+namespace Celsius
 {
     public class StatWorker_HeatConductivity : StatWorker
     {

@@ -5,7 +5,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>4200000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -15,7 +15,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>4000000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -25,7 +25,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterMovingChestDeep"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>3000000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -35,7 +35,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>2100000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -45,7 +45,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterOceanShallow"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>2000000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -55,7 +55,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterMovingShallow"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>2000000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -65,7 +65,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="Marsh"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>2700000</heatCapacity>
 				<conductivity>1</conductivity>
 			</li>
@@ -75,7 +75,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>2000000</heatCapacity>
 				<conductivity>2</conductivity>
 			</li>

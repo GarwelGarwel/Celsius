@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace TemperaturesPlus
+namespace Celsius
 {
     static class TemperatureUtility
     {
@@ -53,7 +53,7 @@ namespace TemperaturesPlus
 
         static float airConductivity = ThingThermalProperties.Air.conductivity * convectionConductivityEffect;
 
-        static float airLerpFactor = 1 - Mathf.Pow(1 - airConductivity / ThingThermalProperties.Air.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+        static float airLerpFactor = 1 - Mathf.Pow(1 - airConductivity / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.secondsPerUpdate);
 
         internal static float DiffusionTemperatureChangeSingle(float oldTemp, ThingThermalProperties targetProps, float neighbourTemp, ThingThermalProperties neighbourProps, bool log = false)
         {
@@ -69,7 +69,7 @@ namespace TemperaturesPlus
             else
             {
                 conductivity = Mathf.Sqrt(targetProps.conductivity * neighbourProps.conductivity);
-                lerpFactor = 1 - Mathf.Pow(1 - conductivity / targetProps.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+                lerpFactor = 1 - Mathf.Pow(1 - conductivity / targetProps.heatCapacity, Celsius.TemperatureInfo.secondsPerUpdate);
             }
 
             if (log)
@@ -96,13 +96,13 @@ namespace TemperaturesPlus
             {
                 LogUtility.Log($"Both objects have the same thermal props: {props1}");
                 conductivity = props1.conductivity;
-                lerpFactor1 = lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+                lerpFactor1 = lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.secondsPerUpdate);
             }
             else
             {
                 conductivity = Mathf.Sqrt(props1.conductivity * props2.conductivity);
-                lerpFactor1 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
-                lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, TemperaturesPlus.TemperatureInfo.secondsPerUpdate);
+                lerpFactor1 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.secondsPerUpdate);
+                lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, Celsius.TemperatureInfo.secondsPerUpdate);
             }
 
             if (log)
@@ -179,7 +179,7 @@ namespace TemperaturesPlus
                 LogUtility.Log($"TemperatureInfo for {map} unavailable!");
                 return false;
             }
-            temperatureInfo.SetTempteratureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * TemperaturesPlus.TemperatureInfo.HeatPushEffect / cell.GetHeatCapacity(map));
+            temperatureInfo.SetTempteratureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * Celsius.TemperatureInfo.HeatPushEffect / cell.GetHeatCapacity(map));
             return true;
         }
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TemperaturesPlus
+namespace Celsius
 {
     [RimWorld.DefOf]
     public static class DefOf

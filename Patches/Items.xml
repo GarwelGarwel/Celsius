@@ -9,7 +9,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[@Name="MealBaseIngredientless"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>1500</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -19,7 +19,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[defName="Kibble"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>50</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -29,7 +29,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[defName="Pemmican"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>60</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -41,7 +41,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[defName="Milk"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>170</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -51,7 +51,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[@Name="EggBase"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>480</heatCapacity>
 				<conductivity>1</conductivity>
 			</li>
@@ -61,7 +61,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[@Name="OrganicProductBase"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.StuffThermalProperties">
+			<li Class="Celsius.StuffThermalProperties">
 				<specificHeatCapacity>3500</specificHeatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -73,7 +73,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[thingClass="Medicine"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.StuffThermalProperties">
+			<li Class="Celsius.StuffThermalProperties">
 				<specificHeatCapacity>4000</specificHeatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
@@ -83,7 +83,7 @@
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[defName="Chemfuel"]</xpath>
 		<value>
-			<li Class="TemperaturesPlus.ThingThermalProperties">
+			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>100</heatCapacity>
 				<conductivity>0.1</conductivity>
 			</li>

@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using Verse;
 
-namespace TemperaturesPlus
+namespace Celsius
 {
     public class CompThermal : ThingComp
     {
