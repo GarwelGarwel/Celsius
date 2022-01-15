@@ -2,6 +2,10 @@
 
 <Patch>
 
+	<Operation Class="XmlExtensions.PatchOperationRemove">
+		<xpath>/Defs/ThingDef[defName="Campfire"]/comps/li[@Class="CompProperties_HeatPusher"]/heatPushMaxTemperature</xpath>
+	</Operation>
+
 	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
 		<xpath>/Defs/ThingDef[defName="SteamGeyser"]</xpath>
 		<value>

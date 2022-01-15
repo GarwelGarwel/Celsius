@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using static RimWorld.ColonistBar;
 
 namespace TemperaturesPlus
 {
@@ -32,8 +33,14 @@ namespace TemperaturesPlus
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
                 prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
             harmony.Patch(
-              AccessTools.PropertyGetter(typeof(Thing), "AmbientTemperature"),
-              prefix: new HarmonyMethod(type.GetMethod("Thing_AmbientTemperature_get")));
+                AccessTools.PropertyGetter(typeof(Thing), "AmbientTemperature"),
+                prefix: new HarmonyMethod(type.GetMethod("Thing_AmbientTemperature_get")));
+            harmony.Patch(
+                AccessTools.Method($"Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
+                prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_PushHeat")));
+            harmony.Patch(
+                AccessTools.Method($"Verse.GenTemperature:ControlTemperatureTempChange"),
+                postfix: new HarmonyMethod(type.GetMethod($"GenTemperature_ControlTemperatureTempChange")));
             harmony.Patch(
                 AccessTools.Method($"Verse.AttachableThing:Destroy"),
                 prefix: new HarmonyMethod(type.GetMethod($"AttachableThing_Destroy")));
@@ -55,7 +62,7 @@ namespace TemperaturesPlus
         // Replaces GenTemperature.TryGetDirectAirTemperatureForCell by providing cell-specific temperature
         public static bool GenTemperature_TryGetDirectAirTemperatureForCell(ref bool __result, IntVec3 c, Map map, out float temperature)
         {
-            temperature = TemperatureUtility.GetTemperatureForCell(c, map);
+            temperature = c.GetTemperatureForCell(map);
             __result = true;
             return false;
         }
@@ -63,14 +70,9 @@ namespace TemperaturesPlus
         // Replaces Room.Temperature with room's average temperature (e.g. for displaying in the bottom right corner)
         public static bool Room_Temperature_get(ref float __result, Room __instance)
         {
-            float oldResult = __result;
-            TemperatureInfo temperatureInfo = __instance.Map.TemperatureInfo();
-            if (temperatureInfo == null)
-            {
-                LogUtility.Log($"TemperatureInfo unavailable for {__instance?.Map}.", LogLevel.Error);
+            if (__instance.Map.GetComponent<TemperatureInfo>() == null)
                 return true;
-            }
-            __result = __instance.Cells.Average(cell => temperatureInfo.GetTemperatureForCell(cell));
+            __result = __instance.GetTemperature();
             return false;
         }
 
@@ -82,6 +84,32 @@ namespace TemperaturesPlus
                 return true;
             __result = comp.temperature;
             return false;
+        }
+
+        // Replaces GenTemperature.PushHeat(IntVec3, Map, float) to change temperature at the specific cell instead of the whole room
+        public static bool GenTemperature_PushHeat(ref bool __result, IntVec3 c, Map map, float energy) => __result = TemperatureUtility.TryPushHeat(c, map, energy);
+
+        // Attaches to GenTemperature.ControlTemperatureTempChange to implement heat pushing for temperature control things (Heater, Cooler, Vent)
+        public static float GenTemperature_ControlTemperatureTempChange(float result, IntVec3 cell, Map map, float energyLimit, float targetTemperature)
+        {
+            Room room = cell.GetRoom(map);
+            float roomTemp = room != null ? room.GetTemperature() : cell.GetTemperatureForCell(map);
+            if (UI.MouseCell() == cell)
+                LogUtility.Log($"ControlTemperatureTempChange({cell}, {energyLimit}, {targetTemperature}). Room temperature: {roomTemp:F1}C.");
+
+            if (energyLimit > 0)
+                if (roomTemp < targetTemperature - TemperatureUtility.TemperatureChangePrecision)
+                {
+                    TemperatureUtility.TryPushHeat(cell, map, energyLimit);
+                    return energyLimit;
+                }
+                else return 0;
+            else if (roomTemp > targetTemperature + TemperatureUtility.TemperatureChangePrecision)
+            {
+                TemperatureUtility.TryPushHeat(cell, map, energyLimit);
+                return energyLimit;
+            }
+            else return 0;
         }
 
         // Replaces AttachableThing.Destroy to reduce temperature when a Fire is destroyed to the ignition temperature

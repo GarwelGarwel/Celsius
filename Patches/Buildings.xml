@@ -20,7 +20,7 @@
 		<value>
 			<li Class="TemperaturesPlus.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
-				<mass>10</mass>
+				<mass>8</mass>
 			</li>
 		</value>
 	</Operation>
@@ -30,7 +30,18 @@
 		<value>
 			<li Class="TemperaturesPlus.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
-				<mass>25</mass>
+				<mass>20</mass>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Vent"]</xpath>
+		<value>
+			<li Class="TemperaturesPlus.ThingThermalProperties">
+				<replacesAirProperties>true</replacesAirProperties>
+				<heatCapacity>9300</heatCapacity>
+				<conductivity>20</conductivity>
 			</li>
 		</value>
 	</Operation>

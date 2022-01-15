@@ -16,10 +16,12 @@ namespace TemperaturesPlus
     {
         const float FireHeatPush = 15;
         const float PawnHeatPush = 0.2f;
-        const float TemperatureChangePrecision = 0.01f;
+        public const float TemperatureChangePrecision = 0.01f;
         public const float MinFreezingTemperature = -3;
 
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
+
+        #region TEMPERATURE
 
         public static float GetTemperatureForCell(this IntVec3 cell, Map map)
         {
@@ -29,70 +31,29 @@ namespace TemperaturesPlus
             return tempInfo.GetTemperatureForCell(cell);
         }
 
-        public static ThingThermalProperties GetThermalProperties(this IntVec3 cell, Map map)
-        {
-            ThingThermalProperties thermalProps = null;
-            if (cell.InBounds(map))
-                thermalProps = cell.GetThingList(map)
-                    .Select(thing => thing.TryGetComp<CompThermal>()?.ThermalProperties)
-                    .FirstOrDefault(props => props != null && props.replacesAirProperties);
-            return thermalProps ?? ThingThermalProperties.Air;
-        }
-
-        internal static bool IsAir(this IntVec3 cell, Map map) => cell.GetThermalProperties(map) == ThingThermalProperties.Air;
-
-        public static ThingThermalProperties GetTerrainThermalProperties(this IntVec3 cell, Map map) =>
-            cell.GetTerrain(map).GetModExtension<ThingThermalProperties>() ?? ThingThermalProperties.Empty;
-
-        public static bool HasTerrainTemperature(this IntVec3 cell, Map map) => cell.GetTerrainThermalProperties(map).heatCapacity > 0;
-
-        public static float FreezingPoint(this TerrainDef water)
-        {
-            switch (water.defName)
-            {
-                case "WaterOceanDeep":
-                case "WaterOceanShallow":
-                    return -2;
-
-                case "WaterMovingChestDeep":
-                    return -3;
-
-                case "WaterMovingShallow":
-                    return -2;
-            }
-            return 0;
-        }
-
-        /// <summary>
-        /// Returns heat capacity for a cell
-        /// </summary>
-        public static float GetHeatCapacity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).heatCapacity;
-
-        public static float GetHeatConductivity(this IntVec3 cell, Map map, bool convection = false)
-        {
-            ThingThermalProperties modEx = cell.GetThermalProperties(map);
-            return convection ? modEx.conductivity * TemperaturesPlus.TemperatureInfo.convectionConductivityEffect : modEx.conductivity;
-        }
-
         public static float GetTemperature(this Thing thing)
         {
             CompThermal comp = thing.TryGetComp<CompThermal>();
             return comp != null && comp.HasTemperature ? comp.temperature : thing.Position.GetTemperatureForCell(thing.Map);
         }
 
-        public static float GetHeatPush(this Thing thing)
+        public static float GetTemperature(this Room room)
         {
-            CompHeatPusher heatPusher = thing.TryGetComp<CompHeatPusher>();
-            if (heatPusher != null)
-                return heatPusher.Props.heatPerSecond;
-            if (thing is Pawn pawn && !pawn.Dead && !pawn.RaceProps.Insect)
-                return pawn.BodySize * PawnHeatPush;
-            if (thing is Fire)
-                return FireHeatPush;
-            return 0;
+            if (room == null)
+            {
+                LogUtility.Log($"Trying to GetTemperature for null room!", LogLevel.Error);
+                return TemperatureTuning.DefaultTemperature;
+            }
+            TemperatureInfo temperatureInfo = room.Map?.TemperatureInfo();
+            if (temperatureInfo == null)
+            {
+                LogUtility.Log($"TemperatureInfo unavailable for {room.Map}.", LogLevel.Error);
+                return room.Temperature;
+            }
+            if (room.TouchesMapEdge)
+                return room.Map.mapTemperature.OutdoorTemp;
+            return room.Cells.Average(cell => temperatureInfo.GetTemperatureForCell(cell));
         }
-
-        public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
         internal static float TemperatureChange(float oldTemp, ThingThermalProperties targetProps, float neighbourTemp, ThingThermalProperties neighbourProps, float convectionFactor, bool log = false)
         {
@@ -125,5 +86,106 @@ namespace TemperaturesPlus
             }
             return (lerpFactor1 * (finalTemp - temp1), lerpFactor2 * (finalTemp - temp2));
         }
+
+        #endregion TEMPERATURE
+
+        #region THERMAL PROPERTIES
+
+        public static ThingThermalProperties GetThermalProperties(this IntVec3 cell, Map map)
+        {
+            ThingThermalProperties thermalProps = null;
+            if (cell.InBounds(map))
+                thermalProps = cell.GetThingList(map)
+                    .Select(thing => thing.TryGetComp<CompThermal>()?.ThermalProperties)
+                    .FirstOrDefault(props => props != null && props.replacesAirProperties);
+            return thermalProps ?? ThingThermalProperties.Air;
+        }
+
+        internal static bool IsAir(this IntVec3 cell, Map map) => cell.GetThermalProperties(map) == ThingThermalProperties.Air;
+
+        /// <summary>
+        /// Returns heat capacity for a cell
+        /// </summary>
+        public static float GetHeatCapacity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).heatCapacity;
+
+        public static float GetHeatConductivity(this IntVec3 cell, Map map, bool convection = false)
+        {
+            ThingThermalProperties modEx = cell.GetThermalProperties(map);
+            return convection ? modEx.conductivity * TemperaturesPlus.TemperatureInfo.convectionConductivityEffect : modEx.conductivity;
+        }
+
+        public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
+
+        #endregion THERMAL PROPERTIES
+
+        #region TERRAIN
+
+        public static ThingThermalProperties GetTerrainThermalProperties(this IntVec3 cell, Map map) =>
+            cell.GetTerrain(map).GetModExtension<ThingThermalProperties>() ?? ThingThermalProperties.Empty;
+
+        public static bool HasTerrainTemperature(this IntVec3 cell, Map map) => cell.GetTerrainThermalProperties(map).heatCapacity > 0;
+
+        public static float FreezingPoint(this TerrainDef water)
+        {
+            switch (water.defName)
+            {
+                case "WaterOceanDeep":
+                case "WaterOceanShallow":
+                    return -2;
+
+                case "WaterMovingChestDeep":
+                    return -3;
+
+                case "WaterMovingShallow":
+                    return -2;
+            }
+            return 0;
+        }
+
+        #endregion TERRAIN
+
+        #region HEAT PUSH
+
+        static bool Active(this Thing thing)
+        {
+            CompRefuelable refuelable = thing.TryGetComp<CompRefuelable>();
+            if (refuelable != null && !refuelable.HasFuel)
+                return false;
+            CompPowerTrader powerTrader = thing.TryGetComp<CompPowerTrader>();
+            if (powerTrader != null && !powerTrader.PowerOn)
+                return false;
+            CompFlickable flickable = thing.TryGetComp<CompFlickable>();
+            if (flickable != null && !flickable.SwitchIsOn)
+                return false;
+            CompBreakdownable breakdownable = thing.TryGetComp<CompBreakdownable>();
+            if (breakdownable != null && breakdownable.BrokenDown)
+                return false;
+            return true;
+        }
+
+        public static float GetSpecialHeatPush(this Thing thing)
+        {
+            if (thing is Pawn pawn && !pawn.Dead && !pawn.RaceProps.Insect)
+                return pawn.BodySize * PawnHeatPush;
+            if (thing is Fire)
+                return FireHeatPush;
+            return 0;
+        }
+
+        public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
+        {
+            if (UI.MouseCell() == cell)
+                LogUtility.Log($"(Tick {Find.TickManager.TicksGame}) Pushing {energy} heat at {cell}.");
+            TemperatureInfo temperatureInfo = map.TemperatureInfo();
+            if (temperatureInfo == null)
+            {
+                LogUtility.Log($"TemperatureInfo for {map} unavailable!");
+                return false;
+            }
+            temperatureInfo.SetTempteratureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * TemperaturesPlus.TemperatureInfo.HeatPushEffect / cell.GetHeatCapacity(map));
+            return true;
+        }
+
+        #endregion HEAT PUSH
     }
 }

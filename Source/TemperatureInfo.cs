@@ -11,10 +11,10 @@ namespace TemperaturesPlus
         public const int ticksPerUpdate = 250;
         public const int secondsPerUpdate = 3600 * ticksPerUpdate / 2500;
         public const float convectionConductivityEffect = 100;
-        const float heatPushEffect = 10;
+        public const float HeatPushEffect = 5;
         const float defaultTempEffect = 0.1f;
         const float thingTempEffect = 1;
-        const float minIgnitionTemperature = 0;
+        const float minIgnitionTemperature = 100;
 
         float[,] temperatures;
         float[,] terrainTemperatures;
@@ -87,7 +87,6 @@ namespace TemperaturesPlus
 
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
-            LogUtility.Log($"Updating temperatures for {map} on tick {Find.TickManager.TicksGame}.");
             float[,] newTemperatures = (float[,])temperatures.Clone();
             for (int x = 0; x < map.Size.x; x++)
                 for (int z = 0; z < map.Size.z; z++)
@@ -154,20 +153,13 @@ namespace TemperaturesPlus
                     for (int i = 0; i < cell.GetThingList(map).Count; i++)
                     {
                         Thing thing = cell.GetThingList(map)[i];
-
-                        // Heat pushers (fire, heaters, coolers, geysers etc.)
-                        float heatPush = thing.GetHeatPush();
-                        if (heatPush != 0)
-                        {
-                            change += heatPush * heatPushEffect * ticksPerUpdate / cellProps.heatCapacity;
-                            if (log)
-                                LogUtility.Log($"Heat push: {heatPush}.");
-                        }
+                        float temperature = temperatures[x, z];
 
                         // Updating temperature of fully simulated things
                         CompThermal compThermal = thing.TryGetComp<CompThermal>();
                         if (compThermal != null && compThermal.HasTemperature)
                         {
+                            temperature = compThermal.temperature;
                             (float, float) tempChange = TemperatureUtility.TemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, newTemperatures[x, z], cellProps, 1, log);
                             if (log)
                                 LogUtility.Log($"{thing} has temperature {compThermal.temperature:F1}C and heat capacity {compThermal.ThermalProperties.heatCapacity}. Thing temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
@@ -178,12 +170,12 @@ namespace TemperaturesPlus
                         // Autoignition
                         if (thing.FireBulwark)
                             canIgnite = false;
-                        else
+                        else if (temperature > minIgnitionTemperature)
                         {
                             float ignitionTemp = thing.GetStatValue(DefOf.IgnitionTemperature);
-                            if (canIgnite && compThermal != null && ignitionTemp > minIgnitionTemperature && compThermal.temperature >= ignitionTemp)
+                            if (canIgnite && compThermal != null && ignitionTemp > minIgnitionTemperature && temperature >= ignitionTemp)
                             {
-                                LogUtility.Log($"{thing} spontaneously ignites at {compThermal.temperature:F1}C! Ignition temperature is {ignitionTemp:F0}C.");
+                                LogUtility.Log($"{thing} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
                                 fireSize += 0.1f * thing.GetStatValue(StatDefOf.Flammability);
                             }
                         }
@@ -200,7 +192,7 @@ namespace TemperaturesPlus
             if (Prefs.DevMode)
             {
                 stopwatch.Stop();
-                LogUtility.Log($"{stopwatch.Elapsed.TotalMilliseconds / ++iterations:N0} ms per update.");
+                LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {stopwatch.Elapsed.TotalMilliseconds / ++iterations:N0} ms.");
             }
         }
 

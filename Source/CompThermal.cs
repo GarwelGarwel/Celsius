@@ -19,6 +19,9 @@ namespace TemperaturesPlus
                 if (parent is Building_Door door && door.Open)
                     return ThingThermalProperties.Empty;
 
+                if (parent is Building_Vent vent && vent.GetComp<CompFlickable>().SwitchIsOn)
+                    return ThingThermalProperties.Empty;
+
                 if (thermalProps != null)
                     return thermalProps;
 
