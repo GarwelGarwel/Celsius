@@ -37,22 +37,21 @@ namespace TemperaturesPlus
             }
         }
 
-        internal static bool ShouldApplyTo(ThingDef thingDef) =>
-            thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Building;
+        internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Building;
 
-        public override string CompInspectStringExtra() =>
-            ThermalProperties.heatCapacity > 0 ? $"Temperature: {temperature.ToStringTemperature()}\nHeat capacity: {ThermalProperties.heatCapacity:N0}\nStuff: {parent.GetUnderlyingStuff()?.LabelCap ?? "N/A"} (x{thermalProps.mass.ToStringMass()})" : "";
+        public override string CompInspectStringExtra() => HasTemperature ? $"Temperature: {temperature.ToStringTemperature()}" : "";
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
-            if (HasTemperature)
-                temperature = parent.Position.GetTemperatureForCell(parent.Map);
+            if (!respawningAfterLoad && HasTemperature)
+                parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
+                //temperature = parent.Map.mapTemperature.OutdoorTemp;
         }
 
         public override void PreAbsorbStack(Thing otherStack, int count)
         {
             if (HasTemperature)
-                temperature = GenMath.WeightedAverage(temperature, parent.stackCount, otherStack.TryGetComp<CompThermal>().temperature, count);
+                temperature = GenMath.WeightedAverage(temperature, parent.stackCount, otherStack.GetTemperature(), count);
             thermalProps = null;
         }
 

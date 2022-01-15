@@ -8,10 +8,12 @@
 		<description>How slowly the object changes its temperature.</description>
 		<category>Basics</category>
 		<workerClass>TemperaturesPlus.StatWorker_HeatCapacity</workerClass>
+		<forInformationOnly>true</forInformationOnly>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>1400</displayPriorityInCategory>
 		<toStringStyle>Integer</toStringStyle>
+		<formatString>{0} J/C</formatString>
 		<minifiedThingInherits>true</minifiedThingInherits>
 		<defaultBaseValue>0</defaultBaseValue>
 		<minValue>0</minValue>
@@ -23,7 +25,8 @@
 		<description>Minimum temperature when this thing ignites.</description>
 		<category>BasicsNonPawn</category>
 		<showOnPawns>false</showOnPawns>
-		<displayPriorityInCategory>1300</displayPriorityInCategory>
+		<showOnDefaultValue>false</showOnDefaultValue>
+		<displayPriorityInCategory>3010</displayPriorityInCategory>
 		<toStringStyle>Temperature</toStringStyle>
 		<minifiedThingInherits>true</minifiedThingInherits>
 		<defaultBaseValue>0</defaultBaseValue>

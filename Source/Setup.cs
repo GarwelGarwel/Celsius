@@ -8,8 +8,11 @@ using Verse;
 
 namespace TemperaturesPlus
 {
+    /// <summary>
+    /// Harmony patches and Defs preparation on game startup
+    /// </summary>
     [StaticConstructorOnStartup]
-    public static class Setup
+    internal static class Setup
     {
         static Harmony harmony;
 
@@ -21,22 +24,6 @@ namespace TemperaturesPlus
 
             harmony = new Harmony("Garwel.TemperaturesPlus");
             Type type = typeof(Setup);
-
-            void LogPatchError(string methodName) => LogUtility.Log($"Error patching {methodName}.", LogLevel.Error);
-
-            void Patch(string className, string methodName, bool patchPrefix = true, bool patchPostfix = false)
-            {
-                try
-                {
-                    if (harmony.Patch(
-                        AccessTools.Method($"{className}:{methodName}"),
-                        patchPrefix ? new HarmonyMethod(type.GetMethod($"{className}_{methodName}")) : null,
-                        patchPostfix ? new HarmonyMethod(type.GetMethod($"{className}_{methodName}")) : null) == null)
-                        LogPatchError($"{className}.{methodName}");
-                }
-                catch (Exception ex)
-                { LogUtility.Log($"Exception while patching {className}.{methodName}: {ex}"); }
-            }
 
             harmony.Patch(
                 AccessTools.Method($"Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
@@ -52,7 +39,7 @@ namespace TemperaturesPlus
                 prefix: new HarmonyMethod(type.GetMethod($"AttachableThing_Destroy")));
             LogUtility.Log($"Harmony initialization complete.");
 
-            // Adding CompThermal to all applicable Things
+            // Adding CompThermal and ThingThermalProperties to all applicable Things
             foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where(def => CompThermal.ShouldApplyTo(def)))
             {
                 if (def.IsMeat)
@@ -65,6 +52,7 @@ namespace TemperaturesPlus
             }
         }
 
+        // Replaces GenTemperature.TryGetDirectAirTemperatureForCell by providing cell-specific temperature
         public static bool GenTemperature_TryGetDirectAirTemperatureForCell(ref bool __result, IntVec3 c, Map map, out float temperature)
         {
             temperature = TemperatureUtility.GetTemperatureForCell(c, map);
@@ -72,6 +60,7 @@ namespace TemperaturesPlus
             return false;
         }
 
+        // Replaces Room.Temperature with room's average temperature (e.g. for displaying in the bottom right corner)
         public static bool Room_Temperature_get(ref float __result, Room __instance)
         {
             float oldResult = __result;
@@ -85,6 +74,7 @@ namespace TemperaturesPlus
             return false;
         }
 
+        // Replaces Thing.AmbientTemperature with thing's own temperature if it has one
         public static bool Thing_AmbientTemperature_get(ref float __result, Thing __instance)
         {
             CompThermal comp = __instance.TryGetComp<CompThermal>();
@@ -94,6 +84,7 @@ namespace TemperaturesPlus
             return false;
         }
 
+        // Replaces AttachableThing.Destroy to reduce temperature when a Fire is destroyed to the ignition temperature
         public static void AttachableThing_Destroy(AttachableThing __instance)
         {
             LogUtility.Log($"AttachableThing_Destroy({__instance})");

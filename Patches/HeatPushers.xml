@@ -2,18 +2,6 @@
 
 <Patch>
 
-	<!--Operation Class="XmlExtensions.PatchOperationSafeAdd">
-		<xpath>/Defs/ThingDef[defName="Fire"]</xpath>
-		<value>
-			<comps>
-				<li Class="CompProperties_HeatPusher">
-					<compClass>CompHeatPusher</compClass>
-					<heatPerSecond>15</heatPerSecond>
-				</li>
-			</comps>
-		</value>
-	</Operation-->
-
 	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
 		<xpath>/Defs/ThingDef[defName="SteamGeyser"]</xpath>
 		<value>
