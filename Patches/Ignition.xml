@@ -80,9 +80,57 @@
 	</Operation>
 
 	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="Hay"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>100</IgnitionTemperature>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="PsychoidLeaves"]/statBases | Defs/ThingDef[defName="SmokeleafLeaves"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>250</IgnitionTemperature>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
 		<xpath>Defs/ThingDef[defName="Chemfuel"]/statBases</xpath>
 		<value>
 			<IgnitionTemperature>250</IgnitionTemperature>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[@Name="ShellBase"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>250</IgnitionTemperature>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[@Name="TrapIEDBase"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>250</IgnitionTemperature>
+		</value>
+	</Operation>
+
+	<!-- ROYALTY -->
+
+	<Operation Class="PatchOperationAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="UnstablePowerCell"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>225</IgnitionTemperature>
+		</value>
+	</Operation>
+
+	<!-- IDEOLOGY -->
+
+	<Operation Class="PatchOperationAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="AncientFuelNode"]/statBases</xpath>
+		<value>
+			<IgnitionTemperature>225</IgnitionTemperature>
 		</value>
 	</Operation>
 

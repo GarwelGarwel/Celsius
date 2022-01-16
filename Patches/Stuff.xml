@@ -2,7 +2,7 @@
 
 <Patch>
 
-	<!-- Note: Specific heat capacity in J/kg/C. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
+	<!-- Note: Specific heat capacity in J/kg/C, conductivity in W/C. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
 
 	<!-- Pure stuff: Basics -->
 	
