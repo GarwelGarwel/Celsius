@@ -11,7 +11,7 @@ namespace Celsius
         public static float HeatConductivityFactor;
         public static float ConvectionConductivityEffect;
         public static float HeatPushEffect;
-        public static bool DebugMode = Prefs.DevMode;
+        public static bool DebugMode = Prefs.LogVerbose;
 
         public const float AirHeatCapacity_Default = 1200;
         public const float ConvectionConductivityEffect_Default = 10;
@@ -28,12 +28,12 @@ namespace Celsius
             Scribe_Values.Look(ref HeatConductivityFactor, "HeatConductivityFactor", 1);
             Scribe_Values.Look(ref ConvectionConductivityEffect, "ConvectionConductivityEffect", ConvectionConductivityEffect_Default);
             Scribe_Values.Look(ref HeatPushEffect, "HeatPushEffect", HeatPushEffect_Base);
-            Scribe_Values.Look(ref DebugMode, "DebugMode", Prefs.DevMode);
+            Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
         }
 
         public static void Reset()
         {
-            ShowTemperatureMap = Prefs.DevMode;
+            ShowTemperatureMap = false;
             FreezingAndMeltingEnabled = true;
             AutoignitionEnabled = true;
             AirHeatCapacity = AirHeatCapacity_Default;

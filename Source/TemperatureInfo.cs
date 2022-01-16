@@ -38,12 +38,12 @@ namespace Celsius
                 for (int j = 0; j < temperatures.GetLength(1); j++)
                 {
                     IntVec3 cell = new IntVec3(i, 0, j);
-                    Room room = cell.GetRoom(map);
+                    Room room = cell.GetRoomOrAdjacent(map, RegionType.Set_Passable);
                     if (room != null)
                         temperatures[i, j] = room.TempTracker.Temperature;
                     else TryGetEnvironmentTemperatureForCell(cell, out temperatures[i, j]);
                     if (cell.HasTerrainTemperature(map))
-                        terrainTemperatures[i, j] = temperatures[i, j];
+                        terrainTemperatures[i, j] = map.mapTemperature.SeasonalTemp;
                 }
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
@@ -82,7 +82,7 @@ namespace Celsius
             {
                 Text.Font = GameFont.Tiny;
                 string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
-                if (cell.HasTerrainTemperature(map))
+                if (Settings.FreezingAndMeltingEnabled && cell.HasTerrainTemperature(map))
                     tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
             }
@@ -93,7 +93,7 @@ namespace Celsius
             if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
                 return;
 
-            if (Prefs.DevMode)
+            if (Settings.DebugMode)
                 tickStopwatch.Start();
 
             IntVec3 mouseCell = UI.MouseCell();
@@ -101,6 +101,8 @@ namespace Celsius
             float[,] newTemperatures = (float[,])temperatures.Clone();
             minTemperature = TemperatureTuning.DefaultTemperature - 20;
             maxTemperature = TemperatureTuning.DefaultTemperature + 20;
+
+            // Main loop
             for (int x = 0; x < map.Size.x; x++)
                 for (int z = 0; z < map.Size.z; z++)
                 {
@@ -166,10 +168,9 @@ namespace Celsius
                         }
                     }
 
+                    // Things in the cell
                     bool canIgnite = true;
                     float fireSize = 0;
-
-                    // Things in cell
                     for (int i = 0; i < cell.GetThingList(map).Count; i++)
                     {
                         Thing thing = cell.GetThingList(map)[i];
@@ -208,16 +209,17 @@ namespace Celsius
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
                         newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
-                    if (newTemperatures[x, z] < minTemperature)
-                        minTemperature = newTemperatures[x, z];
-                    else if (newTemperatures[x, z] > maxTemperature)
-                        maxTemperature = newTemperatures[x, z];
+                    if (Settings.ShowTemperatureMap)
+                        if (newTemperatures[x, z] < minTemperature)
+                            minTemperature = newTemperatures[x, z];
+                        else if (newTemperatures[x, z] > maxTemperature)
+                            maxTemperature = newTemperatures[x, z];
                 }
 
             temperatures = newTemperatures;
             overlayDrawer.SetDirty();
 
-            if (Prefs.DevMode)
+            if (Settings.DebugMode)
             {
                 tickStopwatch.Stop();
                 LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {tickStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");

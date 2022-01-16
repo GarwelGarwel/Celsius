@@ -32,7 +32,7 @@ namespace Celsius
                 {
                     if (thermalProps.mass == 0)
                         thermalProps.mass = Mass;
-                    if (thermalProps.heatCapacity == 0)
+                    if (stuffProps.specificHeatCapacity > 0 && thermalProps.mass > 0)
                         thermalProps.heatCapacity = stuffProps.specificHeatCapacity * thermalProps.mass;
                     thermalProps.conductivity *= stuffProps.conductivity;
                 }
@@ -41,21 +41,13 @@ namespace Celsius
             }
         }
 
-        public override void Initialize(CompProperties props)
-        {
-            base.Initialize(props);
-            //if (parent.Spawned)
-            //    parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
-            //else temperature = TemperatureTuning.DefaultTemperature;
-        }
-
         internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Building;
 
         public override string CompInspectStringExtra() => HasTemperature ? $"Temperature: {temperature.ToStringTemperature()}" : "";
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
-            if (!initialized && !respawningAfterLoad && HasTemperature)
+            if (!initialized && HasTemperature)
             {
                 parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
                 initialized = true;
@@ -69,9 +61,6 @@ namespace Celsius
             thermalProps = null;
         }
 
-        public override void PostSplitOff(Thing piece)
-        {
-            thermalProps = null;
-        }
+        public override void PostSplitOff(Thing piece) => thermalProps = null;
     }
 }

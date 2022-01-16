@@ -21,6 +21,7 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
 				<mass>8</mass>
+				<heatCapacity>12000</heatCapacity>
 			</li>
 		</value>
 	</Operation>
@@ -31,6 +32,7 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<replacesAirProperties>true</replacesAirProperties>
 				<mass>20</mass>
+				<heatCapacity>16000</heatCapacity>
 			</li>
 		</value>
 	</Operation>

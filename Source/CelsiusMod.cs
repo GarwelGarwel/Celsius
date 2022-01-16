@@ -26,7 +26,7 @@ namespace Celsius
             Listing_Standard content = new Listing_Standard();
             content.Begin(rect);
 
-            content.CheckboxLabeled("Show temperature map", ref Settings.ShowTemperatureMap, "Show cells' temperatures on a map and a mouse cursor tooltip.");
+            content.CheckboxLabeled("Show heat map", ref Settings.ShowTemperatureMap, "Show temperatures' map and a mouse cursor tooltip.");
             content.CheckboxLabeled("Freezing and melting", ref Settings.FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
             content.CheckboxLabeled("Autoignition", ref Settings.AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot.");
 
@@ -43,6 +43,8 @@ namespace Celsius
 
             content.Label($"Heat push effect: {(Settings.HeatPushEffect / Settings.HeatPushEffect_Base).ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
             Settings.HeatPushEffect = Settings.HeatPushEffect_Base * (float)Math.Round(content.Slider(Settings.HeatPushEffect / Settings.HeatPushEffect_Base, 0, 5), 1);
+
+            content.CheckboxLabeled("Debug logging mode", ref Settings.DebugMode, "Verbose logging of Celsius' work.");
 
             if (content.ButtonText("Reset to default"))
                 Settings.Reset();
