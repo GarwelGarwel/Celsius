@@ -16,7 +16,7 @@ namespace Celsius
         float[,] temperatures;
         float[,] terrainTemperatures;
 
-        float minTemperature = -100, maxTemperature = 100;
+        float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
         Color minComfortableColor = new Color(0, 0.5f, 0.5f);
         Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
@@ -25,7 +25,7 @@ namespace Celsius
         int tickIterations;
 
         public TemperatureInfo(Map map)
-            :base(map)
+            : base(map)
         {
             temperatures = new float[map.Size.x, map.Size.z];
             terrainTemperatures = new float[map.Size.x, map.Size.z];
@@ -105,7 +105,7 @@ namespace Celsius
                 for (int z = 0; z < map.Size.z; z++)
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
-                    log = Prefs.DevMode && cell == mouseCell;
+                    log = false;// Prefs.DevMode && cell == mouseCell;
                     ThingThermalProperties cellProps = cell.GetThermalProperties(map);
                     if (log)
                         LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.");
@@ -244,8 +244,6 @@ namespace Celsius
 
         public void SetTempteratureForCell(IntVec3 cell, float temperature)
         {
-            if (Mathf.Abs(temperature - GetTemperatureForCell(cell)) > 20)
-                LogUtility.Log($"Suspiciously fast temperature change from {GetTemperatureForCell(cell):F1}C to {temperature:F1}C at {cell}.", LogLevel.Warning);
             if (cell.InBounds(map) && temperatures != null)
                 temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
         }

@@ -44,6 +44,12 @@ namespace Celsius
             harmony.Patch(
                 AccessTools.Method($"Verse.AttachableThing:Destroy"),
                 prefix: new HarmonyMethod(type.GetMethod($"AttachableThing_Destroy")));
+            harmony.Patch(
+                AccessTools.Method($"RimWorld.JobGiver_SeekSafeTemperature:ClosestRegionWithinTemperatureRange"),
+                prefix: new HarmonyMethod(type.GetMethod($"JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange")));
+            harmony.Patch(
+                AccessTools.Method($"Verse.DangerUtility:GetDangerFor"),
+                postfix: new HarmonyMethod(type.GetMethod($"DangerUtility_GetDangerFor")));
             LogUtility.Log($"Harmony initialization complete.");
 
             // Adding CompThermal and ThingThermalProperties to all applicable Things
@@ -132,6 +138,41 @@ namespace Celsius
                         compThermal.temperature = Mathf.Min(compThermal.temperature, temperature);
                 }
             }
+        }
+
+        // Replaces JobGiver_SeekSafeTemperature.ClosestRegionWithinTemperatureRange to only seek regions with no dangerous cells
+        public static bool JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange(ref Region __result, JobGiver_SeekSafeTemperature __instance, IntVec3 root, Map map, FloatRange tempRange, TraverseParms traverseParms)
+        {
+            LogUtility.Log($"JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange for {root.GetFirstPawn(map)} at {root} (t = {root.GetTemperatureForCell(map):F1}C)");
+            Region region = root.GetRegion(map, RegionType.Set_Passable);
+            if (region == null)
+                return false;
+            RegionEntryPredicate entryCondition = (Region from, Region r) => r.Allows(traverseParms, false);
+            Region foundReg = null;
+            RegionProcessor regionProcessor = delegate (Region r)
+            {
+                if (r.IsDoorway)
+                    return false;
+                if (r.Cells.All(cell => tempRange.Includes(cell.GetTemperatureForCell(map))))
+                {
+                    foundReg = r;
+                    return true;
+                }
+                return false;
+            };
+            RegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, 9999, RegionType.Set_Passable);
+            LogUtility.Log($"Safe region found: {foundReg}");
+            __result = foundReg;
+            return false;
+        }
+
+        // Attaches to DangerUtility.GetDangerFor to mark specific (too hot or too cold) cells as dangerous
+        public static Danger DangerUtility_GetDangerFor(Danger result, IntVec3 c, Pawn p, Map map)
+        {
+            float temperature = c.GetTemperatureForCell(map);
+            FloatRange range = p.SafeTemperatureRange();
+            Danger danger = range.Includes(temperature) ? Danger.None : (range.ExpandedBy(80).Includes(temperature) ? Danger.Some : Danger.Deadly);
+            return danger > result ? danger : result;
         }
     }
 }
