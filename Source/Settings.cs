@@ -4,7 +4,7 @@ namespace Celsius
 {
     public class Settings : ModSettings
     {
-        public static bool ShowTemperatureTooltip;
+        public static bool ShowTemperatureMap;
         public static bool FreezingAndMeltingEnabled;
         public static bool AutoignitionEnabled;
         public static float AirHeatCapacity;
@@ -21,7 +21,7 @@ namespace Celsius
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref ShowTemperatureTooltip, "ShowTemperatureTooltip");
+            Scribe_Values.Look(ref ShowTemperatureMap, "ShowTemperatureMap");
             Scribe_Values.Look(ref FreezingAndMeltingEnabled, "FreezingAndMeltingEnabled", true);
             Scribe_Values.Look(ref AutoignitionEnabled, "AutoignitionEnabled", true);
             Scribe_Values.Look(ref AirHeatCapacity, "AirHeatCapacity", AirHeatCapacity_Default);
@@ -33,7 +33,7 @@ namespace Celsius
 
         public static void Reset()
         {
-            ShowTemperatureTooltip = Prefs.DevMode;
+            ShowTemperatureMap = Prefs.DevMode;
             FreezingAndMeltingEnabled = true;
             AutoignitionEnabled = true;
             AirHeatCapacity = AirHeatCapacity_Default;

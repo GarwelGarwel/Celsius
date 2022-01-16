@@ -26,7 +26,7 @@ namespace Celsius
             Listing_Standard content = new Listing_Standard();
             content.Begin(rect);
 
-            content.CheckboxLabeled("Show temperature tooltip", ref Settings.ShowTemperatureTooltip, "Display cell's temperature next to mouse cursor.");
+            content.CheckboxLabeled("Show temperature map", ref Settings.ShowTemperatureMap, "Show cells' temperatures on a map and a mouse cursor tooltip.");
             content.CheckboxLabeled("Freezing and melting", ref Settings.FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
             content.CheckboxLabeled("Autoignition", ref Settings.AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot.");
 

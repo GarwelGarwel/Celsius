@@ -13,7 +13,7 @@ namespace Celsius
     {
         internal static void Log(string message, LogLevel logLevel = LogLevel.Message)
         {
-            message = $"[Temperatures+] {message}";
+            message = $"[Celsius] {message}";
             switch (logLevel)
             {
                 case LogLevel.Message:

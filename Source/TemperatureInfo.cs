@@ -16,14 +16,20 @@ namespace Celsius
         float[,] temperatures;
         float[,] terrainTemperatures;
 
-        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        int iterations;
+        float minTemperature = -100, maxTemperature = 100;
+        CellBoolDrawer overlayDrawer;
+        Color minComfortableColor = new Color(0, 0.5f, 0.5f);
+        Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
+
+        System.Diagnostics.Stopwatch tickStopwatch = new System.Diagnostics.Stopwatch();
+        int tickIterations;
 
         public TemperatureInfo(Map map)
             :base(map)
         {
             temperatures = new float[map.Size.x, map.Size.z];
             terrainTemperatures = new float[map.Size.x, map.Size.z];
+            overlayDrawer = new CellBoolDrawer(index => !map.fogGrid.IsFogged(index), () => Color.white, index => TemperatureColorForCell(index), map.Size.x, map.Size.z);
         }
 
         public override void FinalizeInit()
@@ -49,18 +55,37 @@ namespace Celsius
             Scribe_Values.Look(ref terrainTemperatures, "terrainTemperatures");
         }
 
+        Color TemperatureColorForCell(int index)
+        {
+            float temperature = GetTemperatureForCell(CellIndicesUtility.IndexToCell(index, map.Size.x));
+            if (temperature < TemperatureTuning.DefaultTemperature - 5)
+                return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (TemperatureTuning.DefaultTemperature - 5 - minTemperature));
+            if (temperature < TemperatureTuning.DefaultTemperature + 5)
+                return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - TemperatureTuning.DefaultTemperature + 5) / 10);
+            return Color.Lerp(maxComfortableColor, Color.red, (maxTemperature - temperature) / (maxTemperature - TemperatureTuning.DefaultTemperature - 5));
+        }
+
+        public override void MapComponentUpdate()
+        {
+            base.MapComponentUpdate();
+            if (Settings.ShowTemperatureMap)
+                overlayDrawer.MarkForDraw();
+            overlayDrawer.CellBoolDrawerUpdate();
+        }
+
         public override void MapComponentOnGUI()
         {
-            if (!Settings.ShowTemperatureTooltip)
+            if (!Settings.ShowTemperatureMap)
                 return;
             IntVec3 cell = UI.MouseCell();
-            if (!cell.InBounds(map))
-                return;
-            Text.Font = GameFont.Tiny;
-            string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
-            if (cell.HasTerrainTemperature(map))
-                tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
-            Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
+            if (cell.InBounds(map) && (!cell.Fogged(map) || Prefs.DevMode))
+            {
+                Text.Font = GameFont.Tiny;
+                string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
+                if (cell.HasTerrainTemperature(map))
+                    tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
+                Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
+            }
         }
 
         public override void MapComponentTick()
@@ -69,18 +94,19 @@ namespace Celsius
                 return;
 
             if (Prefs.DevMode)
-                stopwatch.Start();
+                tickStopwatch.Start();
 
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
+            minTemperature = TemperatureTuning.DefaultTemperature - 20;
+            maxTemperature = TemperatureTuning.DefaultTemperature + 20;
             for (int x = 0; x < map.Size.x; x++)
                 for (int z = 0; z < map.Size.z; z++)
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
                     log = Prefs.DevMode && cell == mouseCell;
                     ThingThermalProperties cellProps = cell.GetThermalProperties(map);
-                    //float change = 0;
                     if (log)
                         LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.");
 
@@ -178,19 +204,23 @@ namespace Celsius
                     if (canIgnite && fireSize > 0)
                         FireUtility.TryStartFireIn(cell, map, fireSize);
 
-                    //newTemperatures[x, z] += change;
-
                     // Default environment temperature
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
                         newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
+
+                    if (newTemperatures[x, z] < minTemperature)
+                        minTemperature = newTemperatures[x, z];
+                    else if (newTemperatures[x, z] > maxTemperature)
+                        maxTemperature = newTemperatures[x, z];
                 }
 
             temperatures = newTemperatures;
+            overlayDrawer.SetDirty();
 
             if (Prefs.DevMode)
             {
-                stopwatch.Stop();
-                LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {stopwatch.Elapsed.TotalMilliseconds / ++iterations:N0} ms.");
+                tickStopwatch.Stop();
+                LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {tickStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
             }
         }
 
