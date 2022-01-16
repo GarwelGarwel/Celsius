@@ -58,8 +58,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CellUtility.cs" />
+    <Compile Include="CelsiusMod.cs" />
     <Compile Include="CompThermal.cs" />
     <Compile Include="DefOf.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Setup.cs" />
     <Compile Include="LogUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

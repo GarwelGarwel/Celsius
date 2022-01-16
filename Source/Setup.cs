@@ -57,6 +57,8 @@ namespace Celsius
                 }
                 def.comps.Add(new CompProperties(typeof(CompThermal)));
             }
+
+            TemperatureUtility.RecalculateAirProperties();
         }
 
         // Replaces GenTemperature.TryGetDirectAirTemperatureForCell by providing cell-specific temperature
@@ -112,11 +114,10 @@ namespace Celsius
             else return 0;
         }
 
-        // Replaces AttachableThing.Destroy to reduce temperature when a Fire is destroyed to the ignition temperature
+        // Attaches to AttachableThing.Destroy to reduce temperature when a Fire is destroyed to the ignition temperature
         public static void AttachableThing_Destroy(AttachableThing __instance)
         {
-            LogUtility.Log($"AttachableThing_Destroy({__instance})");
-            if (__instance is Fire)
+            if (Settings.AutoignitionEnabled && __instance is Fire)
             {
                 TemperatureInfo temperatureInfo = __instance.Map?.TemperatureInfo();
                 if (temperatureInfo != null)

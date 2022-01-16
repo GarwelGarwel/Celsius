@@ -8,11 +8,10 @@ namespace Celsius
 {
     public class TemperatureInfo : MapComponent
     {
-        public const int ticksPerUpdate = 250;
-        const int updateTickOffset = 18;
-        public const int secondsPerUpdate = 3600 * ticksPerUpdate / 2500;
-        public const float HeatPushEffect = 5;
-        const float minIgnitionTemperature = 100;
+        public const int TicksPerUpdate = 250;
+        const int UpdateTickOffset = 18;
+        public const int SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
+        const float MinIgnitionTemperature = 100;
 
         float[,] temperatures;
         float[,] terrainTemperatures;
@@ -52,24 +51,21 @@ namespace Celsius
 
         public override void MapComponentOnGUI()
         {
-            if (!Prefs.DevMode)
+            if (!Settings.ShowTemperatureTooltip)
                 return;
             IntVec3 cell = UI.MouseCell();
             if (!cell.InBounds(map))
                 return;
             Text.Font = GameFont.Tiny;
-            string tooltip = $"Air: {GetTemperatureForCell(cell).ToStringTemperature()}";
+            string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
             if (cell.HasTerrainTemperature(map))
                 tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
             Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
         }
 
-        string CellInfo(IntVec3 cell) =>
-            $"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.";
-
         public override void MapComponentTick()
         {
-            if (Find.TickManager.TicksGame % ticksPerUpdate != updateTickOffset)
+            if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
                 return;
 
             if (Prefs.DevMode)
@@ -84,9 +80,9 @@ namespace Celsius
                     IntVec3 cell = new IntVec3(x, 0, z);
                     log = Prefs.DevMode && cell == mouseCell;
                     ThingThermalProperties cellProps = cell.GetThermalProperties(map);
-                    float change = 0;
+                    //float change = 0;
                     if (log)
-                        LogUtility.Log(CellInfo(cell));
+                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.");
 
                     // Diffusion & convection
                     void DiffusionWithNeighbour(IntVec3 neighbour)
@@ -96,7 +92,7 @@ namespace Celsius
                             cellProps,
                             GetTemperatureForCell(neighbour),
                             neighbour.GetThermalProperties(map));
-                        change += changes.Item1;
+                        newTemperatures[x, z] += changes.Item1;
                         if (neighbour.InBounds(map))
                             newTemperatures[neighbour.x, neighbour.z] += changes.Item2;
                     }
@@ -108,39 +104,38 @@ namespace Celsius
                     if (z == 0)
                         DiffusionWithNeighbour(cell + IntVec3.South);
 
-                    // Default environment temperature
-                    if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
-                        change += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], cellProps, environmentTemperature, cellProps);
-
                     // Terrain temperature
-                    TerrainDef terrain = cell.GetTerrain(map);
-                    ThingThermalProperties terrainProps = terrain.GetModExtension<ThingThermalProperties>();
-                    if (terrainProps != null && terrainProps.heatCapacity > 0)
+                    if (Settings.FreezingAndMeltingEnabled)
                     {
-                        (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(GetTerrainTemperature(cell), terrainProps, newTemperatures[x, z], cellProps);
-                        if (log)
-                            LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
-                        terrainTemperatures[x, z] += tempChange.Item1;
-                        newTemperatures[x, z] += tempChange.Item2;
-
-                        // Freezing and melting
-                        if (terrain.IsWater && terrainTemperatures[x, z] < terrain.FreezingPoint())
+                        TerrainDef terrain = cell.GetTerrain(map);
+                        ThingThermalProperties terrainProps = terrain.GetModExtension<ThingThermalProperties>();
+                        if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
                             if (log)
-                                LogUtility.Log($"{terrain} freezes at {cell} (t = {terrainTemperatures[x, z]:F1}C)");
-                            map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
-                            map.terrainGrid.SetUnderTerrain(cell, terrain);
-                        }
-                        else if (terrainTemperatures[x, z] > TemperatureUtility.MinFreezingTemperature && terrain == TerrainDefOf.Ice)
-                        {
-                            TerrainDef meltedTerrain = cell.BestWaterTerrain(map);
-                            if (terrainTemperatures[x, z] > meltedTerrain.FreezingPoint())
+                                LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
+                            terrainTemperatures[x, z] += tempChange.Item1;
+                            newTemperatures[x, z] += tempChange.Item2;
+
+                            // Freezing and melting
+                            if (terrain.IsWater && terrainTemperatures[x, z] < terrain.FreezingPoint())
                             {
-                                if (map.terrainGrid.UnderTerrainAt(cell) == null)
-                                    map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
                                 if (log)
-                                    LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName} (t = {terrainTemperatures[x, z]:F1}C)");
-                                map.terrainGrid.RemoveTopLayer(cell, false);
+                                    LogUtility.Log($"{terrain} freezes at {cell} (t = {terrainTemperatures[x, z]:F1}C)");
+                                map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
+                                map.terrainGrid.SetUnderTerrain(cell, terrain);
+                            }
+                            else if (terrainTemperatures[x, z] > TemperatureUtility.MinFreezingTemperature && terrain == TerrainDefOf.Ice)
+                            {
+                                TerrainDef meltedTerrain = cell.BestWaterTerrain(map);
+                                if (terrainTemperatures[x, z] > meltedTerrain.FreezingPoint())
+                                {
+                                    if (map.terrainGrid.UnderTerrainAt(cell) == null)
+                                        map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
+                                    if (log)
+                                        LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName} (t = {terrainTemperatures[x, z]:F1}C)");
+                                    map.terrainGrid.RemoveTopLayer(cell, false);
+                                }
                             }
                         }
                     }
@@ -152,27 +147,27 @@ namespace Celsius
                     for (int i = 0; i < cell.GetThingList(map).Count; i++)
                     {
                         Thing thing = cell.GetThingList(map)[i];
-                        float temperature = temperatures[x, z];
+                        float temperature = newTemperatures[x, z];
 
                         // Updating temperature of fully simulated things
                         CompThermal compThermal = thing.TryGetComp<CompThermal>();
                         if (compThermal != null && compThermal.HasTemperature)
                         {
-                            temperature = compThermal.temperature;
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, newTemperatures[x, z], cellProps, log);
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, temperature, cellProps, log);
                             if (log)
                                 LogUtility.Log($"{thing} has temperature {compThermal.temperature:F1}C and heat capacity {compThermal.ThermalProperties.heatCapacity}. Thing temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
+                            temperature = compThermal.temperature;
                             compThermal.temperature += tempChange.Item1;
                             newTemperatures[x, z] += tempChange.Item2;
                         }
 
                         // Autoignition
-                        if (thing.FireBulwark)
+                        if (!Settings.AutoignitionEnabled || thing.FireBulwark)
                             canIgnite = false;
-                        else if (temperature > minIgnitionTemperature)
+                        else if (temperature > MinIgnitionTemperature)
                         {
                             float ignitionTemp = thing.GetStatValue(DefOf.IgnitionTemperature);
-                            if (canIgnite && compThermal != null && ignitionTemp > minIgnitionTemperature && temperature >= ignitionTemp)
+                            if (canIgnite && compThermal != null && ignitionTemp > MinIgnitionTemperature && temperature >= ignitionTemp)
                             {
                                 LogUtility.Log($"{thing} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
                                 fireSize += 0.1f * thing.GetStatValue(StatDefOf.Flammability);
@@ -183,7 +178,11 @@ namespace Celsius
                     if (canIgnite && fireSize > 0)
                         FireUtility.TryStartFireIn(cell, map, fireSize);
 
-                    newTemperatures[x, z] += change;
+                    //newTemperatures[x, z] += change;
+
+                    // Default environment temperature
+                    if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
+                        newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
                 }
 
             temperatures = newTemperatures;
@@ -204,7 +203,7 @@ namespace Celsius
                 return true;
             }
             temperature = map.mapTemperature.OutdoorTemp;
-            return roof == null && cell.IsAir(map);
+            return roof == null;
         }
 
         public float GetTemperatureForCell(IntVec3 cell) =>
@@ -215,8 +214,10 @@ namespace Celsius
 
         public void SetTempteratureForCell(IntVec3 cell, float temperature)
         {
+            if (Mathf.Abs(temperature - GetTemperatureForCell(cell)) > 20)
+                LogUtility.Log($"Suspiciously fast temperature change from {GetTemperatureForCell(cell):F1}C to {temperature:F1}C at {cell}.", LogLevel.Warning);
             if (cell.InBounds(map) && temperatures != null)
-                temperatures[cell.x, cell.z] = temperature;
+                temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
         }
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
@@ -229,7 +230,7 @@ namespace Celsius
                 if (thing.GetStatValue(StatDefOf.Flammability) > 0)
                 {
                     float ignitionTemperature = thing.GetStatValue(DefOf.IgnitionTemperature);
-                    if (ignitionTemperature > minIgnitionTemperature)
+                    if (ignitionTemperature > MinIgnitionTemperature)
                         min = Mathf.Min(min, ignitionTemperature);
                 }
             }

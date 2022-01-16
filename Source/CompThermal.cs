@@ -5,7 +5,8 @@ namespace Celsius
 {
     public class CompThermal : ThingComp
     {
-        public float temperature = -9999;
+        bool initialized;
+        public float temperature;
         ThingThermalProperties thermalProps;
 
         float Mass => parent.def.EverHaulable ? parent.GetStatValue(StatDefOf.Mass) : parent.def.CostStuffCount;
@@ -40,14 +41,25 @@ namespace Celsius
             }
         }
 
+        public override void Initialize(CompProperties props)
+        {
+            base.Initialize(props);
+            //if (parent.Spawned)
+            //    parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
+            //else temperature = TemperatureTuning.DefaultTemperature;
+        }
+
         internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Building;
 
         public override string CompInspectStringExtra() => HasTemperature ? $"Temperature: {temperature.ToStringTemperature()}" : "";
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
-            if (HasTemperature && temperature < -2000)
+            if (!initialized && !respawningAfterLoad && HasTemperature)
+            {
                 parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
+                initialized = true;
+            }
         }
 
         public override void PreAbsorbStack(Thing otherStack, int count)

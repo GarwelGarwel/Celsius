@@ -9,7 +9,7 @@ namespace Celsius
         public static readonly ThingThermalProperties Air = new ThingThermalProperties()
         {
             replacesAirProperties = true,
-            heatCapacity = 1200,
+            heatCapacity = Settings.AirHeatCapacity,
             conductivity = 0.03f
         };
 
