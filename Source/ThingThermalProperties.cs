@@ -8,7 +8,6 @@ namespace Celsius
 
         public static readonly ThingThermalProperties Air = new ThingThermalProperties()
         {
-            replacesAirProperties = true,
             heatCapacity = Settings.AirHeatCapacity,
             conductivity = 0.03f
         };
@@ -19,7 +18,6 @@ namespace Celsius
             conductivity = 0.5f
         };
 
-        public bool replacesAirProperties;
         public float mass;
         public float heatCapacity;
         public float conductivity = 1;
@@ -31,13 +29,11 @@ namespace Celsius
         {
             if (copyFrom == null)
                 return;
-            replacesAirProperties = copyFrom.replacesAirProperties;
             mass = copyFrom.mass;
             heatCapacity = copyFrom.heatCapacity;
             conductivity = copyFrom.conductivity;
         }
 
-        public override string ToString() =>
-            $"Mass: {mass.ToStringMass()}. Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C.{(replacesAirProperties ? " Replaces air properties." : "")}";
+        public override string ToString() => $"Mass: {mass.ToStringMass()}. Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C.";
     }
 }

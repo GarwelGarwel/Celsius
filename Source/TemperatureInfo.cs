@@ -174,29 +174,16 @@ namespace Celsius
                     for (int i = 0; i < cell.GetThingList(map).Count; i++)
                     {
                         Thing thing = cell.GetThingList(map)[i];
-                        float temperature = newTemperatures[x, z];
-
-                        // Updating temperature of fully simulated things
-                        CompThermal compThermal = thing.TryGetComp<CompThermal>();
-                        if (compThermal != null && compThermal.HasTemperature)
-                        {
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(compThermal.temperature, compThermal.ThermalProperties, temperature, cellProps, log);
-                            if (log)
-                                LogUtility.Log($"{thing} has temperature {compThermal.temperature:F1}C and heat capacity {compThermal.ThermalProperties.heatCapacity}. Thing temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
-                            temperature = compThermal.temperature;
-                            compThermal.temperature += tempChange.Item1;
-                            newTemperatures[x, z] += tempChange.Item2;
-                        }
 
                         // Autoignition
                         if (!Settings.AutoignitionEnabled || thing.FireBulwark)
                             canIgnite = false;
-                        else if (temperature > MinIgnitionTemperature)
+                        else if (temperatures[x, z] > MinIgnitionTemperature)
                         {
                             float ignitionTemp = thing.GetStatValue(DefOf.IgnitionTemperature);
-                            if (canIgnite && compThermal != null && ignitionTemp > MinIgnitionTemperature && temperature >= ignitionTemp)
+                            if (canIgnite && ignitionTemp > MinIgnitionTemperature && temperatures[x, z] >= ignitionTemp)
                             {
-                                LogUtility.Log($"{thing} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
+                                LogUtility.Log($"{thing} spontaneously ignites at {temperatures[x, z]:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
                                 fireSize += 0.1f * thing.GetStatValue(StatDefOf.Flammability);
                             }
                         }

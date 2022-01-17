@@ -2,13 +2,12 @@
 
 <Patch>
 
-	<!-- Note: Specific heat capacity in J/kg/C. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
+	<!-- Note: Heat capacity in J/C, conductivity in W/C. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
 
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<replacesAirProperties>true</replacesAirProperties>
 				<heatCapacity>2200000</heatCapacity>
 				<conductivity>2.5</conductivity>
 			</li>
@@ -19,7 +18,6 @@
 		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<replacesAirProperties>true</replacesAirProperties>
 				<mass>8</mass>
 				<heatCapacity>12000</heatCapacity>
 			</li>
@@ -30,7 +28,6 @@
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<replacesAirProperties>true</replacesAirProperties>
 				<mass>20</mass>
 				<heatCapacity>16000</heatCapacity>
 			</li>
@@ -41,7 +38,6 @@
 		<xpath>Defs/ThingDef[defName="Vent"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<replacesAirProperties>true</replacesAirProperties>
 				<heatCapacity>9300</heatCapacity>
 				<conductivity>20</conductivity>
 			</li>

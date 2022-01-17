@@ -5,13 +5,9 @@ namespace Celsius
 {
     public class CompThermal : ThingComp
     {
-        bool initialized;
-        public float temperature;
         ThingThermalProperties thermalProps;
 
         float Mass => parent.def.EverHaulable ? parent.GetStatValue(StatDefOf.Mass) : parent.def.CostStuffCount;
-
-        public bool HasTemperature => ThermalProperties.heatCapacity > 0 && !ThermalProperties.replacesAirProperties;
 
         public ThingThermalProperties ThermalProperties
         {
@@ -41,26 +37,6 @@ namespace Celsius
             }
         }
 
-        internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Building;
-
-        public override string CompInspectStringExtra() => HasTemperature ? $"Temperature: {temperature.ToStringTemperature()}" : "";
-
-        public override void PostSpawnSetup(bool respawningAfterLoad)
-        {
-            if (!initialized && HasTemperature)
-            {
-                parent.Map.TemperatureInfo().TryGetEnvironmentTemperatureForCell(parent.Position, out temperature);
-                initialized = true;
-            }
-        }
-
-        public override void PreAbsorbStack(Thing otherStack, int count)
-        {
-            if (HasTemperature)
-                temperature = GenMath.WeightedAverage(temperature, parent.stackCount, otherStack.GetTemperature(), count);
-            thermalProps = null;
-        }
-
-        public override void PostSplitOff(Thing piece) => thermalProps = null;
+        internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Building;
     }
 }

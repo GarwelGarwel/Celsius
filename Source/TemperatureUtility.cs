@@ -22,12 +22,6 @@ namespace Celsius
             return tempInfo.GetTemperatureForCell(cell);
         }
 
-        public static float GetTemperature(this Thing thing)
-        {
-            CompThermal comp = thing.TryGetComp<CompThermal>();
-            return comp != null && comp.HasTemperature ? comp.temperature : thing.Position.GetTemperatureForCell(thing.Map);
-        }
-
         public static float GetTemperature(this Room room)
         {
             if (room == null)
@@ -135,11 +129,9 @@ namespace Celsius
             if (cell.InBounds(map))
                 thermalProps = cell.GetThingList(map)
                     .Select(thing => thing.TryGetComp<CompThermal>()?.ThermalProperties)
-                    .FirstOrDefault(props => props != null && props.replacesAirProperties);
+                    .FirstOrDefault(props => props != null && props.heatCapacity > 0);
             return thermalProps ?? ThingThermalProperties.Air;
         }
-
-        internal static bool IsAir(this IntVec3 cell, Map map) => cell.GetThermalProperties(map) == ThingThermalProperties.Air;
 
         /// <summary>
         /// Returns heat capacity for a cell
