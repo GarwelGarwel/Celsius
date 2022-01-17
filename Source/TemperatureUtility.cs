@@ -60,7 +60,7 @@ namespace Celsius
         {
             if (Mathf.Abs(oldTemp - neighbourTemp) < TemperatureChangePrecision)
                 return 0;
-            float finalTemp = GenMath.WeightedAverage(oldTemp, thermalProps.heatCapacity, neighbourTemp, thermalProps.heatCapacity);
+            float finalTemp = (oldTemp + neighbourTemp) / 2;
             float conductivity, lerpFactor;
             if (thermalProps == ThingThermalProperties.Air)
             {
@@ -86,11 +86,11 @@ namespace Celsius
         {
             if (Mathf.Abs(temp1 - temp2) < TemperatureChangePrecision)
                 return (0, 0);
-            float finalTemp = GenMath.WeightedAverage(temp1, props1.heatCapacity, temp2, props2.heatCapacity);
-            float conductivity, lerpFactor1, lerpFactor2;
+            float finalTemp, conductivity, lerpFactor1, lerpFactor2;
 
             if (props1 == ThingThermalProperties.Air && props2 == ThingThermalProperties.Air)
             {
+                finalTemp = (temp1 + temp2) / 2;
                 conductivity = airConductivity;
                 lerpFactor1 = lerpFactor2 = airLerpFactor;
             }
@@ -98,12 +98,14 @@ namespace Celsius
             else if (props1 == props2)
             {
                 LogUtility.Log($"Both objects have the same thermal props: {props1}");
+                finalTemp = (temp1 + temp2) / 2;
                 conductivity = props1.conductivity * Settings.HeatConductivityFactor;
                 lerpFactor1 = Mathf.Min(lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             }
 
             else
             {
+                finalTemp = GenMath.WeightedAverage(temp1, props1.heatCapacity, temp2, props2.heatCapacity);
                 conductivity = Mathf.Sqrt(props1.conductivity * props2.conductivity) * Settings.HeatConductivityFactor;
                 lerpFactor1 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
                 lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
@@ -125,17 +127,16 @@ namespace Celsius
 
         public static ThingThermalProperties GetThermalProperties(this IntVec3 cell, Map map)
         {
-            ThingThermalProperties thermalProps = null;
             if (cell.InBounds(map))
-                thermalProps = cell.GetThingList(map)
-                    .Select(thing => thing.TryGetComp<CompThermal>()?.ThermalProperties)
-                    .FirstOrDefault(props => props != null && props.heatCapacity > 0);
-            return thermalProps ?? ThingThermalProperties.Air;
+                foreach (Thing thing in cell.GetThingList(map))
+                {
+                    ThingThermalProperties thermalProps = thing.TryGetComp<CompThermal>()?.ThermalProperties;
+                    if (thermalProps != null && thermalProps.heatCapacity > 0)
+                        return thermalProps;
+                }
+            return ThingThermalProperties.Air;
         }
 
-        /// <summary>
-        /// Returns heat capacity for a cell
-        /// </summary>
         public static float GetHeatCapacity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).heatCapacity;
 
         public static float GetHeatConductivity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).conductivity;

@@ -136,7 +136,7 @@ namespace Celsius
                     if (Settings.FreezingAndMeltingEnabled)
                     {
                         TerrainDef terrain = cell.GetTerrain(map);
-                        ThingThermalProperties terrainProps = terrain.GetModExtension<ThingThermalProperties>();
+                        ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
                             (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
@@ -168,33 +168,35 @@ namespace Celsius
                         }
                     }
 
-                    // Things in the cell
-                    bool canIgnite = true;
-                    float fireSize = 0;
-                    for (int i = 0; i < cell.GetThingList(map).Count; i++)
-                    {
-                        Thing thing = cell.GetThingList(map)[i];
+                    // Default environment temperature
+                    if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
+                        newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
-                        // Autoignition
-                        if (!Settings.AutoignitionEnabled || thing.FireBulwark)
-                            canIgnite = false;
-                        else if (temperatures[x, z] > MinIgnitionTemperature)
+                    // Things in the cell
+                    if (Settings.AutoignitionEnabled && temperatures[x, z] > MinIgnitionTemperature)
+                    {
+                        float fireSize = 0;
+                        for (int i = 0; i < cell.GetThingList(map).Count; i++)
                         {
+                            Thing thing = cell.GetThingList(map)[i];
+
+                            // Autoignition
+                            if (thing.FireBulwark)
+                            {
+                                fireSize = 0;
+                                break;
+                            }
                             float ignitionTemp = thing.GetStatValue(DefOf.IgnitionTemperature);
-                            if (canIgnite && ignitionTemp > MinIgnitionTemperature && temperatures[x, z] >= ignitionTemp)
+                            if (ignitionTemp >= MinIgnitionTemperature && temperatures[x, z] >= ignitionTemp)
                             {
                                 LogUtility.Log($"{thing} spontaneously ignites at {temperatures[x, z]:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
                                 fireSize += 0.1f * thing.GetStatValue(StatDefOf.Flammability);
                             }
                         }
+
+                        if (fireSize > 0)
+                            FireUtility.TryStartFireIn(cell, map, fireSize);
                     }
-
-                    if (canIgnite && fireSize > 0)
-                        FireUtility.TryStartFireIn(cell, map, fireSize);
-
-                    // Default environment temperature
-                    if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
-                        newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
                     if (Settings.ShowTemperatureMap)
                         if (newTemperatures[x, z] < minTemperature)

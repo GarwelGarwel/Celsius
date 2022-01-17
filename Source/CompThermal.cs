@@ -5,9 +5,8 @@ namespace Celsius
 {
     public class CompThermal : ThingComp
     {
+        [Unsaved]
         ThingThermalProperties thermalProps;
-
-        float Mass => parent.def.EverHaulable ? parent.GetStatValue(StatDefOf.Mass) : parent.def.CostStuffCount;
 
         public ThingThermalProperties ThermalProperties
         {
@@ -26,10 +25,9 @@ namespace Celsius
                 StuffThermalProperties stuffProps = parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>();
                 if (stuffProps != null)
                 {
-                    if (thermalProps.mass == 0)
-                        thermalProps.mass = Mass;
-                    if (stuffProps.specificHeatCapacity > 0 && thermalProps.mass > 0)
-                        thermalProps.heatCapacity = stuffProps.specificHeatCapacity * thermalProps.mass;
+                    float mass = parent.GetStatValue(StatDefOf.Mass);
+                    if (stuffProps.specificHeatCapacity > 0 && mass > 0)
+                        thermalProps.heatCapacity = stuffProps.specificHeatCapacity * mass;
                     thermalProps.conductivity *= stuffProps.conductivity;
                 }
                 thermalProps.heatCapacity *= parent.stackCount;
@@ -37,6 +35,6 @@ namespace Celsius
             }
         }
 
-        internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Building;
+        internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Building && thingDef.HasModExtension<ThingThermalProperties>();
     }
 }

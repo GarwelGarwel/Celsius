@@ -8,22 +8,33 @@
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
-	<description>Adds realistic simulation of thermodynamics to the game.
-	
-	Main features:
-	
-	- Temperature is tracked and accurately represented for every map cell (instead of room-wide as in vanilla). For instance, air near fire is warmer; caves provide naturally stable temperature etc.
-	
-	- Certain items and buildings have their own temperature that gradually changes with surrounding air.
-	
-	- Water freezes and ice melts.
-	
-	- Highly flammable things may spontaneously ignite when it gets extremely hot.
-	
-	Celsius opens up many new challenges and ways to play RimWorld. You can warm your colonists by the campfire outside, melt ice sheets or unleash deadly firestorms on your enemies.
-	
-	The mod is pretty well optimized for performace and shouldn't visibly slow down the game. Still, you may disable or tweak almost any part of it to your liking.
-	</description>
+	<description>Celsius adds realistic simulation of thermodynamics to the game.
+
+Main features:
+
+- Temperature is tracked and accurately represented for every map cell (instead of room-wide as in vanilla) based on real-world thermal properties. For instance, air near fire is warmer; caves and bodies of water provide naturally stable environment etc.
+
+- Water freezes and ice melts.
+
+- Flammable things may spontaneously ignite when it gets extremely hot.
+
+- The mod comes with a handy heat map to quickly sea hot and cold spots.
+
+Celsius opens up many new challenges and ways to play RimWorld. Abandon houses and warm colonists at a campfire, melt ice sheets or unleash deadly firestorms on your enemies!
+
+The mod is well optimized for performance and shouldn't noticeably slow down the game. Nevertheless, you may disable or tweak almost any part of it to your liking.
+
+You can install it in an ongoing game; removal mid-game is also theoretically possible but untested.
+
+DLCs are supported. Mods support is an ongoing effort. Mod authors can provide patches on their side or submit PRs in Github.
+
+For issue reports, suggestions and pull requests, visit Github: https://github.com/GarwelGarwel/Celsius
+
+Dependencies:
+
+- Harmony
+
+- XML Extensions</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>

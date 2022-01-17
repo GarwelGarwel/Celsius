@@ -15,12 +15,31 @@
 	</Operation>
 
 	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>2200000</heatCapacity>
+				<conductivity>2.5</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<mass>8</mass>
+				<!--mass>8</mass-->
 				<heatCapacity>12000</heatCapacity>
 			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
+		<value>
+			<statBases>
+				<Mass>8</Mass>
+			</statBases>
 		</value>
 	</Operation>
 
@@ -28,9 +47,18 @@
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<mass>20</mass>
+				<!--mass>20</mass-->
 				<heatCapacity>16000</heatCapacity>
 			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
+		<value>
+			<statBases>
+				<Mass>20</Mass>
+			</statBases>
 		</value>
 	</Operation>
 

@@ -12,13 +12,6 @@ namespace Celsius
             conductivity = 0.03f
         };
 
-        public static readonly ThingThermalProperties Meat = new ThingThermalProperties()
-        {
-            heatCapacity = 100,
-            conductivity = 0.5f
-        };
-
-        public float mass;
         public float heatCapacity;
         public float conductivity = 1;
 
@@ -29,11 +22,10 @@ namespace Celsius
         {
             if (copyFrom == null)
                 return;
-            mass = copyFrom.mass;
             heatCapacity = copyFrom.heatCapacity;
             conductivity = copyFrom.conductivity;
         }
 
-        public override string ToString() => $"Mass: {mass.ToStringMass()}. Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C.";
+        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C.";
     }
 }
