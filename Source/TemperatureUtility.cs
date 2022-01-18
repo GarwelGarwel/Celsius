@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -56,7 +57,7 @@ namespace Celsius
             LogUtility.Log($"Air conductivity: {airConductivity:F2}. Air lerp factor: {airLerpFactor:P1}.");
         }
 
-        internal static float DiffusionTemperatureChangeSingle(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
+        public static float DiffusionTemperatureChangeSingle(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
         {
             if (Mathf.Abs(oldTemp - neighbourTemp) < TemperatureChangePrecision)
                 return 0;
@@ -82,7 +83,7 @@ namespace Celsius
             return lerpFactor * (finalTemp - oldTemp);
         }
 
-        internal static (float, float) DiffusionTemperatureChangeMutual(float temp1, ThingThermalProperties props1, float temp2, ThingThermalProperties props2, bool log = false)
+        public static (float, float) DiffusionTemperatureChangeMutual(float temp1, ThingThermalProperties props1, float temp2, ThingThermalProperties props2, bool log = false)
         {
             if (Mathf.Abs(temp1 - temp2) < TemperatureChangePrecision)
                 return (0, 0);
@@ -97,7 +98,6 @@ namespace Celsius
 
             else if (props1 == props2)
             {
-                LogUtility.Log($"Both objects have the same thermal props: {props1}");
                 finalTemp = (temp1 + temp2) / 2;
                 conductivity = props1.conductivity * Settings.HeatConductivityFactor;
                 lerpFactor1 = Mathf.Min(lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
@@ -128,12 +128,15 @@ namespace Celsius
         public static ThingThermalProperties GetThermalProperties(this IntVec3 cell, Map map)
         {
             if (cell.InBounds(map))
-                foreach (Thing thing in cell.GetThingList(map))
+            {
+                List<Thing> thingsList = cell.GetThingList(map);
+                for (int i = 0; i < thingsList.Count; i++)
                 {
-                    ThingThermalProperties thermalProps = thing.TryGetComp<CompThermal>()?.ThermalProperties;
+                    ThingThermalProperties thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
                     if (thermalProps != null && thermalProps.heatCapacity > 0)
                         return thermalProps;
                 }
+            }
             return ThingThermalProperties.Air;
         }
 

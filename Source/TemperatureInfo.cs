@@ -1,6 +1,9 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using Verse;
 
@@ -10,7 +13,7 @@ namespace Celsius
     {
         public const int TicksPerUpdate = 250;
         const int UpdateTickOffset = 18;
-        public const int SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
+        public const float SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
         const float MinIgnitionTemperature = 100;
 
         float[,] temperatures;
@@ -48,11 +51,38 @@ namespace Celsius
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
 
+        string ArrayToString(float[,] array)
+        {
+            List<byte> bytes = new List<byte>(map.Size.x * map.Size.z * sizeof(float));
+            for (int x = 0; x < map.Size.x; x++)
+                for (int z = 0; z < map.Size.z; z++)
+                    bytes.AddRange(BitConverter.GetBytes(array[x, z]));
+            return Convert.ToBase64String(bytes.ToArray());
+        }
+
+        float[,] StringToArray(string str)
+        {
+            byte[] bytes = Convert.FromBase64String(str);
+            float[,] array = new float[map.Size.x, map.Size.z];
+            int i = 0;
+            for (int x = 0; x < map.Size.x; x++)
+                for (int z = 0; z < map.Size.z; z++)
+                {
+                    array[x, z] = BitConverter.ToSingle(bytes, i);
+                    i += sizeof(float);
+                }
+            return array;
+        }
+
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look(ref temperatures, "temperatures");
-            Scribe_Values.Look(ref terrainTemperatures, "terrainTemperatures");
+            string str = ArrayToString(temperatures);
+            Scribe_Values.Look(ref str, "temperatures");
+            temperatures = StringToArray(str);
+            str = ArrayToString(terrainTemperatures);
+            Scribe_Values.Look(ref str, "terrainTemperatures");
+            terrainTemperatures = StringToArray(str);
         }
 
         Color TemperatureColorForCell(int index)
@@ -62,7 +92,7 @@ namespace Celsius
                 return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (TemperatureTuning.DefaultTemperature - 5 - minTemperature));
             if (temperature < TemperatureTuning.DefaultTemperature + 5)
                 return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - TemperatureTuning.DefaultTemperature + 5) / 10);
-            return Color.Lerp(maxComfortableColor, Color.red, (maxTemperature - temperature) / (maxTemperature - TemperatureTuning.DefaultTemperature - 5));
+            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxTemperature) / (maxTemperature - TemperatureTuning.DefaultTemperature - 5));
         }
 
         public override void MapComponentUpdate()
