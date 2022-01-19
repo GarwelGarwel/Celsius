@@ -73,7 +73,7 @@ namespace Celsius
         // Replaces Room.Temperature with room's average temperature (e.g. for displaying in the bottom right corner)
         public static bool Room_Temperature_get(ref float __result, Room __instance)
         {
-            if (__instance.Map.GetComponent<TemperatureInfo>() == null)
+            if (__instance.Map.TemperatureInfo() == null)
                 return true;
             __result = __instance.GetTemperature();
             return false;

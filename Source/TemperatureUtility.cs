@@ -45,16 +45,13 @@ namespace Celsius
 
         #region DIFFUSION
 
-        static float airConductivity;
-
         static float airLerpFactor;
 
         internal static void RecalculateAirProperties()
         {
             ThingThermalProperties.Air.heatCapacity = Settings.AirHeatCapacity;
-            airConductivity = ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect;
-            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - airConductivity / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            LogUtility.Log($"Air conductivity: {airConductivity:F2}. Air lerp factor: {airLerpFactor:P1}.");
+            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}.");
         }
 
         public static float DiffusionTemperatureChangeSingle(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
@@ -62,21 +59,12 @@ namespace Celsius
             if (Mathf.Abs(oldTemp - neighbourTemp) < TemperatureChangePrecision)
                 return 0;
             float finalTemp = (oldTemp + neighbourTemp) / 2;
-            float conductivity, lerpFactor;
-            if (thermalProps == ThingThermalProperties.Air)
-            {
-                conductivity = airConductivity;
-                lerpFactor = airLerpFactor;
-            }
-            else
-            {
-                conductivity = thermalProps.conductivity * Settings.HeatConductivityFactor;
-                lerpFactor = Mathf.Min(1 - Mathf.Pow(1 - conductivity / thermalProps.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            }
-
+            float lerpFactor = thermalProps == ThingThermalProperties.Air
+                ? airLerpFactor
+                : Mathf.Min(1 - Mathf.Pow(1 - thermalProps.conductivity * Settings.HeatConductivityFactor / thermalProps.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             if (log)
             {
-                LogUtility.Log($"Old temperature: {oldTemp:F1}C. Neighbour temperature: {neighbourTemp:F1}C. Heat capacity: {thermalProps.heatCapacity}. Conductivity: {conductivity}.");
+                LogUtility.Log($"Old temperature: {oldTemp:F1}C. Neighbour temperature: {neighbourTemp:F1}C. {thermalProps}.");
                 LogUtility.Log($"Final temperature: {finalTemp:F1}C. Lerp factor: {lerpFactor:P1}.");
             }
 
@@ -87,35 +75,33 @@ namespace Celsius
         {
             if (Mathf.Abs(temp1 - temp2) < TemperatureChangePrecision)
                 return (0, 0);
-            float finalTemp, conductivity, lerpFactor1, lerpFactor2;
+            float finalTemp, lerpFactor1, lerpFactor2;
 
             if (props1 == ThingThermalProperties.Air && props2 == ThingThermalProperties.Air)
             {
                 finalTemp = (temp1 + temp2) / 2;
-                conductivity = airConductivity;
                 lerpFactor1 = lerpFactor2 = airLerpFactor;
             }
 
-            else if (props1 == props2)
+            else if (props1.Equals(props2))
             {
                 finalTemp = (temp1 + temp2) / 2;
-                conductivity = props1.conductivity * Settings.HeatConductivityFactor;
-                lerpFactor1 = Mathf.Min(lerpFactor2 = 1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+                lerpFactor1 = lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - props1.conductivity * Settings.HeatConductivityFactor / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             }
 
             else
             {
                 finalTemp = GenMath.WeightedAverage(temp1, props1.heatCapacity, temp2, props2.heatCapacity);
-                conductivity = Mathf.Sqrt(props1.conductivity * props2.conductivity) * Settings.HeatConductivityFactor;
+                float conductivity = Mathf.Sqrt(props1.conductivity * props2.conductivity) * Settings.HeatConductivityFactor;
                 lerpFactor1 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
                 lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             }
 
             if (log)
             {
-                LogUtility.Log($"Object 1: t = {temp1:F1}C, capacity = {props1.heatCapacity}, conductivity = {props1.conductivity}");
-                LogUtility.Log($"Object 2: t = {temp2:F1}C, capacity = {props2.heatCapacity}, conductivity = {props2.conductivity}");
-                LogUtility.Log($"Final temperature: {finalTemp:F1}C. Overall conductivity: {conductivity:F1}. Lerp factor 1: {lerpFactor1:P1}. Lerp factor 2: {lerpFactor2:P1}.");
+                LogUtility.Log($"Object 1: t = {temp1:F1}C. {props1}");
+                LogUtility.Log($"Object 2: t = {temp2:F1}C. {props2}");
+                LogUtility.Log($"Final temperature: {finalTemp:F1}C. Lerp factor 1: {lerpFactor1:P1}. Lerp factor 2: {lerpFactor2:P1}.");
             }
 
             return (lerpFactor1 * (finalTemp - temp1), lerpFactor2 * (finalTemp - temp2));

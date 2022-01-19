@@ -15,8 +15,12 @@ namespace Celsius
                 if (parent is Building_Door door && door.Open)
                     return ThingThermalProperties.Empty;
 
-                if (parent is Building_Vent vent && vent.GetComp<CompFlickable>().SwitchIsOn)
-                    return ThingThermalProperties.Empty;
+                if (parent is Building_Vent)
+                {
+                    CompFlickable flickable = parent.GetComp<CompFlickable>();
+                    if (flickable == null || flickable.SwitchIsOn)
+                        return ThingThermalProperties.Empty;
+                }
 
                 if (thermalProps != null)
                     return thermalProps;
@@ -30,7 +34,7 @@ namespace Celsius
                         thermalProps.heatCapacity = stuffProps.specificHeatCapacity * mass;
                     thermalProps.conductivity *= stuffProps.conductivity;
                 }
-                else thermalProps = parent.def.GetModExtension<ThingThermalProperties>();
+                else thermalProps = parent.def.GetModExtension<ThingThermalProperties>() ?? ThingThermalProperties.Empty;
                 return thermalProps;
             }
         }

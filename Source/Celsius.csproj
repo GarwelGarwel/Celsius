@@ -60,6 +60,7 @@
     <Compile Include="CellUtility.cs" />
     <Compile Include="CelsiusMod.cs" />
     <Compile Include="CompThermal.cs" />
+    <Compile Include="DataUtility.cs" />
     <Compile Include="DefOf.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Setup.cs" />
