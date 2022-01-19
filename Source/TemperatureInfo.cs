@@ -147,7 +147,7 @@ namespace Celsius
                 for (int z = 0; z < map.Size.z; z++)
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
-                    log = false;// Prefs.DevMode && cell == mouseCell;
+                    log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell;
                     ThingThermalProperties cellProps = cell.GetThermalProperties(map);
                     if (log)
                         LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.");

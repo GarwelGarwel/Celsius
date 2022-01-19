@@ -27,5 +27,9 @@ namespace Celsius
         }
 
         public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C.";
+
+        public override bool Equals(object obj) => obj is ThingThermalProperties props && props.heatCapacity == heatCapacity && props.conductivity == conductivity;
+
+        public override int GetHashCode() => (heatCapacity, conductivity).GetHashCode();
     }
 }

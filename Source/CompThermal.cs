@@ -21,16 +21,16 @@ namespace Celsius
                 if (thermalProps != null)
                     return thermalProps;
 
-                thermalProps = new ThingThermalProperties(parent.def.GetModExtension<ThingThermalProperties>());
                 StuffThermalProperties stuffProps = parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>();
                 if (stuffProps != null)
                 {
+                    thermalProps = new ThingThermalProperties(parent.def.GetModExtension<ThingThermalProperties>());
                     float mass = parent.GetStatValue(StatDefOf.Mass);
                     if (stuffProps.specificHeatCapacity > 0 && mass > 0)
                         thermalProps.heatCapacity = stuffProps.specificHeatCapacity * mass;
                     thermalProps.conductivity *= stuffProps.conductivity;
                 }
-                thermalProps.heatCapacity *= parent.stackCount;
+                else thermalProps = parent.def.GetModExtension<ThingThermalProperties>();
                 return thermalProps;
             }
         }
