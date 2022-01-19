@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -21,11 +22,11 @@ namespace Celsius
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
-        Color minComfortableColor = new Color(0, 0.5f, 0.5f);
-        Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
+        readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
+        readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
 
-        System.Diagnostics.Stopwatch tickStopwatch = new System.Diagnostics.Stopwatch();
-        int tickIterations;
+        Stopwatch updateStopwatch = new Stopwatch(), totalStopwatch = new Stopwatch();
+        int tickIterations, totalTicks;
 
         public TemperatureInfo(Map map)
             : base(map)
@@ -97,7 +98,6 @@ namespace Celsius
 
         public override void MapComponentUpdate()
         {
-            base.MapComponentUpdate();
             if (Settings.ShowTemperatureMap)
                 overlayDrawer.MarkForDraw();
             overlayDrawer.CellBoolDrawerUpdate();
@@ -105,6 +105,9 @@ namespace Celsius
 
         public override void MapComponentOnGUI()
         {
+            if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
+                totalStopwatch.Stop();
+
             if (!Settings.ShowTemperatureMap)
                 return;
             IntVec3 cell = UI.MouseCell();
@@ -120,11 +123,18 @@ namespace Celsius
 
         public override void MapComponentTick()
         {
+            if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed == TimeSpeed.Ultrafast)
+            {
+                if (++totalTicks % 500 == 0)
+                    LogUtility.Log($"Total ultrafast ticks: {totalTicks}. Average time/1000 ticks: {1000 * totalStopwatch.ElapsedMilliseconds / totalTicks} ms.");
+                totalStopwatch.Start();
+            }
+
             if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
                 return;
 
             if (Settings.DebugMode)
-                tickStopwatch.Start();
+                updateStopwatch.Start();
 
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
@@ -240,8 +250,8 @@ namespace Celsius
 
             if (Settings.DebugMode)
             {
-                tickStopwatch.Stop();
-                LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {tickStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
+                updateStopwatch.Stop();
+                LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
             }
         }
 
