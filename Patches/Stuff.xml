@@ -83,6 +83,7 @@
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
 				<specificHeatCapacity>835</specificHeatCapacity>
+				<conductivity>2</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -112,6 +113,7 @@
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
 				<specificHeatCapacity>760</specificHeatCapacity>
+				<conductivity>2</conductivity>
 			</li>
 		</value>
 	</Operation>

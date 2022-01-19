@@ -28,7 +28,6 @@
 		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<!--mass>8</mass-->
 				<heatCapacity>12000</heatCapacity>
 			</li>
 		</value>
@@ -47,7 +46,6 @@
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<!--mass>20</mass-->
 				<heatCapacity>16000</heatCapacity>
 			</li>
 		</value>

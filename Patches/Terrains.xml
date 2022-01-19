@@ -2,11 +2,13 @@
 
 <Patch>
 
+	<!-- Note: Taking only 25 cm layer of water/ice => heat capacity for 0.25 of a cubic meter. Conductivity is increased x6 to account for RimWorld's shorter year. -->
+
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>4200000</heatCapacity>
+				<heatCapacity>1050000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
 		</value>
@@ -16,7 +18,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>4000000</heatCapacity>
+				<heatCapacity>1000000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
 		</value>
@@ -26,7 +28,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingChestDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>3000000</heatCapacity>
+				<heatCapacity>1500000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
 		</value>
@@ -36,7 +38,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>2100000</heatCapacity>
+				<heatCapacity>1050000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
 		</value>
@@ -46,7 +48,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>2000000</heatCapacity>
+				<heatCapacity>1000000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
 		</value>
@@ -56,7 +58,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>2000000</heatCapacity>
+				<heatCapacity>1250000</heatCapacity>
 				<conductivity>0.6</conductivity>
 			</li>
 		</value>
@@ -66,7 +68,7 @@
 		<xpath>Defs/TerrainDef[defName="Marsh"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>2700000</heatCapacity>
+				<heatCapacity>675000</heatCapacity>
 				<conductivity>1</conductivity>
 			</li>
 		</value>
@@ -76,7 +78,7 @@
 		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>2000000</heatCapacity>
+				<heatCapacity>500000</heatCapacity>
 				<conductivity>2</conductivity>
 			</li>
 		</value>
