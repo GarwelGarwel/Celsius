@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- VANILLA FURNITURE EXPANDED - ARCHITECT -->
+
+	<!-- Thermal data -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_LogWall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>34000</heatCapacity>
+				<conductivity>0.15</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_HedgeWall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>6800</heatCapacity>
+				<conductivity>0.45</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_ArmoredWall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>27900</heatCapacity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_ArmoredWall"]</xpath>
+		<value>
+			<statBases>
+				<Mass>60</Mass>
+			</statBases>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_ArmoredDoor"]</xpath>
+		<value>
+			<statBases>
+				<Mass>24</Mass>
+			</statBases>
+		</value>
+	</Operation>
+
+	<!-- Stuff -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[@Name="FakeWoodBase"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<specificHeatCapacity>1700</specificHeatCapacity>
+				<conductivity>0.15</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- Ignition data -->
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_LogWall"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>300</IgnitionTemperature>
+			</statBases>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_HedgeWall"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>300</IgnitionTemperature>
+			</statBases>
+		</value>
+	</Operation>
+
+</Patch>
