@@ -26,14 +26,10 @@ namespace Celsius
             Listing_Standard content = new Listing_Standard();
             content.Begin(rect);
 
-            content.CheckboxLabeled("Show heat map", ref Settings.ShowTemperatureMap, "Show temperatures' map and a mouse cursor tooltip.");
+            content.CheckboxLabeled("Show temperature map", ref Settings.ShowTemperatureMap, "Show heat map and a mouse cursor tooltip.");
             content.CheckboxLabeled("Freezing and melting", ref Settings.FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
             content.CheckboxLabeled("Autoignition", ref Settings.AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot.");
-
-            content.Label(
-                $"Air heat capacity: {Settings.AirHeatCapacity:N0} J/C",
-                tooltip: $"Heat capacity (how slowly air changes temperature) in Joules/Celsius. Recommended value: {Settings.AirHeatCapacity_Default:N0} J/C.");
-            Settings.AirHeatCapacity = (float)Math.Round(content.Slider(Settings.AirHeatCapacity / 10, 40, 200)) * 10;
+            content.Label($"Change the following values at your own risk.".Colorize(Color.red));
 
             content.Label($"Heat conductivity: {Settings.HeatConductivityMultiplier.ToStringPercent()}", tooltip: "How quickly heat travels and temperatures equalize.");
             Settings.HeatConductivityMultiplier = (float)Math.Round(content.Slider(Settings.HeatConductivityMultiplier, 0.1f, 2), 1);
@@ -45,6 +41,11 @@ namespace Celsius
             content.Label($"Heat push: {Settings.HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
             Settings.HeatPushMultiplier = (float)Math.Round(content.Slider(Settings.HeatPushMultiplier, 0, 5), 1);
             Settings.HeatPushEffect = Settings.HeatPushEffect_Base * Settings.HeatPushMultiplier;
+
+            content.Label(
+                $"Air heat capacity: {Settings.AirHeatCapacity:N0} J/C",
+                tooltip: $"Heat capacity (how slowly air changes temperature) in Joules/Celsius. Recommended value: {Settings.AirHeatCapacity_Default:N0} J/C.");
+            Settings.AirHeatCapacity = (float)Math.Round(content.Slider(Settings.AirHeatCapacity / 10, 40, 200)) * 10;
 
             content.CheckboxLabeled("Debug logging mode", ref Settings.DebugMode, "Verbose logging of Celsius' work.");
 

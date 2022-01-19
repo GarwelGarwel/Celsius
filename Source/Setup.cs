@@ -32,6 +32,9 @@ namespace Celsius
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
                 prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
             harmony.Patch(
+                AccessTools.Method($"RimWorld.PlaySettings:DoPlaySettingsGlobalControls"),
+                postfix: new HarmonyMethod(type.GetMethod($"PlaySettings_DoPlaySettingsGlobalControls")));
+            harmony.Patch(
                 AccessTools.Method($"Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
                 prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_PushHeat")));
             harmony.Patch(
@@ -77,6 +80,13 @@ namespace Celsius
                 return true;
             __result = __instance.GetTemperature();
             return false;
+        }
+
+        // Adds an icon to the widgets row in the bottom right of the screen to toggle temperature map
+        public static void PlaySettings_DoPlaySettingsGlobalControls(WidgetRow row, bool worldView)
+        {
+            if (!worldView)
+                row.ToggleableIcon(ref Settings.ShowTemperatureMap, ContentFinder<Texture2D>.Get("Icon"), "Temperature Map", SoundDefOf.Mouseover_ButtonToggle);
         }
 
         // Replaces GenTemperature.PushHeat(IntVec3, Map, float) to change temperature at the specific cell instead of the whole room

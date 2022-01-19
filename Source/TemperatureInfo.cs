@@ -1,6 +1,4 @@
 ﻿using RimWorld;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using Verse;
@@ -9,7 +7,7 @@ namespace Celsius
 {
     public class TemperatureInfo : MapComponent
     {
-        public const int TicksPerUpdate = 250;
+        public const int TicksPerUpdate = 120;
         const int UpdateTickOffset = 18;
         public const float SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
         const float MinIgnitionTemperature = 100;
