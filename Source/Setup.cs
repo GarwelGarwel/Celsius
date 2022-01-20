@@ -62,7 +62,7 @@ namespace Celsius
                 def.comps.Add(new CompProperties(typeof(CompThermal)));
             }
 
-            TemperatureUtility.RecalculateAirProperties();
+            TemperatureUtility.SettingsChanged();
         }
 
         // Replaces GenTemperature.TryGetDirectAirTemperatureForCell by providing cell-specific temperature

@@ -181,15 +181,13 @@ namespace Celsius
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
                         newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
-                    // Things in the cell
+                    // Autoignition
                     if (Settings.AutoignitionEnabled && temperatures[x, z] > MinIgnitionTemperature)
                     {
                         float fireSize = 0;
                         for (int i = 0; i < cell.GetThingList(map).Count; i++)
                         {
                             Thing thing = cell.GetThingList(map)[i];
-
-                            // Autoignition
                             if (thing.FireBulwark)
                             {
                                 fireSize = 0;

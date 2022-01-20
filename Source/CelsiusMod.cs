@@ -1,6 +1,8 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -10,16 +12,8 @@ namespace Celsius
 {
     public class CelsiusMod : Mod
     {
-        float airHeatCapacity, heatConductivityFactor, convectionConductivityEffect;
-
         public CelsiusMod(ModContentPack content)
-            : base(content)
-        {
-            GetSettings<Settings>();
-            airHeatCapacity = Settings.AirHeatCapacity;
-            heatConductivityFactor = Settings.HeatConductivityFactor;
-            convectionConductivityEffect = Settings.ConvectionConductivityEffect;
-        }
+            : base(content) => GetSettings<Settings>();
 
         public override void DoSettingsWindowContents(Rect rect)
         {
@@ -28,7 +22,7 @@ namespace Celsius
 
             content.CheckboxLabeled("Show temperature map", ref Settings.ShowTemperatureMap, "Show heat map and a mouse cursor tooltip.");
             content.CheckboxLabeled("Freezing and melting", ref Settings.FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
-            content.CheckboxLabeled("Autoignition", ref Settings.AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot.");
+            content.CheckboxLabeled("Advanced autoignition", ref Settings.AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.");
             content.Label($"Change the following values at your own risk.".Colorize(Color.red));
 
             content.Label($"Heat conductivity: {Settings.HeatConductivityMultiplier.ToStringPercent()}", tooltip: "How quickly heat travels and temperatures equalize.");
@@ -36,7 +30,7 @@ namespace Celsius
             Settings.HeatConductivityFactor = Settings.HeatConductivityFactor_Base * Settings.HeatConductivityMultiplier;
 
             content.Label($"Convection conductivity effect: x{Settings.ConvectionConductivityEffect}", tooltip: $"How much air convection increases air conductivity. Recommended value: {Settings.ConvectionConductivityEffect_Default}.");
-            Settings.ConvectionConductivityEffect = (float)Math.Round(content.Slider(Settings.ConvectionConductivityEffect, 1, 50));
+            Settings.ConvectionConductivityEffect = (float)Math.Round(content.Slider(Settings.ConvectionConductivityEffect, 1, 10));
 
             content.Label($"Heat push: {Settings.HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
             Settings.HeatPushMultiplier = (float)Math.Round(content.Slider(Settings.HeatPushMultiplier, 0, 5), 1);
@@ -45,7 +39,7 @@ namespace Celsius
             content.Label(
                 $"Air heat capacity: {Settings.AirHeatCapacity:N0} J/C",
                 tooltip: $"Heat capacity (how slowly air changes temperature) in Joules/Celsius. Recommended value: {Settings.AirHeatCapacity_Default:N0} J/C.");
-            Settings.AirHeatCapacity = (float)Math.Round(content.Slider(Settings.AirHeatCapacity / 10, 40, 200)) * 10;
+            Settings.AirHeatCapacity = (float)Math.Round(content.Slider(Settings.AirHeatCapacity / 50, 600 / 50, 2000 / 50)) * 50;
 
             content.CheckboxLabeled("Debug logging mode", ref Settings.DebugMode, "Verbose logging of Celsius' work.");
 
@@ -60,16 +54,7 @@ namespace Celsius
         public override void WriteSettings()
         {
             base.WriteSettings();
-            if (airHeatCapacity != Settings.AirHeatCapacity
-                || heatConductivityFactor != Settings.HeatConductivityFactor
-                || convectionConductivityEffect != Settings.ConvectionConductivityEffect)
-            {
-                LogUtility.Log("Air-related settings have changed. Recalculating air properties.");
-                TemperatureUtility.RecalculateAirProperties();
-                airHeatCapacity = Settings.AirHeatCapacity;
-                heatConductivityFactor = Settings.HeatConductivityFactor;
-                convectionConductivityEffect = Settings.ConvectionConductivityEffect;
-            }
+            TemperatureUtility.SettingsChanged();
         }
     }
 }
