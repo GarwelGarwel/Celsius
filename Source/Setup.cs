@@ -140,7 +140,6 @@ namespace Celsius
             Region region = root.GetRegion(map, RegionType.Set_Passable);
             if (region == null)
                 return false;
-            RegionEntryPredicate entryCondition = (Region from, Region r) => r.Allows(traverseParms, false);
             Region foundReg = null;
             RegionProcessor regionProcessor = delegate (Region r)
             {
@@ -153,7 +152,7 @@ namespace Celsius
                 }
                 return false;
             };
-            RegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, 9999, RegionType.Set_Passable);
+            RegionTraverser.BreadthFirstTraverse(region, (Region from, Region r) => r.Allows(traverseParms, false), regionProcessor);
             LogUtility.Log($"Safe region found: {foundReg}");
             __result = foundReg;
             return false;

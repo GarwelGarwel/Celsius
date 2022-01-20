@@ -25,25 +25,28 @@ namespace Celsius
 
         public TemperatureInfo(Map map)
             : base(map)
-        {
-            temperatures = new float[map.Size.x, map.Size.z];
-            terrainTemperatures = new float[map.Size.x, map.Size.z];
-            overlayDrawer = new CellBoolDrawer(index => !map.fogGrid.IsFogged(index), () => Color.white, index => TemperatureColorForCell(index), map.Size.x, map.Size.z);
-        }
+        { }
 
         public override void FinalizeInit()
         {
-            for (int i = 0; i < temperatures.GetLength(0); i++)
-                for (int j = 0; j < temperatures.GetLength(1); j++)
-                {
-                    IntVec3 cell = new IntVec3(i, 0, j);
-                    Room room = cell.GetRoomOrAdjacent(map, RegionType.Set_Passable);
-                    if (room != null)
-                        temperatures[i, j] = room.TempTracker.Temperature;
-                    else TryGetEnvironmentTemperatureForCell(cell, out temperatures[i, j]);
-                    if (cell.HasTerrainTemperature(map))
-                        terrainTemperatures[i, j] = map.mapTemperature.SeasonalTemp;
-                }
+            if (temperatures == null)
+            {
+                LogUtility.Log($"Initializing temperatures from vanilla data.");
+                temperatures = new float[map.Size.x, map.Size.z];
+                terrainTemperatures = new float[map.Size.x, map.Size.z];
+                for (int i = 0; i < temperatures.GetLength(0); i++)
+                    for (int j = 0; j < temperatures.GetLength(1); j++)
+                    {
+                        IntVec3 cell = new IntVec3(i, 0, j);
+                        Room room = cell.GetRoomOrAdjacent(map);
+                        if (room != null)
+                            temperatures[i, j] = room.TempTracker.Temperature;
+                        else TryGetEnvironmentTemperatureForCell(cell, out temperatures[i, j]);
+                        if (cell.HasTerrainTemperature(map))
+                            terrainTemperatures[i, j] = map.mapTemperature.SeasonalTemp;
+                    }
+            }
+            overlayDrawer = new CellBoolDrawer(index => !map.fogGrid.IsFogged(index), () => Color.white, index => TemperatureColorForCell(index), map.Size.x, map.Size.z);
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
 
@@ -52,10 +55,12 @@ namespace Celsius
             base.ExposeData();
             string str = DataUtility.ArrayToString(temperatures);
             Scribe_Values.Look(ref str, "temperatures");
-            temperatures = DataUtility.StringToArray(str, map.Size.x);
+            if (str != null)
+                temperatures = DataUtility.StringToArray(str, map.Size.x);
             str = DataUtility.ArrayToString(terrainTemperatures);
             Scribe_Values.Look(ref str, "terrainTemperatures");
-            terrainTemperatures = DataUtility.StringToArray(str, map.Size.x);
+            if (str != null)
+                terrainTemperatures = DataUtility.StringToArray(str, map.Size.x);
         }
 
         Color TemperatureColorForCell(int index)
@@ -238,7 +243,7 @@ namespace Celsius
             return roof == null;
         }
 
-        public float GetTemperatureForCell(IntVec3 cell) => temperatures[cell.x, cell.z];
+        public float GetTemperatureForCell(IntVec3 cell) => temperatures != null ? temperatures[cell.x, cell.z] : TemperatureTuning.DefaultTemperature;
 
         public float GetTerrainTemperature(IntVec3 cell) =>
             cell.HasTerrainTemperature(map) ? terrainTemperatures[cell.x, cell.z] : GetTemperatureForCell(cell);

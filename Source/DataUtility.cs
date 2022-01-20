@@ -7,6 +7,8 @@ namespace Celsius
     {
         public static string ArrayToString(float[,] array)
         {
+            if (array == null)
+                return null;
             List<byte> bytes = new List<byte>(array.Length * sizeof(float));
             for (int x = 0; x < array.GetLength(0); x++)
                 for (int z = 0; z < array.GetLength(1); z++)
