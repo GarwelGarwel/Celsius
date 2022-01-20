@@ -41,6 +41,9 @@ namespace Celsius
                 AccessTools.Method($"Verse.GenTemperature:ControlTemperatureTempChange"),
                 postfix: new HarmonyMethod(type.GetMethod($"GenTemperature_ControlTemperatureTempChange")));
             harmony.Patch(
+                AccessTools.Method($"RimWorld.SteadyEnvironmentEffects:MeltAmountAt"),
+                postfix: new HarmonyMethod(type.GetMethod($"SteadyEnvironmentEffects_MeltAmountAt")));
+            harmony.Patch(
                 AccessTools.Method($"Verse.AttachableThing:Destroy"),
                 prefix: new HarmonyMethod(type.GetMethod($"AttachableThing_Destroy")));
             harmony.Patch(
@@ -97,9 +100,6 @@ namespace Celsius
         {
             Room room = cell.GetRoom(map);
             float roomTemp = room != null ? room.GetTemperature() : cell.GetTemperatureForCell(map);
-            if (UI.MouseCell() == cell)
-                LogUtility.Log($"ControlTemperatureTempChange({cell}, {energyLimit}, {targetTemperature}). Room temperature: {roomTemp:F1}C.");
-
             if (energyLimit > 0)
                 if (roomTemp < targetTemperature - TemperatureUtility.TemperatureChangePrecision)
                 {
@@ -114,6 +114,9 @@ namespace Celsius
             }
             else return 0;
         }
+
+        // Disables vanilla snow melting
+        public static float SteadyEnvironmentEffects_MeltAmountAt(float result, float temperature) => 0;
 
         // Attaches to AttachableThing.Destroy to reduce temperature when a Fire is destroyed to the ignition temperature
         public static void AttachableThing_Destroy(AttachableThing __instance)

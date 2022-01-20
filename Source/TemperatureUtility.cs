@@ -54,11 +54,8 @@ namespace Celsius
             ThingThermalProperties.Air.heatCapacity = Settings.AirHeatCapacity;
             airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}.");
-            // Disabling/re-renabling stock autoignition
             FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
-            //typeof(SteadyEnvironmentEffects).GetField("AutoIgnitionTemperatureRange", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, vanillaAutoIgnitionTemperatureRange);
-            LogUtility.Log($"Vanilla autoignition temperatures: {(FloatRange)AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").GetValue(null)}");
         }
 
         public static float DiffusionTemperatureChangeSingle(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
@@ -167,7 +164,7 @@ namespace Celsius
 
         #endregion TERRAIN
 
-        #region HEAT PUSH
+        #region HEAT PUSH AND SNOW MELTING
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
@@ -183,6 +180,8 @@ namespace Celsius
             return true;
         }
 
-        #endregion HEAT PUSH
+        public static float MeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
+
+        #endregion HEAT PUSH AND SNOW MELTING
     }
 }

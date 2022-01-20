@@ -181,6 +181,10 @@ namespace Celsius
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
                         newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
+                    // Snow melting
+                    if (cell.GetSnowDepth(map) > 0)
+                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]));
+
                     // Autoignition
                     if (Settings.AutoignitionEnabled && temperatures[x, z] > MinIgnitionTemperature)
                     {
