@@ -34,6 +34,7 @@ namespace Celsius
                 LogUtility.Log($"Initializing temperatures from vanilla data.");
                 temperatures = new float[map.Size.x, map.Size.z];
                 terrainTemperatures = new float[map.Size.x, map.Size.z];
+                bool hasTerrainTemperatures = false;
                 for (int i = 0; i < temperatures.GetLength(0); i++)
                     for (int j = 0; j < temperatures.GetLength(1); j++)
                     {
@@ -43,8 +44,13 @@ namespace Celsius
                             temperatures[i, j] = room.TempTracker.Temperature;
                         else TryGetEnvironmentTemperatureForCell(cell, out temperatures[i, j]);
                         if (cell.HasTerrainTemperature(map))
+                        {
                             terrainTemperatures[i, j] = map.mapTemperature.SeasonalTemp;
+                            hasTerrainTemperatures = true;
+                        }
                     }
+                if (!hasTerrainTemperatures)
+                    terrainTemperatures = null;
             }
             overlayDrawer = new CellBoolDrawer(index => !map.fogGrid.IsFogged(index), () => Color.white, index => TemperatureColorForCell(index), map.Size.x, map.Size.z);
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
@@ -92,7 +98,7 @@ namespace Celsius
             {
                 Text.Font = GameFont.Tiny;
                 string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
-                if (Settings.FreezingAndMeltingEnabled && cell.HasTerrainTemperature(map))
+                if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures && cell.HasTerrainTemperature(map))
                     tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
             }
@@ -147,7 +153,7 @@ namespace Celsius
                     DiffusionWithNeighbour(cell + IntVec3.North);
 
                     // Terrain temperature
-                    if (Settings.FreezingAndMeltingEnabled)
+                    if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                     {
                         TerrainDef terrain = cell.GetTerrain(map);
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
@@ -245,13 +251,11 @@ namespace Celsius
 
         public float GetTemperatureForCell(IntVec3 cell) => temperatures != null ? temperatures[cell.x, cell.z] : TemperatureTuning.DefaultTemperature;
 
-        public float GetTerrainTemperature(IntVec3 cell) =>
-            cell.HasTerrainTemperature(map) ? terrainTemperatures[cell.x, cell.z] : GetTemperatureForCell(cell);
+        public bool HasTerrainTemperatures => terrainTemperatures != null;
 
-        public void SetTempteratureForCell(IntVec3 cell, float temperature)
-        {
-            temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
-        }
+        public float GetTerrainTemperature(IntVec3 cell) => terrainTemperatures[cell.x, cell.z];
+
+        public void SetTempteratureForCell(IntVec3 cell, float temperature) => temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
         {
