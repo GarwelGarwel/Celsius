@@ -16,8 +16,8 @@ namespace Celsius
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const float HeatConductivityFactor_Base = 6;
-        public const float ConvectionConductivityEffect_Default = 5;
-        public const float HeatPushEffect_Base = 4;
+        public const float ConvectionConductivityEffect_Default = 10;
+        public const float HeatPushEffect_Base = 5;
         public const float AirHeatCapacity_Default = 1200;
 
         public Settings() => Reset();
