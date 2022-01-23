@@ -25,6 +25,17 @@ namespace Celsius
             return tempInfo.GetTemperatureForCell(cell);
         }
 
+        public static float GetSurroundingTemperature(this IntVec3 cell, Map map)
+        {
+            TemperatureInfo tempInfo = map.TemperatureInfo();
+            if (tempInfo == null || !cell.InBounds(map))
+                return map.mapTemperature.OutdoorTemp;
+            float sum = cell.GetTemperatureForCell(map);
+            foreach (IntVec3 c in cell.AdjacentCells())
+                sum += c.InBounds(map) ? c.GetTemperatureForCell(map) : cell.GetTemperatureForCell(map);
+            return sum / 9;
+        }
+
         public static float GetTemperature(this Room room)
         {
             if (room == null)
