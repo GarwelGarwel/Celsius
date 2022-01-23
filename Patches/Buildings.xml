@@ -8,17 +8,7 @@
 		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>2200000</heatCapacity>
-				<conductivity>2.5</conductivity>
-			</li>
-		</value>
-	</Operation>
-
-	<Operation Class="PatchOperationAddModExtension">
-		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
-		<value>
-			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>2200000</heatCapacity>
+				<heatCapacity>1000000</heatCapacity>
 				<conductivity>2.5</conductivity>
 			</li>
 		</value>
@@ -28,7 +18,7 @@
 		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>12000</heatCapacity>
+				<heatCapacity>6000</heatCapacity>
 			</li>
 		</value>
 	</Operation>
@@ -37,7 +27,7 @@
 		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
 		<value>
 			<statBases>
-				<Mass>8</Mass>
+				<Mass>4</Mass>
 			</statBases>
 		</value>
 	</Operation>
@@ -46,7 +36,7 @@
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>16000</heatCapacity>
+				<heatCapacity>8000</heatCapacity>
 			</li>
 		</value>
 	</Operation>
@@ -55,7 +45,7 @@
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
 			<statBases>
-				<Mass>20</Mass>
+				<Mass>10</Mass>
 			</statBases>
 		</value>
 	</Operation>
@@ -64,7 +54,17 @@
 		<xpath>Defs/ThingDef[defName="Vent"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>9300</heatCapacity>
+				<heatCapacity>3000</heatCapacity>
+				<conductivity>20</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Cooler"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>3000</heatCapacity>
 				<conductivity>20</conductivity>
 			</li>
 		</value>

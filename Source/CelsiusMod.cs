@@ -1,10 +1,4 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using UnityEngine;
 using Verse;
 
@@ -30,7 +24,7 @@ namespace Celsius
             Settings.HeatConductivityFactor = Settings.HeatConductivityFactor_Base * Settings.HeatConductivityMultiplier;
 
             content.Label($"Convection conductivity effect: x{Settings.ConvectionConductivityEffect}", tooltip: $"How much air convection increases air conductivity. Recommended value: {Settings.ConvectionConductivityEffect_Default}.");
-            Settings.ConvectionConductivityEffect = (float)Math.Round(content.Slider(Settings.ConvectionConductivityEffect, 1, 20));
+            Settings.ConvectionConductivityEffect = (float)Math.Round(content.Slider(Settings.ConvectionConductivityEffect, 1, 500));
 
             content.Label($"Heat push: {Settings.HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
             Settings.HeatPushMultiplier = (float)Math.Round(content.Slider(Settings.HeatPushMultiplier, 0, 5), 1);
@@ -39,7 +33,7 @@ namespace Celsius
             content.Label(
                 $"Air heat capacity: {Settings.AirHeatCapacity:N0} J/C",
                 tooltip: $"Heat capacity (how slowly air changes temperature) in Joules/Celsius. Recommended value: {Settings.AirHeatCapacity_Default:N0} J/C.");
-            Settings.AirHeatCapacity = (float)Math.Round(content.Slider(Settings.AirHeatCapacity / 50, 600 / 50, 2000 / 50)) * 50;
+            Settings.AirHeatCapacity = (float)Math.Round(content.Slider(Settings.AirHeatCapacity / 50, 600 / 50, 5000 / 50)) * 50;
 
             content.CheckboxLabeled("Debug logging mode", ref Settings.DebugMode, "Verbose logging of Celsius' work.");
 
