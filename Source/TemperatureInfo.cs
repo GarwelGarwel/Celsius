@@ -1,5 +1,7 @@
 ﻿using RimWorld;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -14,6 +16,7 @@ namespace Celsius
 
         float[,] temperatures;
         float[,] terrainTemperatures;
+        Dictionary<int, float> roomTemperatures;
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
@@ -29,6 +32,7 @@ namespace Celsius
 
         public override void FinalizeInit()
         {
+            roomTemperatures = new Dictionary<int, float>();
             if (temperatures == null)
             {
                 LogUtility.Log($"Initializing temperatures from vanilla data.");
@@ -41,7 +45,10 @@ namespace Celsius
                         IntVec3 cell = new IntVec3(i, 0, j);
                         Room room = cell.GetRoomOrAdjacent(map);
                         if (room != null)
+                        {
                             temperatures[i, j] = room.TempTracker.Temperature;
+                            roomTemperatures[room.ID] = temperatures[i, j];
+                        }
                         else TryGetEnvironmentTemperatureForCell(cell, out temperatures[i, j]);
                         if (cell.HasTerrainTemperature(map))
                         {
@@ -122,6 +129,7 @@ namespace Celsius
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
+            roomTemperatures.Clear();
             minTemperature = TemperatureTuning.DefaultTemperature - 20;
             maxTemperature = TemperatureTuning.DefaultTemperature + 20;
 
@@ -250,6 +258,20 @@ namespace Celsius
         }
 
         public float GetTemperatureForCell(IntVec3 cell) => temperatures != null ? temperatures[cell.x, cell.z] : TemperatureTuning.DefaultTemperature;
+
+        public float GetRoomTemperature(Room room)
+        {
+            if (room == null || room.ID == -1 || roomTemperatures == null)
+            {
+                LogUtility.Log($"Could not get temperature for room {room?.ToString() ?? "null"}.", LogLevel.Error);
+                return TemperatureTuning.DefaultTemperature;
+            }
+            float temperature;
+            if (roomTemperatures.TryGetValue(room.ID, out temperature))
+                return temperature;
+            temperature = room.Cells.Average(cell => GetTemperatureForCell(cell));
+            return roomTemperatures[room.ID] = temperature;
+        }
 
         public bool HasTerrainTemperatures => terrainTemperatures != null;
 

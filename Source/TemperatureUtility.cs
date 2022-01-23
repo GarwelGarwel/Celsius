@@ -2,7 +2,6 @@
 using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using Verse;
 
@@ -51,7 +50,7 @@ namespace Celsius
             }
             if (room.TouchesMapEdge)
                 return room.Map.mapTemperature.OutdoorTemp;
-            return room.Cells.Average(cell => temperatureInfo.GetTemperatureForCell(cell));
+            return temperatureInfo.GetRoomTemperature(room);
         }
 
         #endregion TEMPERATURE
