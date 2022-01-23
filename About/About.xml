@@ -12,7 +12,7 @@
 
 Main features:
 
-- Temperature is tracked and accurately represented for every map cell (instead of room-wide as in vanilla) based on real-world thermal properties. For instance, air near fire is warmer; caves and bodies of water provide naturally stable environment etc.
+- Temperature is tracked and accurately represented for every map cell based on real-world thermal properties.
 
 - Water freezes and ice melts.
 
@@ -22,7 +22,7 @@ Main features:
 
 Celsius opens up many new challenges and ways to play RimWorld. Abandon houses and warm colonists at a campfire, melt ice sheets or unleash deadly firestorms on your enemies!
 
-The mod is well optimized for performance and shouldn't noticeably slow down the game. Nevertheless, you may disable or tweak almost any part of it to your liking.
+The mod is well optimized and shouldn't noticeably slow down the game. Nevertheless, you may disable or tweak its features to your liking.
 
 You can install it in an ongoing game; removal mid-game is also theoretically possible but untested.
 
@@ -31,10 +31,16 @@ DLCs are supported. Mods support is an ongoing effort. Mod authors can provide p
 For issue reports, suggestions and pull requests, visit Github: https://github.com/GarwelGarwel/Celsius
 
 Dependencies:
-
 - Harmony
+- XML Extensions
 
-- XML Extensions</description>
+Currently supported mods:
+- Primitive Workbenches
+- Vanilla Furniture Extended: base mod, Architect, Medical, Security
+
+Conflicts:
+- Any mod that alters temperature-related things in the game is likely to cause issues. 
+- Heat Map, Proxy Heat are not needed, because Celsius does everything these mod do (and much more)</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>

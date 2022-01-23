@@ -9,7 +9,6 @@
 		<category>Basics</category>
 		<workerClass>Celsius.StatWorker_HeatCapacity</workerClass>
 		<forInformationOnly>true</forInformationOnly>
-		<showIfUndefined>false</showIfUndefined>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>1400</displayPriorityInCategory>
@@ -26,7 +25,6 @@
 		<category>Basics</category>
 		<workerClass>Celsius.StatWorker_HeatConductivity</workerClass>
 		<forInformationOnly>true</forInformationOnly>
-		<showIfUndefined>false</showIfUndefined>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>1398</displayPriorityInCategory>
@@ -41,7 +39,6 @@
 		<label>autoignition temperature</label>
 		<description>Minimum temperature when this thing ignites.</description>
 		<category>BasicsNonPawn</category>
-		<showIfUndefined>false</showIfUndefined>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>2990</displayPriorityInCategory>
