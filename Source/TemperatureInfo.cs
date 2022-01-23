@@ -1,5 +1,7 @@
 ﻿using RimWorld;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -14,6 +16,7 @@ namespace Celsius
 
         float[,] temperatures;
         float[,] terrainTemperatures;
+        Dictionary<int, float> roomTemperatures;
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
@@ -29,22 +32,32 @@ namespace Celsius
 
         public override void FinalizeInit()
         {
+            roomTemperatures = new Dictionary<int, float>();
             if (temperatures == null)
             {
                 LogUtility.Log($"Initializing temperatures from vanilla data.");
                 temperatures = new float[map.Size.x, map.Size.z];
                 terrainTemperatures = new float[map.Size.x, map.Size.z];
+                bool hasTerrainTemperatures = false;
                 for (int i = 0; i < temperatures.GetLength(0); i++)
                     for (int j = 0; j < temperatures.GetLength(1); j++)
                     {
                         IntVec3 cell = new IntVec3(i, 0, j);
                         Room room = cell.GetRoomOrAdjacent(map);
                         if (room != null)
+                        {
                             temperatures[i, j] = room.TempTracker.Temperature;
+                            roomTemperatures[room.ID] = temperatures[i, j];
+                        }
                         else TryGetEnvironmentTemperatureForCell(cell, out temperatures[i, j]);
                         if (cell.HasTerrainTemperature(map))
+                        {
                             terrainTemperatures[i, j] = map.mapTemperature.SeasonalTemp;
+                            hasTerrainTemperatures = true;
+                        }
                     }
+                if (!hasTerrainTemperatures)
+                    terrainTemperatures = null;
             }
             overlayDrawer = new CellBoolDrawer(index => !map.fogGrid.IsFogged(index), () => Color.white, index => TemperatureColorForCell(index), map.Size.x, map.Size.z);
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
@@ -92,7 +105,7 @@ namespace Celsius
             {
                 Text.Font = GameFont.Tiny;
                 string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
-                if (Settings.FreezingAndMeltingEnabled && cell.HasTerrainTemperature(map))
+                if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures && cell.HasTerrainTemperature(map))
                     tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
             }
@@ -116,6 +129,7 @@ namespace Celsius
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
+            roomTemperatures.Clear();
             minTemperature = TemperatureTuning.DefaultTemperature - 20;
             maxTemperature = TemperatureTuning.DefaultTemperature + 20;
 
@@ -147,7 +161,7 @@ namespace Celsius
                     DiffusionWithNeighbour(cell + IntVec3.North);
 
                     // Terrain temperature
-                    if (Settings.FreezingAndMeltingEnabled)
+                    if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                     {
                         TerrainDef terrain = cell.GetTerrain(map);
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
@@ -245,13 +259,25 @@ namespace Celsius
 
         public float GetTemperatureForCell(IntVec3 cell) => temperatures != null ? temperatures[cell.x, cell.z] : TemperatureTuning.DefaultTemperature;
 
-        public float GetTerrainTemperature(IntVec3 cell) =>
-            cell.HasTerrainTemperature(map) ? terrainTemperatures[cell.x, cell.z] : GetTemperatureForCell(cell);
-
-        public void SetTempteratureForCell(IntVec3 cell, float temperature)
+        public float GetRoomTemperature(Room room)
         {
-            temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
+            if (room == null || room.ID == -1 || roomTemperatures == null)
+            {
+                LogUtility.Log($"Could not get temperature for room {room?.ToString() ?? "null"}.", LogLevel.Error);
+                return TemperatureTuning.DefaultTemperature;
+            }
+            float temperature;
+            if (roomTemperatures.TryGetValue(room.ID, out temperature))
+                return temperature;
+            temperature = room.Cells.Average(cell => GetTemperatureForCell(cell));
+            return roomTemperatures[room.ID] = temperature;
         }
+
+        public bool HasTerrainTemperatures => terrainTemperatures != null;
+
+        public float GetTerrainTemperature(IntVec3 cell) => terrainTemperatures[cell.x, cell.z];
+
+        public void SetTempteratureForCell(IntVec3 cell, float temperature) => temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
         {
