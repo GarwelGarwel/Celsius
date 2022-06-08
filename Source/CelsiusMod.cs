@@ -26,6 +26,9 @@ namespace Celsius
             content.Label($"Convection conductivity effect: x{Settings.ConvectionConductivityEffect}", tooltip: $"How much air convection increases air conductivity. Recommended value: {Settings.ConvectionConductivityEffect_Default}.");
             Settings.ConvectionConductivityEffect = (float)Math.Round(content.Slider(Settings.ConvectionConductivityEffect, 1, 500));
 
+            content.Label($"Environment diffusion: {Settings.EnvironmentDiffusionFactor.ToStringPercent()}", tooltip: $"How strongly environment (e.g. outdoor) temperature affects cell temperatures. Recommended value: {Settings.EnvironmentDiffusionFactor_Default.ToStringPercent()}.");
+            Settings.EnvironmentDiffusionFactor = (float)Math.Round(content.Slider(Settings.EnvironmentDiffusionFactor, 0, 1), 1);
+
             content.Label($"Heat push: {Settings.HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
             Settings.HeatPushMultiplier = (float)Math.Round(content.Slider(Settings.HeatPushMultiplier, 0, 5), 1);
             Settings.HeatPushEffect = Settings.HeatPushEffect_Base * Settings.HeatPushMultiplier;

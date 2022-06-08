@@ -99,7 +99,7 @@ namespace Celsius
         public static float GenTemperature_ControlTemperatureTempChange(float result, IntVec3 cell, Map map, float energyLimit, float targetTemperature)
         {
             Room room = cell.GetRoom(map);
-            float roomTemp = room != null ? room.GetTemperature() : cell.GetSurroundingTemperature(map);
+            float roomTemp = room != null && !room.TouchesMapEdge ? room.GetTemperature() : cell.GetSurroundingTemperature(map);
             if (energyLimit > 0)
                 if (roomTemp < targetTemperature - TemperatureUtility.TemperatureChangePrecision)
                 {
