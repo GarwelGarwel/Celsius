@@ -14,9 +14,10 @@ namespace Celsius
         public const float SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
         const float MinIgnitionTemperature = 100;
 
+        bool initialized;
         float[,] temperatures;
         float[,] terrainTemperatures;
-        Dictionary<int, float> roomTemperatures;
+        Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
@@ -32,10 +33,10 @@ namespace Celsius
 
         public override void FinalizeInit()
         {
-            roomTemperatures = new Dictionary<int, float>();
+            //roomTemperatures = new Dictionary<int, float>();
             if (temperatures == null)
             {
-                LogUtility.Log($"Initializing temperatures from vanilla data.");
+                LogUtility.Log($"Initializing temperatures for {map} from vanilla data.", LogLevel.Warning);
                 temperatures = new float[map.Size.x, map.Size.z];
                 terrainTemperatures = new float[map.Size.x, map.Size.z];
                 bool hasTerrainTemperatures = false;
@@ -59,7 +60,13 @@ namespace Celsius
                 if (!hasTerrainTemperatures)
                     terrainTemperatures = null;
             }
-            overlayDrawer = new CellBoolDrawer(index => !map.fogGrid.IsFogged(index), () => Color.white, index => TemperatureColorForCell(index), map.Size.x, map.Size.z);
+            overlayDrawer = new CellBoolDrawer(
+                index => !map.fogGrid.IsFogged(index),
+                () => Color.white,
+                index => TemperatureColorForCell(index),
+                map.Size.x,
+                map.Size.z);
+            initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
 
@@ -119,6 +126,9 @@ namespace Celsius
                     LogUtility.Log($"Total ultrafast ticks: {totalTicks}. Average time/1000 ticks: {1000 * totalStopwatch.ElapsedMilliseconds / totalTicks} ms.");
                 totalStopwatch.Start();
             }
+
+            if (!initialized)
+                FinalizeInit();
 
             if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
                 return;
