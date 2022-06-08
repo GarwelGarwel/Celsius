@@ -148,7 +148,7 @@ namespace Celsius
                     {
                         if (!neighbour.InBounds(map))
                             return;
-                        (float, float) changes = TemperatureUtility.DiffusionTemperatureChangeMutual(
+                        (float, float) changes = TemperatureUtility.DiffusionTemperatureChange(
                             temperatures[x, z],
                             cellProps,
                             GetTemperatureForCell(neighbour),
@@ -167,7 +167,7 @@ namespace Celsius
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
                             if (log)
                                 LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
                             terrainTemperatures[x, z] += tempChange.Item1;
@@ -198,7 +198,7 @@ namespace Celsius
 
                     // Default environment temperature
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
-                        newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
+                        newTemperatures[x, z] += TemperatureUtility.EnvironmentDiffusionTemperatureChange(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
                     // Snow melting
                     if (cell.GetSnowDepth(map) > 0)
