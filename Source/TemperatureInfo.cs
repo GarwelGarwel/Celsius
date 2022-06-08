@@ -88,7 +88,7 @@ namespace Celsius
 
         public override void MapComponentUpdate()
         {
-            if (Settings.ShowTemperatureMap)
+            if (Settings.ShowTemperatureMap && Find.CurrentMap == map)
                 overlayDrawer.MarkForDraw();
             overlayDrawer.CellBoolDrawerUpdate();
         }
