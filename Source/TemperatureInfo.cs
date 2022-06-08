@@ -14,9 +14,10 @@ namespace Celsius
         public const float SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
         const float MinIgnitionTemperature = 100;
 
+        bool initialized;
         float[,] temperatures;
         float[,] terrainTemperatures;
-        Dictionary<int, float> roomTemperatures;
+        Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
@@ -32,10 +33,10 @@ namespace Celsius
 
         public override void FinalizeInit()
         {
-            roomTemperatures = new Dictionary<int, float>();
+            //roomTemperatures = new Dictionary<int, float>();
             if (temperatures == null)
             {
-                LogUtility.Log($"Initializing temperatures from vanilla data.");
+                LogUtility.Log($"Initializing temperatures for {map} from vanilla data.", LogLevel.Warning);
                 temperatures = new float[map.Size.x, map.Size.z];
                 terrainTemperatures = new float[map.Size.x, map.Size.z];
                 bool hasTerrainTemperatures = false;
@@ -59,7 +60,13 @@ namespace Celsius
                 if (!hasTerrainTemperatures)
                     terrainTemperatures = null;
             }
-            overlayDrawer = new CellBoolDrawer(index => !map.fogGrid.IsFogged(index), () => Color.white, index => TemperatureColorForCell(index), map.Size.x, map.Size.z);
+            overlayDrawer = new CellBoolDrawer(
+                index => !map.fogGrid.IsFogged(index),
+                () => Color.white,
+                index => TemperatureColorForCell(index),
+                map.Size.x,
+                map.Size.z);
+            initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
 
@@ -88,7 +95,7 @@ namespace Celsius
 
         public override void MapComponentUpdate()
         {
-            if (Settings.ShowTemperatureMap)
+            if (Settings.ShowTemperatureMap && Find.CurrentMap == map)
                 overlayDrawer.MarkForDraw();
             overlayDrawer.CellBoolDrawerUpdate();
         }
@@ -120,6 +127,9 @@ namespace Celsius
                 totalStopwatch.Start();
             }
 
+            if (!initialized)
+                FinalizeInit();
+
             if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
                 return;
 
@@ -148,7 +158,7 @@ namespace Celsius
                     {
                         if (!neighbour.InBounds(map))
                             return;
-                        (float, float) changes = TemperatureUtility.DiffusionTemperatureChangeMutual(
+                        (float, float) changes = TemperatureUtility.DiffusionTemperatureChange(
                             temperatures[x, z],
                             cellProps,
                             GetTemperatureForCell(neighbour),
@@ -167,7 +177,7 @@ namespace Celsius
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChangeMutual(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
                             if (log)
                                 LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
                             terrainTemperatures[x, z] += tempChange.Item1;
@@ -198,7 +208,7 @@ namespace Celsius
 
                     // Default environment temperature
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
-                        newTemperatures[x, z] += TemperatureUtility.DiffusionTemperatureChangeSingle(newTemperatures[x, z], environmentTemperature, cellProps, log);
+                        newTemperatures[x, z] += TemperatureUtility.EnvironmentDiffusionTemperatureChange(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
                     // Snow melting
                     if (cell.GetSnowDepth(map) > 0)

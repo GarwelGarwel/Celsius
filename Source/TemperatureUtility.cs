@@ -57,35 +57,36 @@ namespace Celsius
 
         #region DIFFUSION
 
-        static float airLerpFactor;
+        static float airLerpFactor, diffusionLerpFactor;
 
         internal static void SettingsChanged()
         {
             ThingThermalProperties.Air.heatCapacity = Settings.AirHeatCapacity;
             airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}.");
+            diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}. Diffusion lerp factor: {diffusionLerpFactor:P1}.");
+
             FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
         }
 
-        public static float DiffusionTemperatureChangeSingle(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
+        public static float EnvironmentDiffusionTemperatureChange(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
         {
             if (Mathf.Abs(oldTemp - neighbourTemp) < TemperatureChangePrecision)
                 return 0;
             float finalTemp = (oldTemp + neighbourTemp) / 2;
             float lerpFactor = thermalProps == ThingThermalProperties.Air
-                ? airLerpFactor
-                : Mathf.Min(1 - Mathf.Pow(1 - thermalProps.conductivity * Settings.HeatConductivityFactor / thermalProps.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+                ? diffusionLerpFactor
+                : Mathf.Min(1 - Mathf.Pow(1 - thermalProps.conductivity * Settings.HeatConductivityFactor * Settings.EnvironmentDiffusionFactor / thermalProps.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             if (log)
             {
                 LogUtility.Log($"Old temperature: {oldTemp:F1}C. Neighbour temperature: {neighbourTemp:F1}C. {thermalProps}.");
                 LogUtility.Log($"Final temperature: {finalTemp:F1}C. Lerp factor: {lerpFactor:P1}.");
             }
-
             return lerpFactor * (finalTemp - oldTemp);
         }
 
-        public static (float, float) DiffusionTemperatureChangeMutual(float temp1, ThingThermalProperties props1, float temp2, ThingThermalProperties props2, bool log = false)
+        public static (float, float) DiffusionTemperatureChange(float temp1, ThingThermalProperties props1, float temp2, ThingThermalProperties props2, bool log = false)
         {
             if (Mathf.Abs(temp1 - temp2) < TemperatureChangePrecision)
                 return (0, 0);
