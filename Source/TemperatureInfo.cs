@@ -18,6 +18,7 @@ namespace Celsius
         float[,] temperatures;
         float[,] terrainTemperatures;
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
+        float mountainTemperature;
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
@@ -33,7 +34,6 @@ namespace Celsius
 
         public override void FinalizeInit()
         {
-            //roomTemperatures = new Dictionary<int, float>();
             if (temperatures == null)
             {
                 LogUtility.Log($"Initializing temperatures for {map} from vanilla data.", LogLevel.Warning);
@@ -142,6 +142,8 @@ namespace Celsius
             roomTemperatures.Clear();
             minTemperature = TemperatureTuning.DefaultTemperature - 20;
             maxTemperature = TemperatureTuning.DefaultTemperature + 20;
+            mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
+            LogUtility.Log($"Mountain temperature: {mountainTemperature.ToStringTemperature()}");
 
             // Main loop
             for (int x = 0; x < map.Size.x; x++)
@@ -255,12 +257,36 @@ namespace Celsius
             }
         }
 
+        public float GetMountainTemperatureFor(MountainTemperatureMode mode)
+        {
+            switch (mode)
+            {
+                case MountainTemperatureMode.Vanilla:
+                    return TemperatureTuning.DeepUndergroundTemperature;
+
+                case MountainTemperatureMode.AnnualAverage:
+                    return Find.WorldGrid[map.Tile].temperature;
+
+                case MountainTemperatureMode.SeasonAverage:
+                    return GenTemperature.AverageTemperatureAtTileForTwelfth(map.Tile, GenLocalDate.Twelfth(map).PreviousTwelfth());
+
+                case MountainTemperatureMode.AmbientAir:
+                    return map.mapTemperature.OutdoorTemp;
+
+                case MountainTemperatureMode.Manual:
+                    return Settings.MountainTemperature;
+            }
+            return TemperatureTuning.DeepUndergroundTemperature;
+        }
+
+        public float MountainTemperature => mountainTemperature;
+
         public bool TryGetEnvironmentTemperatureForCell(IntVec3 cell, out float temperature)
         {
             RoofDef roof = cell.GetRoof(map);
             if (cell.GetFirstMineable(map) != null && (roof == RoofDefOf.RoofRockThick || roof == RoofDefOf.RoofRockThin))
             {
-                temperature = TemperatureTuning.DeepUndergroundTemperature;
+                temperature = MountainTemperature;
                 return true;
             }
             temperature = map.mapTemperature.OutdoorTemp;
