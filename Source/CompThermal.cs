@@ -29,9 +29,9 @@ namespace Celsius
                 if (stuffProps != null)
                 {
                     thermalProps = new ThingThermalProperties(parent.def.GetModExtension<ThingThermalProperties>());
-                    float mass = parent.GetStatValue(StatDefOf.Mass);
-                    if (stuffProps.specificHeatCapacity > 0 && mass > 0)
-                        thermalProps.heatCapacity = stuffProps.specificHeatCapacity * mass;
+                    float hc = stuffProps.volumetricHeatCapacity * thermalProps.volume;
+                    if (hc > 0)
+                        thermalProps.heatCapacity = hc + ThingThermalProperties.Air.heatCapacity * (1 - thermalProps.volume / 1000);
                     thermalProps.conductivity *= stuffProps.conductivity;
                 }
                 else thermalProps = parent.def.GetModExtension<ThingThermalProperties>() ?? ThingThermalProperties.Empty;
@@ -40,5 +40,7 @@ namespace Celsius
         }
 
         internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Building && thingDef.HasModExtension<ThingThermalProperties>();
+
+        internal void Reset() => thermalProps = null;
     }
 }

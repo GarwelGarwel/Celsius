@@ -14,6 +14,7 @@ namespace Celsius
 
         public float heatCapacity;
         public float conductivity = 1;
+        public float volume;
 
         public ThingThermalProperties()
         { }
@@ -24,12 +25,14 @@ namespace Celsius
                 return;
             heatCapacity = copyFrom.heatCapacity;
             conductivity = copyFrom.conductivity;
+            volume = copyFrom.volume;
         }
 
-        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C.";
+        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C. Volume: {volume} m^3.";
 
-        public override bool Equals(object obj) => obj is ThingThermalProperties props && props.heatCapacity == heatCapacity && props.conductivity == conductivity;
+        public override bool Equals(object obj) =>
+            obj is ThingThermalProperties props && props.heatCapacity == heatCapacity && props.conductivity == conductivity && props.volume == volume;
 
-        public override int GetHashCode() => (heatCapacity, conductivity).GetHashCode();
+        public override int GetHashCode() => (heatCapacity, conductivity, volume).GetHashCode();
     }
 }

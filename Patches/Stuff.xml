@@ -2,7 +2,7 @@
 
 <Patch>
 
-	<!-- Note: Specific heat capacity in J/kg/C, conductivity in W/C. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
+	<!-- Note: Volumetric heat capacity (in kJ/m^3/C), and conductivity in W/C. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
 
 	<!-- Pure stuff: Basics -->
 	
@@ -10,8 +10,8 @@
 		<xpath>Defs/ThingDef[defName="Silver"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>235</specificHeatCapacity>
-				<conductivity>420</conductivity>
+				<volumetricHeatCapacity>2500</volumetricHeatCapacity>
+				<conductivity>20</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -20,8 +20,8 @@
 		<xpath>Defs/ThingDef[defName="Gold"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>130</specificHeatCapacity>
-				<conductivity>315</conductivity>
+				<volumetricHeatCapacity>2500</volumetricHeatCapacity>
+				<conductivity>15</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -30,8 +30,8 @@
 		<xpath>Defs/ThingDef[defName="Steel"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>465</specificHeatCapacity>
-				<conductivity>20</conductivity>
+				<volumetricHeatCapacity>3120</volumetricHeatCapacity>
+				<conductivity>10</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -40,7 +40,7 @@
 		<xpath>Defs/ThingDef[defName="Plasteel"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>930</specificHeatCapacity>
+				<volumetricHeatCapacity>1600</volumetricHeatCapacity>
 				<conductivity>0.4</conductivity>
 			</li>
 		</value>
@@ -50,8 +50,8 @@
 		<xpath>Defs/ThingDef[defName="WoodLog"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>1700</specificHeatCapacity>
-				<conductivity>0.15</conductivity>
+				<volumetricHeatCapacity>1400</volumetricHeatCapacity>
+				<conductivity>0.2</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -60,8 +60,8 @@
 		<xpath>Defs/ThingDef[defName="Uranium"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>115</specificHeatCapacity>
-				<conductivity>20</conductivity>
+				<volumetricHeatCapacity>2200</volumetricHeatCapacity>
+				<conductivity>10</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -70,8 +70,8 @@
 		<xpath>Defs/ThingDef[defName="Jade"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>860</specificHeatCapacity>
-				<conductivity>65</conductivity>
+				<volumetricHeatCapacity>2600</volumetricHeatCapacity>
+				<conductivity>25</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -82,8 +82,8 @@
 		<xpath>Defs/ThingDef[defName="BlocksSandstone"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>835</specificHeatCapacity>
-				<conductivity>2</conductivity>
+				<volumetricHeatCapacity>2200</volumetricHeatCapacity>
+				<conductivity>1.5</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -92,8 +92,8 @@
 		<xpath>Defs/ThingDef[defName="BlocksGranite"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>790</specificHeatCapacity>
-				<conductivity>2.85</conductivity>
+				<volumetricHeatCapacity>2600</volumetricHeatCapacity>
+				<conductivity>2.5</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -102,8 +102,8 @@
 		<xpath>Defs/ThingDef[defName="BlocksLimestone"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>840</specificHeatCapacity>
-				<conductivity>1.3</conductivity>
+				<volumetricHeatCapacity>2250</volumetricHeatCapacity>
+				<conductivity>1.2</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -112,8 +112,8 @@
 		<xpath>Defs/ThingDef[defName="BlocksSlate"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>760</specificHeatCapacity>
-				<conductivity>2</conductivity>
+				<volumetricHeatCapacity>1600</volumetricHeatCapacity>
+				<conductivity>1.5</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -122,8 +122,8 @@
 		<xpath>Defs/ThingDef[defName="BlocksMarble"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>880</specificHeatCapacity>
-				<conductivity>2.5</conductivity>
+				<volumetricHeatCapacity>2000</volumetricHeatCapacity>
+				<conductivity>2</conductivity>
 			</li>
 		</value>
 	</Operation>
