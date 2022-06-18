@@ -64,9 +64,18 @@ namespace Celsius
             airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}. Diffusion lerp factor: {diffusionLerpFactor:P1}.");
-
             FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
+
+            // Resetting thermal props for all things
+            if (Find.Maps != null)
+                for (int m = 0; m < Find.Maps.Count; m++)
+                {
+                    List<Thing> things = Find.Maps[m]?.listerThings?.AllThings;
+                    if (things != null)
+                        for (int i = 0; i < things.Count; i++)
+                            things[i].TryGetComp<CompThermal>()?.Reset();
+                }
         }
 
         public static float EnvironmentDiffusionTemperatureChange(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
