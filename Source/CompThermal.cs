@@ -13,13 +13,13 @@ namespace Celsius
             get
             {
                 if (parent is Building_Door door && door.Open)
-                    return ThingThermalProperties.Empty;
+                    return ThingThermalProperties.Air;
 
                 if (parent is Building_Vent)
                 {
                     CompFlickable flickable = parent.GetComp<CompFlickable>();
                     if (flickable == null || flickable.SwitchIsOn)
-                        return ThingThermalProperties.Empty;
+                        return ThingThermalProperties.Air;
                 }
 
                 if (thermalProps != null)
