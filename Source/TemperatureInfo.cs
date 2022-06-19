@@ -49,6 +49,7 @@ namespace Celsius
                 LogUtility.Log($"Initializing temperatures for {map} from vanilla data.", LogLevel.Warning);
                 temperatures = new float[map.Size.x, map.Size.z];
                 terrainTemperatures = new float[map.Size.x, map.Size.z];
+                mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
                 bool hasTerrainTemperatures = false;
                 for (int i = 0; i < temperatures.GetLength(0); i++)
                     for (int j = 0; j < temperatures.GetLength(1); j++)

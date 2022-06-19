@@ -19,7 +19,7 @@
 		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>12000</heatCapacity>
+				<heatCapacity>13500</heatCapacity>
 				<conductivity>2</conductivity>
 				<volume>7.5</volume>
 			</li>
@@ -30,7 +30,7 @@
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>15000</heatCapacity>
+				<heatCapacity>17000</heatCapacity>
 				<conductivity>1</conductivity>
 				<volume>10</volume>
 			</li>
@@ -41,8 +41,9 @@
 		<xpath>Defs/ThingDef[defName="Vent"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>6000</heatCapacity>
-				<conductivity>8</conductivity>
+				<heatCapacity>15000</heatCapacity>
+				<conductivity>2</conductivity>
+				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
 	</Operation>
@@ -51,8 +52,9 @@
 		<xpath>Defs/ThingDef[defName="Cooler"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>6000</heatCapacity>
-				<conductivity>8</conductivity>
+				<heatCapacity>15000</heatCapacity>
+				<conductivity>2</conductivity>
+				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
 	</Operation>
