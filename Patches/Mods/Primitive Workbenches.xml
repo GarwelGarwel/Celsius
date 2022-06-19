@@ -11,8 +11,9 @@
 		<xpath>Defs/ThingDef[defName="VBY_HayDoor"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>6000</heatCapacity>
-				<conductivity>0.05</conductivity>
+				<heatCapacity>7000</heatCapacity>
+				<conductivity>0.6</conductivity>
+				<volume>7.5</volume>
 			</li>
 		</value>
 	</Operation>
@@ -22,8 +23,9 @@
 		<xpath>Defs/ThingDef[defName="VBY_Hay_Wall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>15000</heatCapacity>
-				<conductivity>0.05</conductivity>
+				<heatCapacity>9000</heatCapacity>
+				<conductivity>0.3</conductivity>
+				<volume>10</volume>
 			</li>
 		</value>
 	</Operation>
@@ -35,8 +37,8 @@
 		<xpath>Defs/ThingDef[defName="VBY_PrimitiveFlint"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>740</specificHeatCapacity>
-				<conductivity>2</conductivity>
+				<volumetricHeatCapacity>1850</volumetricHeatCapacity>
+				<conductivity>1.5</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -46,8 +48,8 @@
 		<xpath>Defs/ThingDef[defName="VBY_BlocksAdobe"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<specificHeatCapacity>600</specificHeatCapacity>
-				<conductivity>0.3</conductivity>
+				<volumetricHeatCapacity>1000</volumetricHeatCapacity>
+				<conductivity>1.2</conductivity>
 			</li>
 		</value>
 	</Operation>

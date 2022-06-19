@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -62,12 +61,21 @@ namespace Celsius
         internal static void SettingsChanged()
         {
             ThingThermalProperties.Air.heatCapacity = Settings.AirHeatCapacity;
-            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThingThermalProperties.Air.conductivity * ThingThermalProperties.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / ThingThermalProperties.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}. Diffusion lerp factor: {diffusionLerpFactor:P1}.");
-
             FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
+
+            // Resetting thermal props for all things
+            if (Find.Maps != null)
+                for (int m = 0; m < Find.Maps.Count; m++)
+                {
+                    List<Thing> things = Find.Maps[m]?.listerThings?.AllThings;
+                    if (things != null)
+                        for (int i = 0; i < things.Count; i++)
+                            things[i].TryGetComp<CompThermal>()?.Reset();
+                }
         }
 
         public static float EnvironmentDiffusionTemperatureChange(float oldTemp, float neighbourTemp, ThingThermalProperties thermalProps, bool log = false)
@@ -77,7 +85,7 @@ namespace Celsius
             float finalTemp = (oldTemp + neighbourTemp) / 2;
             float lerpFactor = thermalProps == ThingThermalProperties.Air
                 ? diffusionLerpFactor
-                : Mathf.Min(1 - Mathf.Pow(1 - thermalProps.conductivity * Settings.HeatConductivityFactor * Settings.EnvironmentDiffusionFactor / thermalProps.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+                : Mathf.Min(1 - Mathf.Pow(1 - thermalProps.conductivity * thermalProps.conductivity * Settings.HeatConductivityFactor * Settings.EnvironmentDiffusionFactor / thermalProps.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             if (log)
             {
                 LogUtility.Log($"Old temperature: {oldTemp:F1}C. Neighbour temperature: {neighbourTemp:F1}C. {thermalProps}.");
@@ -101,13 +109,13 @@ namespace Celsius
             else if (props1.Equals(props2))
             {
                 finalTemp = (temp1 + temp2) / 2;
-                lerpFactor1 = lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - props1.conductivity * Settings.HeatConductivityFactor / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+                lerpFactor1 = lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - props1.conductivity * props1.conductivity * Settings.HeatConductivityFactor / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             }
 
             else
             {
                 finalTemp = GenMath.WeightedAverage(temp1, props1.heatCapacity, temp2, props2.heatCapacity);
-                float conductivity = Mathf.Sqrt(props1.conductivity * props2.conductivity) * Settings.HeatConductivityFactor;
+                float conductivity = props1.conductivity * props2.conductivity * Settings.HeatConductivityFactor;
                 lerpFactor1 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
                 lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             }
