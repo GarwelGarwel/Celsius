@@ -9,9 +9,19 @@ namespace Celsius
 {
     public class TemperatureInfo : MapComponent
     {
+        // Ticks between full map updates
         public const int TicksPerUpdate = 120;
+
+        // Updates happen when tick % TicksPerUpdate = this value
         const int UpdateTickOffset = 18;
-        public const float SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
+
+        // How many in-game seconds take place between updates (172.8)
+        public const float SecondsPerUpdate = 3600 * TicksPerUpdate / GenDate.TicksPerHour;
+
+        // Relative amount of snow to be melted each update compared to vanilla (0.072)
+        const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
+
+        // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
         bool initialized;
@@ -60,6 +70,7 @@ namespace Celsius
                 if (!hasTerrainTemperatures)
                     terrainTemperatures = null;
             }
+
             overlayDrawer = new CellBoolDrawer(
                 index => !map.fogGrid.IsFogged(index),
                 () => Color.white,
@@ -143,7 +154,6 @@ namespace Celsius
             minTemperature = TemperatureTuning.DefaultTemperature - 20;
             maxTemperature = TemperatureTuning.DefaultTemperature + 20;
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
-            LogUtility.Log($"Mountain temperature: {mountainTemperature.ToStringTemperature()}");
 
             // Main loop
             for (int x = 0; x < map.Size.x; x++)
@@ -213,8 +223,12 @@ namespace Celsius
                         newTemperatures[x, z] += TemperatureUtility.EnvironmentDiffusionTemperatureChange(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
                     // Snow melting
-                    if (cell.GetSnowDepth(map) > 0)
-                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]));
+                    if (temperatures[x, z] > 0 && cell.GetSnowDepth(map) > 0)
+                    {
+                        if (log)
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. Melting: {TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient:F4}.");
+                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient);
+                    }
 
                     // Autoignition
                     if (Settings.AutoignitionEnabled && temperatures[x, z] > MinIgnitionTemperature)
