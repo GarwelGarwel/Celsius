@@ -11,8 +11,9 @@
 		<xpath>Defs/ThingDef[@Name="SterileWallBase"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>8000</heatCapacity>
-				<conductivity>130</conductivity>
+				<heatCapacity>32000</heatCapacity>
+				<conductivity>1</conductivity>
+				<volume>10</volume>
 			</li>
 		</value>
 	</Operation>

@@ -8,7 +8,7 @@
 		<description>How slowly the object changes its temperature.</description>
 		<category>Basics</category>
 		<workerClass>Celsius.StatWorker_HeatCapacity</workerClass>
-		<forInformationOnly>true</forInformationOnly>
+		<hideAtValue>0</hideAtValue>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>1400</displayPriorityInCategory>
@@ -24,11 +24,11 @@
 		<description>How much energy the object exchanges with surrounding air.</description>
 		<category>Basics</category>
 		<workerClass>Celsius.StatWorker_HeatConductivity</workerClass>
-		<forInformationOnly>true</forInformationOnly>
+		<hideAtValue>0</hideAtValue>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>1398</displayPriorityInCategory>
-		<toStringStyle>FloatOne</toStringStyle>
+		<toStringStyle>FloatTwo</toStringStyle>
 		<formatString>{0} W/C</formatString>
 		<defaultBaseValue>0</defaultBaseValue>
 		<minValue>0</minValue>

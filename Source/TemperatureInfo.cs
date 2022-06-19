@@ -9,15 +9,26 @@ namespace Celsius
 {
     public class TemperatureInfo : MapComponent
     {
+        // Ticks between full map updates
         public const int TicksPerUpdate = 120;
+
+        // Updates happen when tick % TicksPerUpdate = this value
         const int UpdateTickOffset = 18;
-        public const float SecondsPerUpdate = 3600 * TicksPerUpdate / 2500;
+
+        // How many in-game seconds take place between updates (172.8)
+        public const float SecondsPerUpdate = 3600 * TicksPerUpdate / GenDate.TicksPerHour;
+
+        // Relative amount of snow to be melted each update compared to vanilla (0.072)
+        const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
+
+        // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
         bool initialized;
         float[,] temperatures;
         float[,] terrainTemperatures;
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
+        float mountainTemperature;
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
@@ -33,12 +44,12 @@ namespace Celsius
 
         public override void FinalizeInit()
         {
-            //roomTemperatures = new Dictionary<int, float>();
             if (temperatures == null)
             {
                 LogUtility.Log($"Initializing temperatures for {map} from vanilla data.", LogLevel.Warning);
                 temperatures = new float[map.Size.x, map.Size.z];
                 terrainTemperatures = new float[map.Size.x, map.Size.z];
+                mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
                 bool hasTerrainTemperatures = false;
                 for (int i = 0; i < temperatures.GetLength(0); i++)
                     for (int j = 0; j < temperatures.GetLength(1); j++)
@@ -60,6 +71,7 @@ namespace Celsius
                 if (!hasTerrainTemperatures)
                     terrainTemperatures = null;
             }
+
             overlayDrawer = new CellBoolDrawer(
                 index => !map.fogGrid.IsFogged(index),
                 () => Color.white,
@@ -142,6 +154,7 @@ namespace Celsius
             roomTemperatures.Clear();
             minTemperature = TemperatureTuning.DefaultTemperature - 20;
             maxTemperature = TemperatureTuning.DefaultTemperature + 20;
+            mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
             // Main loop
             for (int x = 0; x < map.Size.x; x++)
@@ -211,8 +224,12 @@ namespace Celsius
                         newTemperatures[x, z] += TemperatureUtility.EnvironmentDiffusionTemperatureChange(newTemperatures[x, z], environmentTemperature, cellProps, log);
 
                     // Snow melting
-                    if (cell.GetSnowDepth(map) > 0)
-                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]));
+                    if (temperatures[x, z] > 0 && cell.GetSnowDepth(map) > 0)
+                    {
+                        if (log)
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. Melting: {TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient:F4}.");
+                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient);
+                    }
 
                     // Autoignition
                     if (Settings.AutoignitionEnabled && temperatures[x, z] > MinIgnitionTemperature)
@@ -255,12 +272,36 @@ namespace Celsius
             }
         }
 
+        public float GetMountainTemperatureFor(MountainTemperatureMode mode)
+        {
+            switch (mode)
+            {
+                case MountainTemperatureMode.Vanilla:
+                    return TemperatureTuning.DeepUndergroundTemperature;
+
+                case MountainTemperatureMode.AnnualAverage:
+                    return Find.WorldGrid[map.Tile].temperature;
+
+                case MountainTemperatureMode.SeasonAverage:
+                    return GenTemperature.AverageTemperatureAtTileForTwelfth(map.Tile, GenLocalDate.Twelfth(map).PreviousTwelfth());
+
+                case MountainTemperatureMode.AmbientAir:
+                    return map.mapTemperature.OutdoorTemp;
+
+                case MountainTemperatureMode.Manual:
+                    return Settings.MountainTemperature;
+            }
+            return TemperatureTuning.DeepUndergroundTemperature;
+        }
+
+        public float MountainTemperature => mountainTemperature;
+
         public bool TryGetEnvironmentTemperatureForCell(IntVec3 cell, out float temperature)
         {
             RoofDef roof = cell.GetRoof(map);
             if (cell.GetFirstMineable(map) != null && (roof == RoofDefOf.RoofRockThick || roof == RoofDefOf.RoofRockThin))
             {
-                temperature = TemperatureTuning.DeepUndergroundTemperature;
+                temperature = MountainTemperature;
                 return true;
             }
             temperature = map.mapTemperature.OutdoorTemp;
