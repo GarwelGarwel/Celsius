@@ -9,7 +9,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>250000</heatCapacity>
-				<conductivity>2</conductivity>
+				<conductivity>1</conductivity>
 				<volume>500</volume>
 			</li>
 		</value>
@@ -20,7 +20,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>13500</heatCapacity>
-				<conductivity>2</conductivity>
+				<conductivity>1.5</conductivity>
 				<volume>7.5</volume>
 			</li>
 		</value>
@@ -42,7 +42,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>15000</heatCapacity>
-				<conductivity>2</conductivity>
+				<conductivity>1.5</conductivity>
 				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
@@ -53,7 +53,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>15000</heatCapacity>
-				<conductivity>2</conductivity>
+				<conductivity>1.5</conductivity>
 				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
