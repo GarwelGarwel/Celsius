@@ -56,7 +56,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>17500</heatCapacity>
-				<conductivity>0.5</conductivity>
+				<conductivity>0.4</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -67,7 +68,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>20000</heatCapacity>
-				<conductivity>0.38</conductivity>
+				<conductivity>0.3</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -78,7 +80,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>22500</heatCapacity>
-				<conductivity>0.28</conductivity>
+				<conductivity>0.22</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -89,7 +92,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>25000</heatCapacity>
-				<conductivity>0.21</conductivity>
+				<conductivity>0.16</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>

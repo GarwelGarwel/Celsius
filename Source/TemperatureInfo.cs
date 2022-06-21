@@ -162,9 +162,9 @@ namespace Celsius
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
                     log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell;
-                    ThingThermalProperties cellProps = cell.GetThermalProperties(map);
+                    CellThermalProps cellProps = cell.GetThermalProperties(map);
                     if (log)
-                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.");
+                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cellProps.heatCapacity}. Airflow: {cellProps.airflow:P0}. Conductivity: {cellProps.conductivity}.");
 
                     // Diffusion & convection
                     void DiffusionWithNeighbour(IntVec3 neighbour)
@@ -175,7 +175,8 @@ namespace Celsius
                             temperatures[x, z],
                             cellProps,
                             GetTemperatureForCell(neighbour),
-                            neighbour.GetThermalProperties(map));
+                            neighbour.GetThermalProperties(map),
+                            log);
                         newTemperatures[x, z] += changes.Item1;
                         newTemperatures[neighbour.x, neighbour.z] += changes.Item2;
                     }
@@ -190,7 +191,7 @@ namespace Celsius
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), CellThermalProps.Create(terrainProps), temperatures[x, z], cellProps);
                             if (log)
                                 LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
                             terrainTemperatures[x, z] += tempChange.Item1;
