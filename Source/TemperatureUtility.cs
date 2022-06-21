@@ -187,7 +187,7 @@ namespace Celsius
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
-            if (UI.MouseCell() == cell || energy < 0)
+            if (UI.MouseCell() == cell)
                 LogUtility.Log($"Pushing {energy} heat at {cell}.");
             TemperatureInfo temperatureInfo = map.TemperatureInfo();
             if (temperatureInfo == null)

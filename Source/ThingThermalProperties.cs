@@ -4,7 +4,7 @@ namespace Celsius
 {
     public class ThingThermalProperties : DefModExtension
     {
-        public static readonly ThingThermalProperties Empty = new ThingThermalProperties() { ignoreStuff = true };
+        public static readonly ThingThermalProperties Empty = new ThingThermalProperties() { };
 
         public static readonly ThingThermalProperties Air = new ThingThermalProperties()
         {
@@ -13,32 +13,31 @@ namespace Celsius
         };
 
         public float heatCapacity;
-        public float conductivity = 1;
         public float volume;
-        public bool ignoreStuff;
+        public float conductivity = 1;
+        public float conductivityWhenOpen = 1;
 
         public ThingThermalProperties()
         { }
 
-        public ThingThermalProperties(ThingThermalProperties copyFrom)
+        public ThingThermalProperties(ThingThermalProperties copyFrom, bool open = false)
         {
             if (copyFrom == null)
                 return;
             heatCapacity = copyFrom.heatCapacity;
-            conductivity = copyFrom.conductivity;
             volume = copyFrom.volume;
-            ignoreStuff = copyFrom.ignoreStuff;
+            conductivity = open ? copyFrom.conductivityWhenOpen : copyFrom.conductivity;
         }
 
-        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C. Volume: {volume} m^3.";
+        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Volume: {volume} m^3. Conductivity: {conductivity} W/C ({conductivityWhenOpen} when open).";
 
         public override bool Equals(object obj) =>
             obj is ThingThermalProperties props
             && props.heatCapacity == heatCapacity
-            && props.conductivity == conductivity
             && props.volume == volume
-            && props.ignoreStuff == ignoreStuff;
+            && props.conductivity == conductivity
+            && props.conductivityWhenOpen == conductivityWhenOpen;
 
-        public override int GetHashCode() => (heatCapacity, conductivity, volume).GetHashCode();
+        public override int GetHashCode() => (heatCapacity, volume, conductivity, conductivityWhenOpen).GetHashCode();
     }
 }

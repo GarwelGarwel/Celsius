@@ -11,8 +11,8 @@
 		<xpath>Defs/ThingDef[defName="VFEArch_LogWall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>15500</heatCapacity>
-				<conductivity>0.45</conductivity>
+				<heatCapacity>17000</heatCapacity>
+				<conductivity>0.5</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -22,7 +22,7 @@
 		<xpath>Defs/ThingDef[defName="VFEArch_HedgeWall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>6000</heatCapacity>
+				<heatCapacity>8000</heatCapacity>
 				<conductivity>0.7</conductivity>
 			</li>
 		</value>
@@ -33,9 +33,9 @@
 		<xpath>Defs/ThingDef[defName="VFEArch_ArmoredWall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>64000</heatCapacity>
+				<heatCapacity>42000</heatCapacity>
+				<volume>12.5</volume>
 				<conductivity>1</conductivity>
-				<volume>20</volume>
 			</li>
 		</value>
 	</Operation>
@@ -45,9 +45,23 @@
 		<xpath>Defs/ThingDef[defName="VFEArch_ArmoredDoor"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>48000</heatCapacity>
-				<conductivity>1.2</conductivity>
-				<volume>15</volume>
+				<heatCapacity>34000</heatCapacity>
+				<volume>10</volume>
+				<conductivity>1.4</conductivity>
+				<conductivityWhenOpen>4.2</conductivityWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_SingleDoor"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>11000</heatCapacity>
+				<volume>6</volume>
+				<conductivity>1.75</conductivity>
+				<conductivityWhenOpen>4.5</conductivityWhenOpen>
 			</li>
 		</value>
 	</Operation>
