@@ -58,19 +58,16 @@ namespace Celsius
 
         static float airLerpFactor, diffusionLerpFactor;
 
-        static float GetLerpFactor(float conductivity, float heatCapacity, float airflow) =>
-            Mathf.Min(1 - Mathf.Pow(1 - conductivity * Settings.HeatConductivityFactor * Mathf.Pow(Settings.ConvectionConductivityEffect, airflow) / heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-
         internal static void SettingsChanged()
         {
             CellThermalProps.Air.heatCapacity = Settings.AirHeatCapacity;
-            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.HeatConductivityFactor * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}. Diffusion lerp factor: {diffusionLerpFactor:P1}.");
             FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
 
-            // Resetting thermal props for all things
+            // Resetting thermal props for all things and thingDefs
             if (Find.Maps != null)
                 for (int m = 0; m < Find.Maps.Count; m++)
                 {
@@ -79,6 +76,8 @@ namespace Celsius
                         for (int i = 0; i < things.Count; i++)
                             things[i].TryGetComp<CompThermal>()?.Reset();
                 }
+            for (int i = 0; i < DefDatabase<ThingDef>.AllDefsListForReading.Count; i++)
+                DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
         }
 
         public static float EnvironmentDiffusionTemperatureChange(float oldTemp, float neighbourTemp, CellThermalProps thermalProps, bool log)
@@ -114,19 +113,17 @@ namespace Celsius
                 finalTemp = (temp1 + temp2) / 2;
                 convection = props1.airflow * props2.airflow;
                 if (convection > 0)
-                    convection = Mathf.Pow(Settings.ConvectionConductivityEffect, convection);
-                else convection = 1;
-                lerpFactor1 = lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - props1.conductivity * props1.conductivity * Settings.HeatConductivityFactor * convection / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+                    lerpFactor1 = lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - props1.conductivity * props2.conductivity * Mathf.Pow(Settings.ConvectionConductivityEffect, convection) / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+                else lerpFactor1 = lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - props1.conductivity * props2.conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             }
 
             else
             {
                 finalTemp = GenMath.WeightedAverage(temp1, props1.heatCapacity, temp2, props2.heatCapacity);
+                float conductivity = props1.conductivity * props2.conductivity;
                 convection = props1.airflow * props2.airflow;
                 if (convection > 0)
-                    convection = Mathf.Pow(Settings.ConvectionConductivityEffect, convection);
-                else convection = 1;
-                float conductivity = props1.conductivity * props2.conductivity * Settings.HeatConductivityFactor * convection;
+                    conductivity *= Mathf.Pow(Settings.ConvectionConductivityEffect, convection);
                 lerpFactor1 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props1.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
                 lerpFactor2 = Mathf.Min(1 - Mathf.Pow(1 - conductivity / props2.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
             }
@@ -149,13 +146,14 @@ namespace Celsius
         {
             if (cell.InBounds(map))
             {
-                List<Thing> thingsList = cell.GetThingList(map);
+                List<Thing> thingsList = map.thingGrid.ThingsListAtFast(cell);
                 for (int i = 0; i < thingsList.Count; i++)
-                {
-                    CellThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
-                    if (thermalProps != null && thermalProps.heatCapacity > 0)
-                        return thermalProps;
-                }
+                    if (CompThermal.ShouldApplyTo(thingsList[i].def))
+                    {
+                        CellThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
+                        if (thermalProps != null)
+                            return thermalProps;
+                    }
             }
             return CellThermalProps.Air;
         }

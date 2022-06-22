@@ -191,7 +191,7 @@ namespace Celsius
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), CellThermalProps.Create(terrainProps), temperatures[x, z], cellProps);
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps.GetCellThermalProps(), temperatures[x, z], cellProps);
                             if (log)
                                 LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
                             terrainTemperatures[x, z] += tempChange.Item1;

@@ -7,8 +7,8 @@ namespace Celsius
     {
         public override float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
         {
-            CompThermal compThermal = req.Thing?.TryGetComp<CompThermal>();
-            return compThermal != null ? compThermal.ThermalProperties.heatCapacity : 0;
+            CellThermalProps thermalProps = req.Thing?.TryGetComp<CompThermal>()?.ThermalProperties;
+            return thermalProps != null ? thermalProps.heatCapacity : 0;
         }
     }
 }

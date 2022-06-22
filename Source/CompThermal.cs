@@ -25,27 +25,19 @@ namespace Celsius
                 if (cachedProps != null)
                     return cachedProps;
 
-                // If the parent Thing has no ThingThermalProperties, return empty record
                 ThingThermalProperties thingThermalProps = parent.def.GetModExtension<ThingThermalProperties>();
-                if (thingThermalProps == null)
-                    return CellThermalProps.Empty;
-
                 StuffThermalProperties stuffProps = thingThermalProps.volume > 0
-                    ? stuffProps = parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
+                    ? parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
                     : null;
                 if (open)
-                    thermalPropsOpen = CellThermalProps.Create(thingThermalProps, stuffProps, true);
-                else thermalProps = CellThermalProps.Create(thingThermalProps, stuffProps, false);
+                    thermalPropsOpen = thingThermalProps.GetCellThermalProps(stuffProps, true);
+                else thermalProps = thingThermalProps.GetCellThermalProps(stuffProps, false);
                 return GetCachedThermalProps(open);
             }
         }
 
         internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Building && thingDef.HasModExtension<ThingThermalProperties>();
 
-        internal void Reset()
-        {
-            thermalProps = null;
-            thermalPropsOpen = null;
-        }
+        internal void Reset() => thermalProps = thermalPropsOpen = null;
     }
 }
