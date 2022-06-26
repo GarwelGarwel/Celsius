@@ -24,6 +24,8 @@ namespace Celsius
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
+        const float MinMaxTemperatureAdjustmentStep = 1;
+
         bool initialized;
         float[,] temperatures;
         float[,] terrainTemperatures;
@@ -32,8 +34,10 @@ namespace Celsius
 
         float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
         CellBoolDrawer overlayDrawer;
-        readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
-        readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
+
+        static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
+        static readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
+        static readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
 
         Stopwatch updateStopwatch = new Stopwatch(), totalStopwatch = new Stopwatch();
         int tickIterations, totalTicks;
@@ -72,6 +76,8 @@ namespace Celsius
                     terrainTemperatures = null;
             }
 
+            minComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
+            maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
             overlayDrawer = new CellBoolDrawer(
                 index => !map.fogGrid.IsFogged(index),
                 () => Color.white,
@@ -98,11 +104,11 @@ namespace Celsius
         Color TemperatureColorForCell(int index)
         {
             float temperature = GetTemperatureForCell(CellIndicesUtility.IndexToCell(index, map.Size.x));
-            if (temperature < TemperatureTuning.DefaultTemperature - 5)
-                return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (TemperatureTuning.DefaultTemperature - 5 - minTemperature));
-            if (temperature < TemperatureTuning.DefaultTemperature + 5)
-                return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - TemperatureTuning.DefaultTemperature + 5) / 10);
-            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxTemperature) / (maxTemperature - TemperatureTuning.DefaultTemperature - 5));
+            if (temperature < minComfortableTemperature)
+                return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
+            if (temperature < maxComfortableTemperature)
+                return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - maxComfortableTemperature) / (maxComfortableTemperature - minComfortableTemperature));
+            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxTemperature) / (maxTemperature - maxComfortableTemperature));
         }
 
         public override void MapComponentUpdate()
@@ -152,8 +158,8 @@ namespace Celsius
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
             roomTemperatures.Clear();
-            minTemperature = TemperatureTuning.DefaultTemperature - 20;
-            maxTemperature = TemperatureTuning.DefaultTemperature + 20;
+            minTemperature += MinMaxTemperatureAdjustmentStep;
+            maxTemperature -= MinMaxTemperatureAdjustmentStep;
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
             // Main loop
