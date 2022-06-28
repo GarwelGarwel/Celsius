@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+
+	<KeyBindingCategoryDef>
+		<defName>Celsius</defName>
+		<label>Celsius</label>
+		<description>Key bindings for Celsius mod.</description>
+	</KeyBindingCategoryDef>
+
+</Defs>

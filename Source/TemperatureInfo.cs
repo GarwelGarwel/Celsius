@@ -32,12 +32,12 @@ namespace Celsius
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
         float mountainTemperature;
 
-        float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
-        CellBoolDrawer overlayDrawer;
-
         static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
         static readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
         static readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
+
+        float minTemperature = minComfortableTemperature - 5, maxTemperature = maxComfortableTemperature + 5;
+        CellBoolDrawer overlayDrawer;
 
         Stopwatch updateStopwatch = new Stopwatch(), totalStopwatch = new Stopwatch();
         int tickIterations, totalTicks;
@@ -107,8 +107,8 @@ namespace Celsius
             if (temperature < minComfortableTemperature)
                 return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
             if (temperature < maxComfortableTemperature)
-                return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - maxComfortableTemperature) / (maxComfortableTemperature - minComfortableTemperature));
-            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxTemperature) / (maxTemperature - maxComfortableTemperature));
+                return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - minComfortableTemperature) / (maxComfortableTemperature - minComfortableTemperature));
+            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
         }
 
         public override void MapComponentUpdate()
@@ -122,7 +122,8 @@ namespace Celsius
         {
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
-
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.defaultKeyCodeA)
+                Settings.ShowTemperatureMap = !Settings.ShowTemperatureMap;
             if (!Settings.ShowTemperatureMap)
                 return;
             IntVec3 cell = UI.MouseCell();
@@ -158,8 +159,10 @@ namespace Celsius
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
             roomTemperatures.Clear();
-            minTemperature += MinMaxTemperatureAdjustmentStep;
-            maxTemperature -= MinMaxTemperatureAdjustmentStep;
+            if (minTemperature < minComfortableTemperature + 5)
+                minTemperature += MinMaxTemperatureAdjustmentStep;
+            if (maxTemperature > maxComfortableTemperature - 5)
+                maxTemperature -= MinMaxTemperatureAdjustmentStep;
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
             // Main loop
