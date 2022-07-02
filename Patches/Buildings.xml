@@ -9,19 +9,44 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>250000</heatCapacity>
-				<conductivity>1</conductivity>
 				<volume>500</volume>
+				<conductivity>1</conductivity>
 			</li>
 		</value>
 	</Operation>
 
 	<Operation Class="PatchOperationAddModExtension">
-		<xpath>Defs/ThingDef[thingClass="Building_Door"]</xpath>
+		<xpath>Defs/ThingDef[defName="Door"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>13500</heatCapacity>
-				<conductivity>1.5</conductivity>
 				<volume>7.5</volume>
+				<conductivity>1.5</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Autodoor"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>13500</heatCapacity>
+				<volume>7.5</volume>
+				<conductivity>1.5</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="AnimalFlap"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>8000</heatCapacity>
+				<conductivity>2</conductivity>
+				<airflow>0.2</airflow>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -31,8 +56,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>17000</heatCapacity>
-				<conductivity>1</conductivity>
 				<volume>10</volume>
+				<conductivity>1</conductivity>
 			</li>
 		</value>
 	</Operation>
@@ -43,7 +68,8 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>15000</heatCapacity>
 				<conductivity>1.5</conductivity>
-				<ignoreStuff>true</ignoreStuff>
+				<airflow>0.2</airflow>
+				<airflowWhenOpen>0.8</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -54,7 +80,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>15000</heatCapacity>
 				<conductivity>1.5</conductivity>
-				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
 	</Operation>

@@ -13,7 +13,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>21000</heatCapacity>
 				<conductivity>0.4</conductivity>
-				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
 	</Operation>
@@ -25,7 +24,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>24000</heatCapacity>
 				<conductivity>0.3</conductivity>
-				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
 	</Operation>
@@ -37,7 +35,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>27000</heatCapacity>
 				<conductivity>0.22</conductivity>
-				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
 	</Operation>
@@ -49,7 +46,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>30000</heatCapacity>
 				<conductivity>0.16</conductivity>
-				<ignoreStuff>true</ignoreStuff>
 			</li>
 		</value>
 	</Operation>
@@ -60,8 +56,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>17500</heatCapacity>
-				<conductivity>0.5</conductivity>
-				<ignoreStuff>true</ignoreStuff>
+				<conductivity>0.4</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -72,8 +68,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>20000</heatCapacity>
-				<conductivity>0.38</conductivity>
-				<ignoreStuff>true</ignoreStuff>
+				<conductivity>0.3</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -84,8 +80,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>22500</heatCapacity>
-				<conductivity>0.28</conductivity>
-				<ignoreStuff>true</ignoreStuff>
+				<conductivity>0.22</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -96,8 +92,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>25000</heatCapacity>
-				<conductivity>0.21</conductivity>
-				<ignoreStuff>true</ignoreStuff>
+				<conductivity>0.16</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
