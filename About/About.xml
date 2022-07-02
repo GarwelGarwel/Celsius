@@ -35,8 +35,10 @@ Dependencies:
 - XML Extensions
 
 Currently supported mods:
+- Insulation
 - Primitive Workbenches
 - Vanilla Furniture Extended: base mod, Architect, Medical, Security
+- Windows
 
 Conflicts:
 - Any mod that alters temperature-related things in the game is likely to cause issues. 

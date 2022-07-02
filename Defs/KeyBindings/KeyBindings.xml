@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+  
+  <KeyBindingDef ParentName="GameMapKeyBinding">
+    <defName>Celsius_SwitchTemperatureMap</defName>
+    <label>dolly up</label>
+    <category>Celsius</category>
+    <defaultKeyCodeA>B</defaultKeyCodeA>
+  </KeyBindingDef>
+
+</Defs>

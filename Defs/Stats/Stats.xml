@@ -12,8 +12,8 @@
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>1400</displayPriorityInCategory>
-		<toStringStyle>Integer</toStringStyle>
-		<formatString>{0} J/C</formatString>
+		<toStringStyle>FloatOne</toStringStyle>
+		<formatString>{0} kJ/C</formatString>
 		<defaultBaseValue>0</defaultBaseValue>
 		<minValue>0</minValue>
 	</StatDef>

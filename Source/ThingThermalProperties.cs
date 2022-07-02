@@ -4,41 +4,56 @@ namespace Celsius
 {
     public class ThingThermalProperties : DefModExtension
     {
-        public static readonly ThingThermalProperties Empty = new ThingThermalProperties() { ignoreStuff = true };
-
-        public static readonly ThingThermalProperties Air = new ThingThermalProperties()
-        {
-            heatCapacity = Settings.AirHeatCapacity,
-            conductivity = 0.17f
-        };
-
         public float heatCapacity;
-        public float conductivity = 1;
         public float volume;
-        public bool ignoreStuff;
+        public float conductivity = 1;
+        public float airflow;
+        public float airflowWhenOpen;
+
+        CellThermalProps defaultProps;
 
         public ThingThermalProperties()
         { }
 
-        public ThingThermalProperties(ThingThermalProperties copyFrom)
+        public CellThermalProps GetCellThermalProps()
         {
-            if (copyFrom == null)
-                return;
-            heatCapacity = copyFrom.heatCapacity;
-            conductivity = copyFrom.conductivity;
-            volume = copyFrom.volume;
-            ignoreStuff = copyFrom.ignoreStuff;
+            if (defaultProps == null)
+                defaultProps = new CellThermalProps()
+                {
+                    heatCapacity = heatCapacity,
+                    airflow = airflow,
+                    conductivity = conductivity * Settings.HeatConductivityFactor
+                };
+            return defaultProps;
         }
 
-        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Conductivity: {conductivity} W/C. Volume: {volume} m^3.";
+        public CellThermalProps GetCellThermalProps(StuffThermalProperties stuffProps, bool open)
+        {
+            if (stuffProps == null)
+            {
+                if (heatCapacity <= 0)
+                    return null;
+                if (!open)
+                    return GetCellThermalProps();
+                return new CellThermalProps()
+                {
+                    heatCapacity = heatCapacity,
+                    airflow = airflowWhenOpen,
+                    conductivity = GenMath.WeightedAverage(CellThermalProps.Air.conductivity, airflowWhenOpen, conductivity * Settings.HeatConductivityFactor, 1 - airflowWhenOpen)
+                };
+            }
 
-        public override bool Equals(object obj) =>
-            obj is ThingThermalProperties props
-            && props.heatCapacity == heatCapacity
-            && props.conductivity == conductivity
-            && props.volume == volume
-            && props.ignoreStuff == ignoreStuff;
+            float airflow = open ? airflowWhenOpen : this.airflow;
+            return new CellThermalProps()
+            {
+                heatCapacity = stuffProps.volumetricHeatCapacity * volume + Settings.AirHeatCapacity * (1 - volume / 1000),
+                airflow = airflow,
+                conductivity = GenMath.WeightedAverage(CellThermalProps.Air.conductivity, airflow, conductivity * stuffProps.conductivity * Settings.HeatConductivityFactor, 1 - airflow)
+            };
+        }
 
-        public override int GetHashCode() => (heatCapacity, conductivity, volume).GetHashCode();
+        public void Reset() => defaultProps = null;
+
+        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Volume: {volume} m^3. Conductivity: {conductivity} W/C. Airflow: {airflow:P0} ({airflowWhenOpen:P0} when open).";
     }
 }

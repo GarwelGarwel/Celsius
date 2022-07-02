@@ -12,8 +12,9 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>7000</heatCapacity>
-				<conductivity>0.6</conductivity>
 				<volume>7.5</volume>
+				<conductivity>0.5</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -24,8 +25,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>9000</heatCapacity>
-				<conductivity>0.3</conductivity>
 				<volume>10</volume>
+				<conductivity>0.3</conductivity>
 			</li>
 		</value>
 	</Operation>

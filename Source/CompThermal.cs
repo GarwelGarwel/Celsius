@@ -6,44 +6,38 @@ namespace Celsius
     public class CompThermal : ThingComp
     {
         [Unsaved]
-        ThingThermalProperties thermalProps;
+        CellThermalProps thermalProps;
 
-        public ThingThermalProperties ThermalProperties
+        [Unsaved]
+        CellThermalProps thermalPropsOpen;
+
+        bool IsOpen => (parent is Building_Door door && door.Open) || (parent is Building_Vent && parent.GetComp<CompFlickable>()?.SwitchIsOn == true);
+
+        CellThermalProps GetCachedThermalProps(bool open) => open ? thermalPropsOpen : thermalProps;
+
+        public CellThermalProps ThermalProperties
         {
             get
             {
-                if (parent is Building_Door door && door.Open)
-                    return ThingThermalProperties.Air;
+                // Checking if thermal props already cached
+                bool open = IsOpen;
+                CellThermalProps cachedProps = GetCachedThermalProps(open);
+                if (cachedProps != null)
+                    return cachedProps;
 
-                if (parent is Building_Vent)
-                {
-                    CompFlickable flickable = parent.GetComp<CompFlickable>();
-                    if (flickable == null || flickable.SwitchIsOn)
-                        return ThingThermalProperties.Air;
-                }
-
-                if (thermalProps != null)
-                    return thermalProps;
-
-                thermalProps = parent.def.GetModExtension<ThingThermalProperties>() ?? ThingThermalProperties.Empty;
-                if (thermalProps.ignoreStuff)
-                    return thermalProps;
-
-                StuffThermalProperties stuffProps = parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>();
-                if (stuffProps != null)
-                {
-                    thermalProps = new ThingThermalProperties(thermalProps);
-                    float hc = stuffProps.volumetricHeatCapacity * thermalProps.volume;
-                    if (hc > 0)
-                        thermalProps.heatCapacity = hc + ThingThermalProperties.Air.heatCapacity * (1 - thermalProps.volume / 1000);
-                    thermalProps.conductivity *= stuffProps.conductivity;
-                }
-                return thermalProps;
+                ThingThermalProperties thingThermalProps = parent.def.GetModExtension<ThingThermalProperties>();
+                StuffThermalProperties stuffProps = thingThermalProps.volume > 0
+                    ? parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
+                    : null;
+                if (open)
+                    thermalPropsOpen = thingThermalProps.GetCellThermalProps(stuffProps, true);
+                else thermalProps = thingThermalProps.GetCellThermalProps(stuffProps, false);
+                return GetCachedThermalProps(open);
             }
         }
 
         internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Building && thingDef.HasModExtension<ThingThermalProperties>();
 
-        internal void Reset() => thermalProps = null;
+        internal void Reset() => thermalProps = thermalPropsOpen = null;
     }
 }

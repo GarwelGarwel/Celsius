@@ -24,16 +24,20 @@ namespace Celsius
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
+        const float MinMaxTemperatureAdjustmentStep = 1;
+
         bool initialized;
         float[,] temperatures;
         float[,] terrainTemperatures;
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
         float mountainTemperature;
 
-        float minTemperature = TemperatureTuning.DefaultTemperature - 20, maxTemperature = TemperatureTuning.DefaultTemperature + 20;
+        static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
+        static readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
+        static readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
+
+        float minTemperature = minComfortableTemperature - 5, maxTemperature = maxComfortableTemperature + 5;
         CellBoolDrawer overlayDrawer;
-        readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
-        readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
 
         Stopwatch updateStopwatch = new Stopwatch(), totalStopwatch = new Stopwatch();
         int tickIterations, totalTicks;
@@ -72,6 +76,8 @@ namespace Celsius
                     terrainTemperatures = null;
             }
 
+            minComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
+            maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
             overlayDrawer = new CellBoolDrawer(
                 index => !map.fogGrid.IsFogged(index),
                 () => Color.white,
@@ -98,11 +104,11 @@ namespace Celsius
         Color TemperatureColorForCell(int index)
         {
             float temperature = GetTemperatureForCell(CellIndicesUtility.IndexToCell(index, map.Size.x));
-            if (temperature < TemperatureTuning.DefaultTemperature - 5)
-                return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (TemperatureTuning.DefaultTemperature - 5 - minTemperature));
-            if (temperature < TemperatureTuning.DefaultTemperature + 5)
-                return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - TemperatureTuning.DefaultTemperature + 5) / 10);
-            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxTemperature) / (maxTemperature - TemperatureTuning.DefaultTemperature - 5));
+            if (temperature < minComfortableTemperature)
+                return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
+            if (temperature < maxComfortableTemperature)
+                return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - minComfortableTemperature) / (maxComfortableTemperature - minComfortableTemperature));
+            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
         }
 
         public override void MapComponentUpdate()
@@ -116,7 +122,8 @@ namespace Celsius
         {
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
-
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.defaultKeyCodeA)
+                Settings.ShowTemperatureMap = !Settings.ShowTemperatureMap;
             if (!Settings.ShowTemperatureMap)
                 return;
             IntVec3 cell = UI.MouseCell();
@@ -152,8 +159,10 @@ namespace Celsius
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
             roomTemperatures.Clear();
-            minTemperature = TemperatureTuning.DefaultTemperature - 20;
-            maxTemperature = TemperatureTuning.DefaultTemperature + 20;
+            if (minTemperature < minComfortableTemperature + 5)
+                minTemperature += MinMaxTemperatureAdjustmentStep;
+            if (maxTemperature > maxComfortableTemperature - 5)
+                maxTemperature -= MinMaxTemperatureAdjustmentStep;
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
             // Main loop
@@ -162,9 +171,9 @@ namespace Celsius
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
                     log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell;
-                    ThingThermalProperties cellProps = cell.GetThermalProperties(map);
+                    CellThermalProps cellProps = cell.GetThermalProperties(map);
                     if (log)
-                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cell.GetHeatCapacity(map)}. Conductivity: {cell.GetHeatConductivity(map)}.");
+                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cellProps.heatCapacity}. Airflow: {cellProps.airflow:P0}. Conductivity: {cellProps.conductivity}.");
 
                     // Diffusion & convection
                     void DiffusionWithNeighbour(IntVec3 neighbour)
@@ -175,7 +184,8 @@ namespace Celsius
                             temperatures[x, z],
                             cellProps,
                             GetTemperatureForCell(neighbour),
-                            neighbour.GetThermalProperties(map));
+                            neighbour.GetThermalProperties(map),
+                            log);
                         newTemperatures[x, z] += changes.Item1;
                         newTemperatures[neighbour.x, neighbour.z] += changes.Item2;
                     }
@@ -190,7 +200,7 @@ namespace Celsius
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps, temperatures[x, z], cellProps);
+                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps.GetCellThermalProps(), temperatures[x, z], cellProps);
                             if (log)
                                 LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
                             terrainTemperatures[x, z] += tempChange.Item1;
