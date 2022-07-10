@@ -122,7 +122,7 @@ namespace Celsius
         {
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.defaultKeyCodeA)
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey)
                 Settings.ShowTemperatureMap = !Settings.ShowTemperatureMap;
             if (!Settings.ShowTemperatureMap)
                 return;
