@@ -4,7 +4,7 @@
   
   <KeyBindingDef ParentName="GameMapKeyBinding">
     <defName>Celsius_SwitchTemperatureMap</defName>
-    <label>dolly up</label>
+    <label>toggle temperature map</label>
     <category>Celsius</category>
     <defaultKeyCodeA>B</defaultKeyCodeA>
   </KeyBindingDef>

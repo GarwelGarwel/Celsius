@@ -28,10 +28,10 @@ namespace Celsius
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const float HeatConductivityFactor_Base = 1;
-        public const float ConvectionConductivityEffect_Default = 200;
+        public const float ConvectionConductivityEffect_Default = 100;
         public const float EnvironmentDiffusionFactor_Default = 0.5f;
         public const float HeatPushEffect_Base = 10;
-        public const float AirHeatCapacity_Default = 3000;
+        public const float AirHeatCapacity_Default = 2500;
 
         public Settings() => Reset();
 
