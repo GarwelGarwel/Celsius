@@ -103,6 +103,8 @@ namespace Celsius
 
         Color TemperatureColorForCell(int index)
         {
+            if (Settings.UseVanillaTemperatureColors)
+                return map.mapTemperature.GetCellExtraColor(index);
             float temperature = GetTemperatureForCell(CellIndicesUtility.IndexToCell(index, map.Size.x));
             if (temperature < minComfortableTemperature)
                 return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
@@ -113,7 +115,7 @@ namespace Celsius
 
         public override void MapComponentUpdate()
         {
-            if (Settings.ShowTemperatureMap && Find.CurrentMap == map)
+            if (Find.PlaySettings.showTemperatureOverlay && Find.CurrentMap == map)
                 overlayDrawer.MarkForDraw();
             overlayDrawer.CellBoolDrawerUpdate();
         }
@@ -123,8 +125,8 @@ namespace Celsius
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey)
-                Settings.ShowTemperatureMap = !Settings.ShowTemperatureMap;
-            if (!Settings.ShowTemperatureMap)
+                Find.PlaySettings.showTemperatureOverlay = !Find.PlaySettings.showTemperatureOverlay;
+            if (!Find.PlaySettings.showTemperatureOverlay)
                 return;
             IntVec3 cell = UI.MouseCell();
             if (cell.InBounds(map) && (!cell.Fogged(map) || Prefs.DevMode))
@@ -265,7 +267,7 @@ namespace Celsius
                             FireUtility.TryStartFireIn(cell, map, fireSize);
                     }
 
-                    if (Settings.ShowTemperatureMap)
+                    if (Find.PlaySettings.showTemperatureOverlay && !Settings.UseVanillaTemperatureColors)
                         if (newTemperatures[x, z] < minTemperature)
                             minTemperature = newTemperatures[x, z];
                         else if (newTemperatures[x, z] > maxTemperature)
