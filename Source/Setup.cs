@@ -32,9 +32,6 @@ namespace Celsius
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
                 prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
             harmony.Patch(
-                AccessTools.Method($"RimWorld.PlaySettings:DoPlaySettingsGlobalControls"),
-                postfix: new HarmonyMethod(type.GetMethod($"PlaySettings_DoPlaySettingsGlobalControls")));
-            harmony.Patch(
                 AccessTools.Method($"Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
                 prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_PushHeat")));
             harmony.Patch(
@@ -52,6 +49,9 @@ namespace Celsius
             harmony.Patch(
                 AccessTools.Method($"Verse.DangerUtility:GetDangerFor"),
                 postfix: new HarmonyMethod(type.GetMethod($"DangerUtility_GetDangerFor")));
+            harmony.Patch(
+                AccessTools.Method($"Verse.MapTemperature:TemperatureUpdate"),
+                prefix: new HarmonyMethod(type.GetMethod($"MapTemperature_TemperatureUpdate")));
             LogUtility.Log($"Harmony initialization complete.");
 
             // Adding CompThermal and ThingThermalProperties to all applicable Things
@@ -83,13 +83,6 @@ namespace Celsius
                 return true;
             __result = __instance.GetTemperature();
             return false;
-        }
-
-        // Adds an icon to the widgets row in the bottom right of the screen to toggle temperature map
-        public static void PlaySettings_DoPlaySettingsGlobalControls(WidgetRow row, bool worldView)
-        {
-            if (!worldView)
-                row.ToggleableIcon(ref Settings.ShowTemperatureMap, ContentFinder<Texture2D>.Get("Icon"), "Temperature Map", SoundDefOf.Mouseover_ButtonToggle);
         }
 
         // Replaces GenTemperature.PushHeat(IntVec3, Map, float) to change temperature at the specific cell instead of the whole room
@@ -166,5 +159,8 @@ namespace Celsius
             Danger danger = range.Includes(temperature) ? Danger.None : (range.ExpandedBy(80).Includes(temperature) ? Danger.Some : Danger.Deadly);
             return danger > result ? danger : result;
         }
+
+        // Disable MapTemperature.TemperatureUpdate, because vanilla temperature overlay is not used anymore
+        public static bool MapTemperature_TemperatureUpdate() => false;
     }
 }
