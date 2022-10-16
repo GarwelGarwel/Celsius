@@ -14,6 +14,7 @@ namespace Celsius
     public class Settings : ModSettings
     {
         public static bool UseVanillaTemperatureColors;
+        public static bool ShowTemperatureTooltip;
         public static bool FreezingAndMeltingEnabled;
         public static bool AutoignitionEnabled;
         public static float HeatConductivityMultiplier;
@@ -38,6 +39,7 @@ namespace Celsius
         public override void ExposeData()
         {
             Scribe_Values.Look(ref UseVanillaTemperatureColors, "UseVanillaTemperatureColors");
+            Scribe_Values.Look(ref ShowTemperatureTooltip, "ShowTemperatureTooltip", true);
             Scribe_Values.Look(ref FreezingAndMeltingEnabled, "FreezingAndMeltingEnabled", true);
             Scribe_Values.Look(ref AutoignitionEnabled, "AutoignitionEnabled", true);
             Scribe_Values.Look(ref HeatConductivityMultiplier, "HeatConductivityMultiplier", 1);
@@ -52,6 +54,8 @@ namespace Celsius
 
         public static void Reset()
         {
+            UseVanillaTemperatureColors = false;
+            ShowTemperatureTooltip = true;
             FreezingAndMeltingEnabled = true;
             AutoignitionEnabled = true;
             HeatConductivityMultiplier = 1;
