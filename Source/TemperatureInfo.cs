@@ -124,7 +124,7 @@ namespace Celsius
         {
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey)
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey && Find.MainTabsRoot.OpenTab == null)
                 Find.PlaySettings.showTemperatureOverlay = !Find.PlaySettings.showTemperatureOverlay;
             if (!Find.PlaySettings.showTemperatureOverlay || !Settings.ShowTemperatureTooltip)
                 return;
