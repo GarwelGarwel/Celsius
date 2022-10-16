@@ -126,16 +126,18 @@ namespace Celsius
                 totalStopwatch.Stop();
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey)
                 Find.PlaySettings.showTemperatureOverlay = !Find.PlaySettings.showTemperatureOverlay;
-            if (!Find.PlaySettings.showTemperatureOverlay)
+            if (!Find.PlaySettings.showTemperatureOverlay || !Settings.ShowTemperatureTooltip)
                 return;
             IntVec3 cell = UI.MouseCell();
             if (cell.InBounds(map) && (!cell.Fogged(map) || Prefs.DevMode))
             {
+                GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
                 string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures && cell.HasTerrainTemperature(map))
                     tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
+                Text.Font = font;
             }
         }
 
