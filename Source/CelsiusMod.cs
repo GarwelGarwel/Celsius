@@ -7,14 +7,16 @@ namespace Celsius
     public class CelsiusMod : Mod
     {
         public CelsiusMod(ModContentPack content)
-            : base(content) => GetSettings<Settings>();
+            : base(content) =>
+            GetSettings<Settings>();
 
         public override void DoSettingsWindowContents(Rect rect)
         {
             Listing_Standard content = new Listing_Standard();
             content.Begin(rect);
 
-            content.CheckboxLabeled("Show temperature map", ref Settings.ShowTemperatureMap, "Show heat map and a mouse cursor tooltip.");
+            content.CheckboxLabeled("Use vanilla temperature colors", ref Settings.UseVanillaTemperatureColors, "Use vanilla color scheme for heat overlay instead of Celsius'.");
+            content.CheckboxLabeled("Show temperature tooltip", ref Settings.ShowTemperatureTooltip, "In temperature map mode, show a tooltip next to the cursor with the cell's exact temperature.");
             content.CheckboxLabeled("Freezing and melting", ref Settings.FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
             content.CheckboxLabeled("Advanced autoignition", ref Settings.AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.");
 

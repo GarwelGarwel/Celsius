@@ -13,7 +13,8 @@ namespace Celsius
 
     public class Settings : ModSettings
     {
-        public static bool ShowTemperatureMap;
+        public static bool UseVanillaTemperatureColors;
+        public static bool ShowTemperatureTooltip;
         public static bool FreezingAndMeltingEnabled;
         public static bool AutoignitionEnabled;
         public static float HeatConductivityMultiplier;
@@ -29,15 +30,16 @@ namespace Celsius
 
         public const float HeatConductivityFactor_Base = 1;
         public const float ConvectionConductivityEffect_Default = 100;
-        public const float EnvironmentDiffusionFactor_Default = 0.5f;
-        public const float HeatPushEffect_Base = 10;
+        public const float EnvironmentDiffusionFactor_Default = 0.3f;
+        public const float HeatPushEffect_Base = 4;
         public const float AirHeatCapacity_Default = 2500;
 
         public Settings() => Reset();
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref ShowTemperatureMap, "ShowTemperatureMap");
+            Scribe_Values.Look(ref UseVanillaTemperatureColors, "UseVanillaTemperatureColors");
+            Scribe_Values.Look(ref ShowTemperatureTooltip, "ShowTemperatureTooltip", true);
             Scribe_Values.Look(ref FreezingAndMeltingEnabled, "FreezingAndMeltingEnabled", true);
             Scribe_Values.Look(ref AutoignitionEnabled, "AutoignitionEnabled", true);
             Scribe_Values.Look(ref HeatConductivityMultiplier, "HeatConductivityMultiplier", 1);
@@ -52,6 +54,8 @@ namespace Celsius
 
         public static void Reset()
         {
+            UseVanillaTemperatureColors = false;
+            ShowTemperatureTooltip = true;
             FreezingAndMeltingEnabled = true;
             AutoignitionEnabled = true;
             HeatConductivityMultiplier = 1;
