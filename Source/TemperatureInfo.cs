@@ -103,6 +103,8 @@ namespace Celsius
 
         Color TemperatureColorForCell(int index)
         {
+            if (Settings.UseVanillaTemperatureColors)
+                return map.mapTemperature.GetCellExtraColor(index);
             float temperature = GetTemperatureForCell(CellIndicesUtility.IndexToCell(index, map.Size.x));
             if (temperature < minComfortableTemperature)
                 return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
@@ -113,7 +115,7 @@ namespace Celsius
 
         public override void MapComponentUpdate()
         {
-            if (Settings.ShowTemperatureMap && Find.CurrentMap == map)
+            if (Find.PlaySettings.showTemperatureOverlay && Find.CurrentMap == map)
                 overlayDrawer.MarkForDraw();
             overlayDrawer.CellBoolDrawerUpdate();
         }
@@ -122,18 +124,20 @@ namespace Celsius
         {
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey)
-                Settings.ShowTemperatureMap = !Settings.ShowTemperatureMap;
-            if (!Settings.ShowTemperatureMap)
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey && Find.MainTabsRoot.OpenTab == null)
+                Find.PlaySettings.showTemperatureOverlay = !Find.PlaySettings.showTemperatureOverlay;
+            if (!Find.PlaySettings.showTemperatureOverlay || !Settings.ShowTemperatureTooltip)
                 return;
             IntVec3 cell = UI.MouseCell();
             if (cell.InBounds(map) && (!cell.Fogged(map) || Prefs.DevMode))
             {
+                GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
                 string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures && cell.HasTerrainTemperature(map))
                     tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
+                Text.Font = font;
             }
         }
 
@@ -265,7 +269,7 @@ namespace Celsius
                             FireUtility.TryStartFireIn(cell, map, fireSize);
                     }
 
-                    if (Settings.ShowTemperatureMap)
+                    if (Find.PlaySettings.showTemperatureOverlay && !Settings.UseVanillaTemperatureColors)
                         if (newTemperatures[x, z] < minTemperature)
                             minTemperature = newTemperatures[x, z];
                         else if (newTemperatures[x, z] > maxTemperature)
