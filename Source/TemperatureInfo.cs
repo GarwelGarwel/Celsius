@@ -39,8 +39,10 @@ namespace Celsius
         float minTemperature = minComfortableTemperature - 5, maxTemperature = maxComfortableTemperature + 5;
         CellBoolDrawer overlayDrawer;
 
+#if DEBUG
         Stopwatch updateStopwatch = new Stopwatch(), totalStopwatch = new Stopwatch();
         int tickIterations, totalTicks;
+#endif
 
         public TemperatureInfo(Map map)
             : base(map)
@@ -122,8 +124,10 @@ namespace Celsius
 
         public override void MapComponentOnGUI()
         {
+#if DEBUG
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
+#endif
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey && Find.MainTabsRoot.OpenTab == null)
                 Find.PlaySettings.showTemperatureOverlay = !Find.PlaySettings.showTemperatureOverlay;
             if (!Find.PlaySettings.showTemperatureOverlay || !Settings.ShowTemperatureTooltip)
@@ -143,12 +147,14 @@ namespace Celsius
 
         public override void MapComponentTick()
         {
-            if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed == TimeSpeed.Ultrafast)
+#if DEBUG
+            if (Settings.DebugMode && Find.TickManager.CurTimeSpeed == TimeSpeed.Ultrafast)
             {
                 if (++totalTicks % 500 == 0)
                     LogUtility.Log($"Total ultrafast ticks: {totalTicks}. Average time/1000 ticks: {1000 * totalStopwatch.ElapsedMilliseconds / totalTicks} ms.");
                 totalStopwatch.Start();
             }
+#endif
 
             if (!initialized)
                 FinalizeInit();
@@ -156,8 +162,9 @@ namespace Celsius
             if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
                 return;
 
-            if (Settings.DebugMode)
-                updateStopwatch.Start();
+#if DEBUG
+            updateStopwatch.Start();
+#endif
 
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
@@ -279,11 +286,13 @@ namespace Celsius
             temperatures = newTemperatures;
             overlayDrawer.SetDirty();
 
+#if DEBUG
             if (Settings.DebugMode)
             {
                 updateStopwatch.Stop();
                 LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
             }
+#endif
         }
 
         public float GetMountainTemperatureFor(MountainTemperatureMode mode)
