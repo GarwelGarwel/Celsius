@@ -227,7 +227,7 @@ namespace Celsius
                             }
                             else if (terrainTemperatures[x, z] > TemperatureUtility.MinFreezingTemperature && terrain == TerrainDefOf.Ice)
                             {
-                                TerrainDef meltedTerrain = cell.BestWaterTerrain(map);
+                                TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
                                 if (terrainTemperatures[x, z] > meltedTerrain.FreezingPoint())
                                 {
                                     if (map.terrainGrid.UnderTerrainAt(cell) == null)
