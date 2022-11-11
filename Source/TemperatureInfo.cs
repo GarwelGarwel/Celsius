@@ -33,8 +33,10 @@ namespace Celsius
         float mountainTemperature;
 
         static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
-        static readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
-        static readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
+        static readonly Color minColor = Color.blue;
+        static readonly Color minComfortableColor = new Color(0, 1, 0.5f);
+        static readonly Color maxComfortableColor = new Color(0.5f, 1, 0);
+        static readonly Color maxColor = Color.red;
 
         float minTemperature = minComfortableTemperature - 5, maxTemperature = maxComfortableTemperature + 5;
         CellBoolDrawer overlayDrawer;
@@ -109,10 +111,10 @@ namespace Celsius
                 return map.mapTemperature.GetCellExtraColor(index);
             float temperature = GetTemperatureForCell(CellIndicesUtility.IndexToCell(index, map.Size.x));
             if (temperature < minComfortableTemperature)
-                return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
+                return Color.Lerp(minColor, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
             if (temperature < maxComfortableTemperature)
                 return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - minComfortableTemperature) / (maxComfortableTemperature - minComfortableTemperature));
-            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
+            return Color.Lerp(maxComfortableColor, maxColor, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
         }
 
         public override void MapComponentUpdate()
@@ -170,11 +172,11 @@ namespace Celsius
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
             roomTemperatures.Clear();
+            mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
             if (minTemperature < minComfortableTemperature + 5)
                 minTemperature += MinMaxTemperatureAdjustmentStep;
             if (maxTemperature > maxComfortableTemperature - 5)
                 maxTemperature -= MinMaxTemperatureAdjustmentStep;
-            mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
             // Main loop
             for (int x = 0; x < map.Size.x; x++)
@@ -276,7 +278,7 @@ namespace Celsius
                             FireUtility.TryStartFireIn(cell, map, fireSize);
                     }
 
-                    if (Find.PlaySettings.showTemperatureOverlay && !Settings.UseVanillaTemperatureColors)
+                    if (!Settings.UseVanillaTemperatureColors)
                         if (newTemperatures[x, z] < minTemperature)
                             minTemperature = newTemperatures[x, z];
                         else if (newTemperatures[x, z] > maxTemperature)
