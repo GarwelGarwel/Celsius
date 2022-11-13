@@ -21,6 +21,9 @@ namespace Celsius
         // Relative amount of snow to be melted each update compared to vanilla (0.072)
         const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
 
+        // How quickly snow melts under rain
+        const float SnowMeltCoefficientRain = SnowMeltCoefficient * 2;
+
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
@@ -173,6 +176,7 @@ namespace Celsius
             float[,] newTemperatures = (float[,])temperatures.Clone();
             roomTemperatures.Clear();
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
+            float outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? SnowMeltCoefficientRain : SnowMeltCoefficient;
             if (minTemperature < minComfortableTemperature + 5)
                 minTemperature += MinMaxTemperatureAdjustmentStep;
             if (maxTemperature > maxComfortableTemperature - 5)
@@ -237,6 +241,7 @@ namespace Celsius
                                     if (log)
                                         LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName} (t = {terrainTemperatures[x, z]:F1}C)");
                                     map.terrainGrid.RemoveTopLayer(cell, false);
+                                    map.snowGrid.SetDepth(cell, 0);
                                 }
                             }
                         }
@@ -250,8 +255,8 @@ namespace Celsius
                     if (temperatures[x, z] > 0 && cell.GetSnowDepth(map) > 0)
                     {
                         if (log)
-                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. Melting: {TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient:F4}.");
-                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient);
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {TemperatureUtility.MeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
+                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain));
                     }
 
                     // Autoignition
