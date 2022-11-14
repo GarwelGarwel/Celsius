@@ -191,19 +191,19 @@ namespace Celsius
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
-            if (UI.MouseCell() == cell)
+            if (Prefs.DevMode && UI.MouseCell() == cell)
                 LogUtility.Log($"Pushing {energy} heat at {cell}.");
             TemperatureInfo temperatureInfo = map.TemperatureInfo();
             if (temperatureInfo == null)
             {
-                LogUtility.Log($"TemperatureInfo for {map} unavailable!");
+                LogUtility.Log($"TemperatureInfo for {map} unavailable!", LogLevel.Warning);
                 return false;
             }
-            temperatureInfo.SetTempteratureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * Settings.HeatPushEffect / cell.GetHeatCapacity(map));
+            temperatureInfo.SetTemperatureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * Settings.HeatPushEffect / cell.GetHeatCapacity(map));
             return true;
         }
 
-        public static float MeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
+        public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
 
         #endregion HEAT PUSH AND SNOW MELTING
     }
