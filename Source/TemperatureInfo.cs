@@ -21,6 +21,9 @@ namespace Celsius
         // Relative amount of snow to be melted each update compared to vanilla (0.072)
         const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
 
+        // How quickly snow melts under rain
+        const float SnowMeltCoefficientRain = SnowMeltCoefficient * 2;
+
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
@@ -33,14 +36,18 @@ namespace Celsius
         float mountainTemperature;
 
         static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
-        static readonly Color minComfortableColor = new Color(0, 0.5f, 0.5f);
-        static readonly Color maxComfortableColor = new Color(0.5f, 0.5f, 0);
+        static readonly Color minColor = Color.blue;
+        static readonly Color minComfortableColor = new Color(0, 1, 0.5f);
+        static readonly Color maxComfortableColor = new Color(0.5f, 1, 0);
+        static readonly Color maxColor = Color.red;
 
         float minTemperature = minComfortableTemperature - 5, maxTemperature = maxComfortableTemperature + 5;
         CellBoolDrawer overlayDrawer;
 
+#if DEBUG
         Stopwatch updateStopwatch = new Stopwatch(), totalStopwatch = new Stopwatch();
         int tickIterations, totalTicks;
+#endif
 
         public TemperatureInfo(Map map)
             : base(map)
@@ -107,10 +114,10 @@ namespace Celsius
                 return map.mapTemperature.GetCellExtraColor(index);
             float temperature = GetTemperatureForCell(CellIndicesUtility.IndexToCell(index, map.Size.x));
             if (temperature < minComfortableTemperature)
-                return Color.Lerp(Color.blue, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
+                return Color.Lerp(minColor, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
             if (temperature < maxComfortableTemperature)
                 return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - minComfortableTemperature) / (maxComfortableTemperature - minComfortableTemperature));
-            return Color.Lerp(maxComfortableColor, Color.red, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
+            return Color.Lerp(maxComfortableColor, maxColor, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
         }
 
         public override void MapComponentUpdate()
@@ -122,8 +129,10 @@ namespace Celsius
 
         public override void MapComponentOnGUI()
         {
+#if DEBUG
             if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed != TimeSpeed.Ultrafast && totalStopwatch.IsRunning)
                 totalStopwatch.Stop();
+#endif
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey && Find.MainTabsRoot.OpenTab == null)
                 Find.PlaySettings.showTemperatureOverlay = !Find.PlaySettings.showTemperatureOverlay;
             if (!Find.PlaySettings.showTemperatureOverlay || !Settings.ShowTemperatureTooltip)
@@ -143,12 +152,14 @@ namespace Celsius
 
         public override void MapComponentTick()
         {
-            if (Prefs.DevMode && Settings.DebugMode && Find.TickManager.CurTimeSpeed == TimeSpeed.Ultrafast)
+#if DEBUG
+            if (Settings.DebugMode && Find.TickManager.CurTimeSpeed == TimeSpeed.Ultrafast)
             {
                 if (++totalTicks % 500 == 0)
                     LogUtility.Log($"Total ultrafast ticks: {totalTicks}. Average time/1000 ticks: {1000 * totalStopwatch.ElapsedMilliseconds / totalTicks} ms.");
                 totalStopwatch.Start();
             }
+#endif
 
             if (!initialized)
                 FinalizeInit();
@@ -156,18 +167,20 @@ namespace Celsius
             if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
                 return;
 
-            if (Settings.DebugMode)
-                updateStopwatch.Start();
+#if DEBUG
+            updateStopwatch.Start();
+#endif
 
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
             float[,] newTemperatures = (float[,])temperatures.Clone();
             roomTemperatures.Clear();
+            mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
+            float outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? SnowMeltCoefficientRain : SnowMeltCoefficient;
             if (minTemperature < minComfortableTemperature + 5)
                 minTemperature += MinMaxTemperatureAdjustmentStep;
             if (maxTemperature > maxComfortableTemperature - 5)
                 maxTemperature -= MinMaxTemperatureAdjustmentStep;
-            mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
             // Main loop
             for (int x = 0; x < map.Size.x; x++)
@@ -220,7 +233,7 @@ namespace Celsius
                             }
                             else if (terrainTemperatures[x, z] > TemperatureUtility.MinFreezingTemperature && terrain == TerrainDefOf.Ice)
                             {
-                                TerrainDef meltedTerrain = cell.BestWaterTerrain(map);
+                                TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
                                 if (terrainTemperatures[x, z] > meltedTerrain.FreezingPoint())
                                 {
                                     if (map.terrainGrid.UnderTerrainAt(cell) == null)
@@ -228,6 +241,7 @@ namespace Celsius
                                     if (log)
                                         LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName} (t = {terrainTemperatures[x, z]:F1}C)");
                                     map.terrainGrid.RemoveTopLayer(cell, false);
+                                    map.snowGrid.SetDepth(cell, 0);
                                 }
                             }
                         }
@@ -241,8 +255,8 @@ namespace Celsius
                     if (temperatures[x, z] > 0 && cell.GetSnowDepth(map) > 0)
                     {
                         if (log)
-                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. Melting: {TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient:F4}.");
-                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]) * SnowMeltCoefficient);
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {TemperatureUtility.SnowMeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
+                        map.snowGrid.AddDepth(cell, -TemperatureUtility.SnowMeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain));
                     }
 
                     // Autoignition
@@ -269,7 +283,7 @@ namespace Celsius
                             FireUtility.TryStartFireIn(cell, map, fireSize);
                     }
 
-                    if (Find.PlaySettings.showTemperatureOverlay && !Settings.UseVanillaTemperatureColors)
+                    if (!Settings.UseVanillaTemperatureColors)
                         if (newTemperatures[x, z] < minTemperature)
                             minTemperature = newTemperatures[x, z];
                         else if (newTemperatures[x, z] > maxTemperature)
@@ -279,11 +293,13 @@ namespace Celsius
             temperatures = newTemperatures;
             overlayDrawer.SetDirty();
 
+#if DEBUG
             if (Settings.DebugMode)
             {
                 updateStopwatch.Stop();
                 LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
             }
+#endif
         }
 
         public float GetMountainTemperatureFor(MountainTemperatureMode mode)
@@ -342,7 +358,7 @@ namespace Celsius
 
         public float GetTerrainTemperature(IntVec3 cell) => terrainTemperatures[cell.x, cell.z];
 
-        public void SetTempteratureForCell(IntVec3 cell, float temperature) => temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
+        public void SetTemperatureForCell(IntVec3 cell, float temperature) => temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
         {
