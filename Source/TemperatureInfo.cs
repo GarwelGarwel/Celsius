@@ -255,8 +255,8 @@ namespace Celsius
                     if (temperatures[x, z] > 0 && cell.GetSnowDepth(map) > 0)
                     {
                         if (log)
-                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {TemperatureUtility.MeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
-                        map.snowGrid.AddDepth(cell, -TemperatureUtility.MeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain));
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {TemperatureUtility.SnowMeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
+                        map.snowGrid.AddDepth(cell, -TemperatureUtility.SnowMeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain));
                     }
 
                     // Autoignition
@@ -358,7 +358,7 @@ namespace Celsius
 
         public float GetTerrainTemperature(IntVec3 cell) => terrainTemperatures[cell.x, cell.z];
 
-        public void SetTempteratureForCell(IntVec3 cell, float temperature) => temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
+        public void SetTemperatureForCell(IntVec3 cell, float temperature) => temperatures[cell.x, cell.z] = Mathf.Max(temperature, -273);
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
         {
