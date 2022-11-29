@@ -1,5 +1,7 @@
 ﻿using Verse;
 
+using static Celsius.LogUtility;
+
 namespace Celsius
 {
     public enum MountainTemperatureMode
@@ -31,7 +33,7 @@ namespace Celsius
         public const float HeatConductivityFactor_Base = 1;
         public const float ConvectionConductivityEffect_Default = 100;
         public const float EnvironmentDiffusionFactor_Default = 0.3f;
-        public const float HeatPushEffect_Base = 4;
+        public const float HeatPushEffect_Base = 6;
         public const float AirHeatCapacity_Default = 2500;
 
         public Settings() => Reset();
@@ -59,15 +61,35 @@ namespace Celsius
             FreezingAndMeltingEnabled = true;
             AutoignitionEnabled = true;
             HeatConductivityMultiplier = 1;
-            HeatConductivityFactor = HeatConductivityMultiplier * HeatConductivityFactor_Base;
+            HeatConductivityFactor = HeatConductivityFactor_Base;
             ConvectionConductivityEffect = ConvectionConductivityEffect_Default;
             EnvironmentDiffusionFactor = EnvironmentDiffusionFactor_Default;
             HeatPushMultiplier = 1;
-            HeatPushEffect = HeatPushMultiplier * HeatPushEffect_Base;
+            HeatPushEffect = HeatPushEffect_Base;
             AirHeatCapacity = AirHeatCapacity_Default;
             MountainTemperatureMode = MountainTemperatureMode.Vanilla;
             MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
+            Print();
             TemperatureUtility.SettingsChanged();
+        }
+
+        public static void Print()
+        {
+            if (!DebugMode)
+                return;
+            Log($"UseVanillaTemperatureColors: {UseVanillaTemperatureColors}");
+            Log($"ShowTemperatureTooltip: {ShowTemperatureTooltip}");
+            Log($"FreezingAndMeltingEnabled: {FreezingAndMeltingEnabled}");
+            Log($"AutoignitionEnabled: {AutoignitionEnabled}");
+            Log($"HeatConductivityMultiplier: {HeatConductivityMultiplier.ToStringPercent()}");
+            Log($"HeatConductivityFactor: {HeatConductivityFactor}");
+            Log($"ConvectionConductivityEffect: {ConvectionConductivityEffect}");
+            Log($"EnvironmentDiffusionFactor: {EnvironmentDiffusionFactor}");
+            Log($"HeatPushMultiplier: {HeatPushMultiplier.ToStringPercent()}");
+            Log($"HeatPushEffect: {HeatPushEffect}");
+            Log($"AirHeatCapacity: {AirHeatCapacity}");
+            Log($"MountainTemperatureMode: {MountainTemperatureMode}");
+            Log($"MountainTemperature: {MountainTemperature.ToStringTemperature()}");
         }
     }
 }

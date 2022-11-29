@@ -13,6 +13,28 @@ namespace Celsius
 
         public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
 
+        internal static void SettingsChanged()
+        {
+            CellThermalProps.Air.heatCapacity = Settings.AirHeatCapacity;
+            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
+            LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}. Diffusion lerp factor: {diffusionLerpFactor:P1}.");
+            FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
+            AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
+
+            // Resetting thermal props for all things and thingDefs
+            if (Find.Maps != null)
+                for (int m = 0; m < Find.Maps.Count; m++)
+                {
+                    List<Thing> things = Find.Maps[m]?.listerThings?.AllThings;
+                    if (things != null)
+                        for (int i = 0; i < things.Count; i++)
+                            things[i].TryGetComp<CompThermal>()?.Reset();
+                }
+            for (int i = 0; i < DefDatabase<ThingDef>.AllDefsListForReading.Count; i++)
+                DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
+        }
+
         #region TEMPERATURE
 
         public static float GetTemperatureForCell(this IntVec3 cell, Map map)
@@ -57,28 +79,6 @@ namespace Celsius
         #region DIFFUSION
 
         static float airLerpFactor, diffusionLerpFactor;
-
-        internal static void SettingsChanged()
-        {
-            CellThermalProps.Air.heatCapacity = Settings.AirHeatCapacity;
-            airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - CellThermalProps.Air.conductivity * CellThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / CellThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}. Diffusion lerp factor: {diffusionLerpFactor:P1}.");
-            FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
-            AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
-
-            // Resetting thermal props for all things and thingDefs
-            if (Find.Maps != null)
-                for (int m = 0; m < Find.Maps.Count; m++)
-                {
-                    List<Thing> things = Find.Maps[m]?.listerThings?.AllThings;
-                    if (things != null)
-                        for (int i = 0; i < things.Count; i++)
-                            things[i].TryGetComp<CompThermal>()?.Reset();
-                }
-            for (int i = 0; i < DefDatabase<ThingDef>.AllDefsListForReading.Count; i++)
-                DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
-        }
 
         public static float EnvironmentDiffusionTemperatureChange(float oldTemp, float neighbourTemp, CellThermalProps thermalProps, bool log)
         {
