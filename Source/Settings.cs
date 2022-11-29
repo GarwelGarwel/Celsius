@@ -33,7 +33,7 @@ namespace Celsius
         public const float HeatConductivityFactor_Base = 1;
         public const float ConvectionConductivityEffect_Default = 100;
         public const float EnvironmentDiffusionFactor_Default = 0.3f;
-        public const float HeatPushEffect_Base = 6;
+        public const float HeatPushEffect_Base = 0.0025f;
         public const float AirHeatCapacity_Default = 2500;
 
         public Settings() => Reset();

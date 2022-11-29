@@ -57,7 +57,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CellThermalProps.cs" />
+    <Compile Include="ThermalProps.cs" />
     <Compile Include="CellUtility.cs" />
     <Compile Include="CelsiusMod.cs" />
     <Compile Include="CompThermal.cs" />

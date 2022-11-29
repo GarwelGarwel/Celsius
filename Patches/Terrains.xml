@@ -8,8 +8,9 @@
 		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>105000</heatCapacity>
-				<conductivity>2</conductivity>
+				<heatCapacity>42</heatCapacity>
+				<!--conductivity>2</conductivity-->
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -18,8 +19,9 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>100000</heatCapacity>
-				<conductivity>2</conductivity>
+				<heatCapacity>40</heatCapacity>
+				<!--conductivity>2</conductivity-->
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -28,8 +30,9 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingChestDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>150000</heatCapacity>
-				<conductivity>2</conductivity>
+				<heatCapacity>60</heatCapacity>
+				<!--conductivity>2</conductivity-->
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -38,8 +41,9 @@
 		<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>105000</heatCapacity>
-				<conductivity>2</conductivity>
+				<heatCapacity>42</heatCapacity>
+				<!--conductivity>2</conductivity-->
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -48,8 +52,9 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>100000</heatCapacity>
-				<conductivity>2</conductivity>
+				<heatCapacity>40</heatCapacity>
+				<!--conductivity>2</conductivity-->
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -58,8 +63,9 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>250000</heatCapacity>
-				<conductivity>2</conductivity>
+				<heatCapacity>100</heatCapacity>
+				<!--conductivity>2</conductivity-->
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -68,8 +74,9 @@
 		<xpath>Defs/TerrainDef[defName="Marsh"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>70000</heatCapacity>
-				<conductivity>2.5</conductivity>
+				<heatCapacity>30</heatCapacity>
+				<!--conductivity>2.5</conductivity-->
+				<isolation>4.5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -78,8 +85,9 @@
 		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>50000</heatCapacity>
-				<conductivity>1.7</conductivity>
+				<heatCapacity>20</heatCapacity>
+				<!--conductivity>1.7</conductivity-->
+				<isolation>5.5</isolation>
 			</li>
 		</value>
 	</Operation>
