@@ -190,25 +190,38 @@ namespace Celsius
                     log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell;
                     CellThermalProps cellProps = cell.GetThermalProperties(map);
                     if (log)
-                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cellProps.heatCapacity}. Airflow: {cellProps.airflow:P0}. Conductivity: {cellProps.conductivity}.");
+                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cellProps.heatCapacity}. Airflow: {cellProps.airflow:P0}. Conductivity: {cellProps.Conductivity:P0}.");
+
+                    float energy = 0;
+                    float heatCapacity = cellProps.heatCapacity * cellProps.Conductivity;
+
+                    foreach (IntVec3 neighbour in cell.AdjacentCells())
+                        if (neighbour.InBounds(map))
+                        {
+                            CellThermalProps neighbourProps = neighbour.GetThermalProperties(map);
+                            if (log)
+                                LogUtility.Log($"Neighbour: Temperature: {GetTemperatureForCell(neighbour):F1}C. Capacity: {neighbourProps.heatCapacity}. Conductivity: {neighbourProps.Conductivity:P0}.");
+                            energy += (GetTemperatureForCell(neighbour) - temperatures[x, z]) * neighbourProps.heatCapacity * neighbourProps.Conductivity;
+                            heatCapacity += neighbourProps.heatCapacity * neighbourProps.Conductivity;
+                        }
 
                     // Diffusion & convection
-                    void DiffusionWithNeighbour(IntVec3 neighbour)
-                    {
-                        if (!neighbour.InBounds(map))
-                            return;
-                        (float, float) changes = TemperatureUtility.DiffusionTemperatureChange(
-                            temperatures[x, z],
-                            cellProps,
-                            GetTemperatureForCell(neighbour),
-                            neighbour.GetThermalProperties(map),
-                            log);
-                        newTemperatures[x, z] += changes.Item1;
-                        newTemperatures[neighbour.x, neighbour.z] += changes.Item2;
-                    }
+                    //void DiffusionWithNeighbour(IntVec3 neighbour)
+                    //{
+                    //    if (!neighbour.InBounds(map))
+                    //        return;
+                    //    (float, float) changes = TemperatureUtility.DiffusionTemperatureChange(
+                    //        temperatures[x, z],
+                    //        cellProps,
+                    //        GetTemperatureForCell(neighbour),
+                    //        neighbour.GetThermalProperties(map),
+                    //        log);
+                    //    newTemperatures[x, z] += changes.Item1;
+                    //    newTemperatures[neighbour.x, neighbour.z] += changes.Item2;
+                    //}
 
-                    DiffusionWithNeighbour(cell + IntVec3.East);
-                    DiffusionWithNeighbour(cell + IntVec3.North);
+                    //DiffusionWithNeighbour(cell + IntVec3.East);
+                    //DiffusionWithNeighbour(cell + IntVec3.North);
 
                     // Terrain temperature
                     if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
@@ -217,11 +230,16 @@ namespace Celsius
                         ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            (float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps.GetCellThermalProps(), temperatures[x, z], cellProps);
                             if (log)
-                                LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
-                            terrainTemperatures[x, z] += tempChange.Item1;
-                            newTemperatures[x, z] += tempChange.Item2;
+                                LogUtility.Log($"Terrain temperature: {GetTerrainTemperature(cell):F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain conductivity: {terrainProps.Conductivity:P0}.");
+                            energy += (GetTerrainTemperature(cell) - temperatures[x, z]) * terrainProps.heatCapacity * terrainProps.Conductivity;
+                            heatCapacity += terrainProps.heatCapacity * terrainProps.Conductivity;
+
+                            //(float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps.GetCellThermalProps(), temperatures[x, z], cellProps);
+                            //if (log)
+                            //    LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
+                            //terrainTemperatures[x, z] += tempChange.Item1;
+                            //newTemperatures[x, z] += tempChange.Item2;
 
                             // Freezing and melting
                             if (terrain.IsWater && terrainTemperatures[x, z] < terrain.FreezingPoint())
@@ -249,7 +267,18 @@ namespace Celsius
 
                     // Default environment temperature
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
-                        newTemperatures[x, z] += TemperatureUtility.EnvironmentDiffusionTemperatureChange(newTemperatures[x, z], environmentTemperature, cellProps, log);
+                    {
+                        if (log)
+                            LogUtility.Log($"Environment temperature: {environmentTemperature:F1}C.");
+                        energy += (environmentTemperature - temperatures[x, z]) * CellThermalProps.Air.heatCapacity * CellThermalProps.Air.Conductivity * Settings.EnvironmentDiffusionFactor;
+                        heatCapacity += CellThermalProps.Air.heatCapacity * CellThermalProps.Air.Conductivity;
+                        //newTemperatures[x, z] += TemperatureUtility.EnvironmentDiffusionTemperatureChange(newTemperatures[x, z], environmentTemperature, cellProps, log);
+                    }
+
+                        float equilibriumDifference = energy / heatCapacity;
+                        if (log)
+                            LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat capacity: {heatCapacity:F4}. Equilibrium temperature: {newTemperatures[x, z] + equilibriumDifference:F1}C.");
+                        newTemperatures[x, z] += equilibriumDifference * cellProps.Conductivity;
 
                     // Snow melting
                     if (temperatures[x, z] > 0 && cell.GetSnowDepth(map) > 0)

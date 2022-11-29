@@ -15,6 +15,8 @@ namespace Celsius
         public ThingThermalProperties()
         { }
 
+        public float Conductivity => conductivity / (conductivity + 1);
+
         public CellThermalProps GetCellThermalProps()
         {
             if (defaultProps == null)
