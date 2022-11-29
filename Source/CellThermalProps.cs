@@ -17,6 +17,8 @@ namespace Celsius
         public float airflow;
         public float conductivity = 1;
 
+        public float Conductivity => conductivity / (conductivity + 1);
+
         public CellThermalProps()
         { }
 
