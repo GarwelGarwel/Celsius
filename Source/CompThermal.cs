@@ -6,22 +6,22 @@ namespace Celsius
     public class CompThermal : ThingComp
     {
         [Unsaved]
-        CellThermalProps thermalProps;
+        ThermalProps thermalProps;
 
         [Unsaved]
-        CellThermalProps thermalPropsOpen;
+        ThermalProps thermalPropsOpen;
 
         bool IsOpen => (parent is Building_Door door && door.Open) || (parent is Building_Vent && parent.GetComp<CompFlickable>()?.SwitchIsOn == true);
 
-        CellThermalProps GetCachedThermalProps(bool open) => open ? thermalPropsOpen : thermalProps;
+        ThermalProps GetCachedThermalProps(bool open) => open ? thermalPropsOpen : thermalProps;
 
-        public CellThermalProps ThermalProperties
+        public ThermalProps ThermalProperties
         {
             get
             {
                 // Checking if thermal props already cached
                 bool open = IsOpen;
-                CellThermalProps cachedProps = GetCachedThermalProps(open);
+                ThermalProps cachedProps = GetCachedThermalProps(open);
                 if (cachedProps != null)
                     return cachedProps;
 
