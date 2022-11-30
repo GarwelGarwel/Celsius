@@ -30,7 +30,6 @@
 		<displayPriorityInCategory>1398</displayPriorityInCategory>
 		<toStringStyle>PercentZero</toStringStyle>
 		<formatString>{0}</formatString>
-		<defaultBaseValue>1</defaultBaseValue>
 		<minValue>0</minValue>
 	</StatDef>
 
