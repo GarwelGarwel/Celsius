@@ -15,10 +15,6 @@ namespace Celsius
 
         internal static void SettingsChanged()
         {
-            //ThermalProps.Air.heatCapacity = Settings.AirHeatCapacity;
-            //airLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThermalProps.Air.conductivity * ThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect / ThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            //diffusionLerpFactor = Mathf.Min(1 - Mathf.Pow(1 - ThermalProps.Air.conductivity * ThermalProps.Air.conductivity * Settings.ConvectionConductivityEffect * Settings.EnvironmentDiffusionFactor / ThermalProps.Air.heatCapacity, Celsius.TemperatureInfo.SecondsPerUpdate), 0.25f);
-            //LogUtility.Log($"Air lerp factor: {airLerpFactor:P1}. Diffusion lerp factor: {diffusionLerpFactor:P1}.");
             FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
 
@@ -77,6 +73,32 @@ namespace Celsius
         #endregion TEMPERATURE
 
         #region DIFFUSION
+
+        public static void CalculateHeatTransfer(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
+        {
+            float hf = props.HeatFlow;
+            if (airflow != 1 || !props.IsAir)
+            {
+                if (airflow == 0 || props.airflow == 0)
+                    hf /= Settings.ConvectionConductivityEffect;
+                else hf /= Mathf.Pow(Settings.ConvectionConductivityEffect, airflow * props.airflow);
+            }
+            if (log)
+                LogUtility.Log($"Heatflow: {hf}. Mutual airflow: {airflow * props.airflow}.");
+            energy += (interactingTemperature - homeTemperature) * hf;
+            heatFlow += hf;
+        }
+
+        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, ref float energy, ref float heatFlow, bool log = false)
+        {
+            float hf = props.HeatFlow * Settings.EnvironmentDiffusionFactor;
+            if (!props.IsAir)
+                hf /= Settings.ConvectionConductivityEffect;
+            if (log)
+                LogUtility.Log($"Environment heatflow: {hf}.");
+            energy += (environmentTemperature - cellTemperature) * hf;
+            heatFlow += hf;
+        }
 
         //static float airLerpFactor, diffusionLerpFactor;
 

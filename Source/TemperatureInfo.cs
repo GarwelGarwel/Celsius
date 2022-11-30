@@ -188,33 +188,27 @@ namespace Celsius
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
                     log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell;
+                    float temperature = temperatures[x, z];
                     ThermalProps cellProps = cell.GetThermalProperties(map);
                     if (log)
-                        LogUtility.Log($"Cell {cell}. Temperature: {GetTemperatureForCell(cell):F1}C. Capacity: {cellProps.heatCapacity}. Isolation: {cellProps.isolation}. Conductivity: {cellProps.Conductivity:P0}.");
+                        LogUtility.Log($"Cell {cell}. Temperature: {temperature:F1}C. Capacity: {cellProps.heatCapacity}. Isolation: {cellProps.isolation}. Conductivity: {cellProps.Conductivity:P0}.");
 
                     float energy = 0;
-                    float heatFlowRate = cellProps.heatCapacity * cellProps.Conductivity;
+                    float heatFlowRate = cellProps.HeatFlow;
 
                     // Terrain temperature
                     if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                     {
                         TerrainDef terrain = cell.GetTerrain(map);
-                        ThingThermalProperties terrainProps = terrain?.GetModExtension<ThingThermalProperties>();
+                        ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            energy = (temperatures[x, z] - GetTerrainTemperature(cell)) * heatFlowRate;
-                            heatFlowRate += terrainProps.heatCapacity * terrainProps.Conductivity;
-                            float terrainTempChange = energy / heatFlowRate;
+                            float terrainTemperature = GetTerrainTemperature(cell);
+                            TemperatureUtility.CalculateHeatTransfer(temperature, terrainTemperature, terrainProps, 0, ref energy, ref heatFlowRate, log);
+                            float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlowRate;
                             if (log)
-                                LogUtility.Log($"Terrain temperature: {GetTerrainTemperature(cell):F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain cellHeatFlow: {terrainProps.Conductivity:P0}. Equilibrium temperature: {GetTerrainTemperature(cell) + terrainTempChange:F1}C.");
-                            energy = (GetTerrainTemperature(cell) - temperatures[x, z]) * terrainProps.heatCapacity * terrainProps.Conductivity;
+                                LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain cellHeatFlow: {terrainProps.Conductivity:P0}. Equilibrium temperature: {GetTerrainTemperature(cell) + terrainTempChange:F1}C.");
                             terrainTemperatures[x, z] += terrainTempChange * terrainProps.Conductivity;
-
-                            //(float, float) tempChange = TemperatureUtility.DiffusionTemperatureChange(GetTerrainTemperature(cell), terrainProps.GetCellThermalProps(), temperatures[x, z], cellProps);
-                            //if (log)
-                            //    LogUtility.Log($"Terrain temp change: {tempChange.Item1:F1}C. Cell temp change: {tempChange.Item2:F1}C.");
-                            //terrainTemperatures[x, z] += tempChange.Item1;
-                            //newTemperatures[x, z] += tempChange.Item2;
 
                             // Freezing and melting
                             if (terrain.IsWater && terrainTemperatures[x, z] < terrain.FreezingPoint())
@@ -247,11 +241,7 @@ namespace Celsius
                             ThermalProps neighbourProps = neighbour.GetThermalProperties(map);
                             if (log)
                                 LogUtility.Log($"Neighbour: Temperature: {GetTemperatureForCell(neighbour):F1}C. Capacity: {neighbourProps.heatCapacity}. Conductivity: {neighbourProps.Conductivity:P0}. Air: {neighbourProps.IsAir.ToStringYesNo()}.");
-                            float cellHeatFlow = neighbourProps.heatCapacity * neighbourProps.Conductivity;
-                            if (cellProps.IsAir != neighbourProps.IsAir)
-                                cellHeatFlow /= Settings.ConvectionConductivityEffect;
-                            energy += (GetTemperatureForCell(neighbour) - temperatures[x, z]) * cellHeatFlow;
-                            heatFlowRate += cellHeatFlow;
+                            TemperatureUtility.CalculateHeatTransfer(temperature, GetTemperatureForCell(neighbour), neighbourProps, cellProps.airflow, ref energy, ref heatFlowRate, log);
                         }
 
                     // Default environment temperature
@@ -259,8 +249,7 @@ namespace Celsius
                     {
                         if (log)
                             LogUtility.Log($"Environment temperature: {environmentTemperature:F1}C.");
-                        energy += (environmentTemperature - temperatures[x, z]) * cellProps.heatCapacity * cellProps.Conductivity * Settings.EnvironmentDiffusionFactor;
-                        heatFlowRate += cellProps.heatCapacity * cellProps.Conductivity;
+                        TemperatureUtility.CalculateHeatTransferEnvironment(temperature, environmentTemperature, cellProps, ref energy, ref heatFlowRate, log);
                     }
 
                     // Applying heat transfer
@@ -270,29 +259,29 @@ namespace Celsius
                     newTemperatures[x, z] += equilibriumDifference * cellProps.Conductivity;
 
                     // Snow melting
-                    if (temperatures[x, z] > 0 && cell.GetSnowDepth(map) > 0)
+                    if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                     {
                         if (log)
-                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {TemperatureUtility.SnowMeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
-                        map.snowGrid.AddDepth(cell, -TemperatureUtility.SnowMeltAmountAt(temperatures[x, z]) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain));
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {TemperatureUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
+                        map.snowGrid.AddDepth(cell, -TemperatureUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain));
                     }
 
                     // Autoignition
-                    if (Settings.AutoignitionEnabled && temperatures[x, z] > MinIgnitionTemperature)
+                    if (Settings.AutoignitionEnabled && temperature > MinIgnitionTemperature)
                     {
                         float fireSize = 0;
                         for (int i = 0; i < cell.GetThingList(map).Count; i++)
                         {
                             Thing thing = cell.GetThingList(map)[i];
-                            if (thing.FireBulwark)
+                            if (thing is Fire || (thing.FireBulwark && thing.Spawned))
                             {
                                 fireSize = 0;
                                 break;
                             }
                             float ignitionTemp = thing.GetStatValue(DefOf.IgnitionTemperature);
-                            if (ignitionTemp >= MinIgnitionTemperature && temperatures[x, z] >= ignitionTemp)
+                            if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
                             {
-                                LogUtility.Log($"{thing} spontaneously ignites at {temperatures[x, z]:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
+                                LogUtility.Log($"{thing} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
                                 fireSize += 0.1f * thing.GetStatValue(StatDefOf.Flammability);
                             }
                         }
