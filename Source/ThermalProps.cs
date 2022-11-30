@@ -4,27 +4,27 @@ namespace Celsius
 {
     public class ThermalProps
     {
-        public static readonly ThermalProps Empty = new ThermalProps();
-
-        public static readonly ThermalProps Air = new ThermalProps()
-        {
-            heatCapacity = 1,
-            isolation = 1,
-            airflow = 1
-        };
+        public static readonly ThermalProps Air = new ThermalProps(1, 1, 1);
 
         public float heatCapacity;
-        public float isolation = 1;
+        public float isolation = 1;  // Effective isolation (taking into cosideration airflow)
         public float airflow;
+
+        public float heatflow;
 
         public float Conductivity => Mathf.Pow(Settings.ConductivityPowerBase, isolation);
 
-        public float HeatFlow => heatCapacity * Conductivity;
+        public float HeatFlow => heatflow;
 
         public bool IsAir => airflow == 1;
 
-        public ThermalProps()
-        { }
+        public ThermalProps(float heatCapacity, float isolation, float airflow)
+        {
+            this.heatCapacity = heatCapacity;
+            this.isolation = TemperatureUtility.GetIsolationWithAirflow(isolation, airflow);
+            this.airflow = airflow;
+            heatflow = heatCapacity * Conductivity;
+        }
 
         public override string ToString() => $"Heat capacity: {heatCapacity}. Isolation: {isolation}. Conductivity: {Conductivity:P1}. Airflow: {airflow:P0}.";
 

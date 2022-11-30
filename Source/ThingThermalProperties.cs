@@ -18,38 +18,23 @@ namespace Celsius
         public ThermalProps GetThermalProps()
         {
             if (defaultProps == null)
-                defaultProps = new ThermalProps()
-                {
-                    heatCapacity = heatCapacity,
-                    isolation = isolation,
-                    airflow = airflow
-                };
+                defaultProps = new ThermalProps(heatCapacity, isolation, airflow);
             return defaultProps;
         }
 
         public ThermalProps GetThermalProps(StuffThermalProperties stuffProps, bool open)
         {
-            if (stuffProps == null)
+            if (stuffProps == null || volume == 0)
             {
                 if (heatCapacity <= 0)
                     return null;
                 if (!open)
                     return GetThermalProps();
-                return new ThermalProps()
-                {
-                    heatCapacity = heatCapacity,
-                    isolation = GenMath.WeightedAverage(1, airflowWhenOpen, isolation, 1 - airflowWhenOpen),
-                    airflow = airflowWhenOpen
-                };
+                return new ThermalProps(heatCapacity, isolation, airflowWhenOpen);
             }
 
             float airflow = open ? airflowWhenOpen : this.airflow;
-            return new ThermalProps()
-            {
-                heatCapacity = (stuffProps.volumetricHeatCapacity - 1) * volume + 1,
-                isolation = GenMath.WeightedAverage(1, airflow, isolation * stuffProps.isolation, 1 - airflow),
-                airflow = airflow
-            };
+            return new ThermalProps((stuffProps.volumetricHeatCapacity - 1) * volume + 1, isolation, airflow);
         }
 
         public void Reset() => defaultProps = null;
