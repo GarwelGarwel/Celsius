@@ -187,7 +187,7 @@ namespace Celsius
                 for (int z = 0; z < map.Size.z; z++)
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
-                    log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell;
+                    log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell && Find.PlaySettings.showTemperatureOverlay;
                     float temperature = temperatures[x, z];
                     ThermalProps cellProps = cell.GetThermalProperties(map);
                     if (log)
@@ -212,24 +212,12 @@ namespace Celsius
 
                             // Freezing and melting
                             if (terrain.IsWater && terrainTemperatures[x, z] < terrain.FreezingPoint())
-                            {
-                                if (log)
-                                    LogUtility.Log($"{terrain} freezes at {cell} (t = {terrainTemperatures[x, z]:F1}C)");
-                                map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
-                                map.terrainGrid.SetUnderTerrain(cell, terrain);
-                            }
+                                cell.FreezeTerrain(map, log);
                             else if (terrainTemperatures[x, z] > TemperatureUtility.MinFreezingTemperature && terrain == TerrainDefOf.Ice)
                             {
                                 TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
                                 if (terrainTemperatures[x, z] > meltedTerrain.FreezingPoint())
-                                {
-                                    if (map.terrainGrid.UnderTerrainAt(cell) == null)
-                                        map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
-                                    if (log)
-                                        LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName} (t = {terrainTemperatures[x, z]:F1}C)");
-                                    map.terrainGrid.RemoveTopLayer(cell, false);
-                                    map.snowGrid.SetDepth(cell, 0);
-                                }
+                                    cell.MeltTerrain(map, meltedTerrain, log);
                             }
                         }
                     }
