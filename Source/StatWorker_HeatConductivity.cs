@@ -25,15 +25,18 @@ namespace Celsius
             StuffThermalProperties stuffThermalProperties = compThermal.StuffThermalProperties;
             if (stuffThermalProperties != null)
                 str += $"\nStuff isolation: x{stuffThermalProperties.isolation.ToStringPercent()}";
-            if (thingThermalProperties.airflow > 0)
-                str += $"\nAirflow: {thingThermalProperties.airflow.ToStringPercent()}";
-            if (thingThermalProperties.airflowWhenOpen > 0)
-                str += $"\nAirflow when open: {thingThermalProperties.airflowWhenOpen.ToStringPercent()}";
-            if (compThermal.IsOpen)
-                str += $"\nThe {req.Thing.LabelNoCount} is open".Colorize(Color.yellow);
+            if (thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen && compThermal.IsOpen)
+                str += $"\nThe {req.Thing.LabelNoCount} is open.".Colorize(Color.yellow);
             ThermalProps thermalProps = compThermal.ThermalProperties;
             if (thermalProps != null)
-                str += $"\nConductivity: 2 ^ {-thermalProps.isolation} = {thermalProps.Conductivity.ToStringPercent()}";
+            {
+                if (thermalProps.airflow != 0)
+                {
+                    str += $"\nAirflow: {thermalProps.airflow.ToStringPercent()}";
+                    str += $"\nActual isolation: {thermalProps.isolation}";
+                }
+                str += $"\nConductivity: {Settings.ConductivityPowerBase} ^ {thermalProps.isolation} = {thermalProps.Conductivity.ToStringPercent()}";
+            }
             return str;
         }
     }
