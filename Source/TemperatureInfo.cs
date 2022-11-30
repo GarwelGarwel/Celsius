@@ -194,7 +194,7 @@ namespace Celsius
                         LogUtility.Log($"Cell {cell}. Temperature: {temperature:F1}C. Capacity: {cellProps.heatCapacity}. Isolation: {cellProps.isolation}. Conductivity: {cellProps.Conductivity:P0}.");
 
                     float energy = 0;
-                    float heatFlowRate = cellProps.HeatFlow;
+                    float heatFlow = cellProps.HeatFlow;
 
                     // Terrain temperature
                     if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
@@ -204,10 +204,10 @@ namespace Celsius
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
                             float terrainTemperature = GetTerrainTemperature(cell);
-                            TemperatureUtility.CalculateHeatTransfer(temperature, terrainTemperature, terrainProps, 0, ref energy, ref heatFlowRate, log);
-                            float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlowRate;
+                            TemperatureUtility.CalculateHeatTransfer(temperature, terrainTemperature, terrainProps, 0, ref energy, ref heatFlow, log);
+                            float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
                             if (log)
-                                LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain cellHeatFlow: {terrainProps.Conductivity:P0}. Equilibrium temperature: {GetTerrainTemperature(cell) + terrainTempChange:F1}C.");
+                                LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain cellHeatFlow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {GetTerrainTemperature(cell) + terrainTempChange:F1}C.");
                             terrainTemperatures[x, z] += terrainTempChange * terrainProps.Conductivity;
 
                             // Freezing and melting
@@ -237,25 +237,16 @@ namespace Celsius
                     // Diffusion & convection
                     foreach (IntVec3 neighbour in cell.AdjacentCells())
                         if (neighbour.InBounds(map))
-                        {
-                            ThermalProps neighbourProps = neighbour.GetThermalProperties(map);
-                            if (log)
-                                LogUtility.Log($"Neighbour: Temperature: {GetTemperatureForCell(neighbour):F1}C. Capacity: {neighbourProps.heatCapacity}. Conductivity: {neighbourProps.Conductivity:P0}. Air: {neighbourProps.IsAir.ToStringYesNo()}.");
-                            TemperatureUtility.CalculateHeatTransfer(temperature, GetTemperatureForCell(neighbour), neighbourProps, cellProps.airflow, ref energy, ref heatFlowRate, log);
-                        }
+                            TemperatureUtility.CalculateHeatTransfer(temperature, GetTemperatureForCell(neighbour), neighbour.GetThermalProperties(map), cellProps.airflow, ref energy, ref heatFlow, log);
 
                     // Default environment temperature
                     if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
-                    {
-                        if (log)
-                            LogUtility.Log($"Environment temperature: {environmentTemperature:F1}C.");
-                        TemperatureUtility.CalculateHeatTransferEnvironment(temperature, environmentTemperature, cellProps, ref energy, ref heatFlowRate, log);
-                    }
+                        TemperatureUtility.CalculateHeatTransferEnvironment(temperature, environmentTemperature, cellProps, ref energy, ref heatFlow, log);
 
                     // Applying heat transfer
-                    float equilibriumDifference = energy / heatFlowRate;
+                    float equilibriumDifference = energy / heatFlow;
                     if (log)
-                        LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlowRate:F4}. Equilibrium temperature: {newTemperatures[x, z] + equilibriumDifference:F1}C.");
+                        LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {newTemperatures[x, z] + equilibriumDifference:F1}C.");
                     newTemperatures[x, z] += equilibriumDifference * cellProps.Conductivity;
 
                     // Snow melting

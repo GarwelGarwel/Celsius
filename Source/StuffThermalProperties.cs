@@ -7,6 +7,6 @@ namespace Celsius
         public float volumetricHeatCapacity = 1000;
         public float isolation = 1;
 
-        public override string ToString() => $"Volumetric heat capacity: {volumetricHeatCapacity}/l. Isolation: {isolation.ToStringPercent()}.";
+        public override string ToString() => $"Volumetric heat capacity: {volumetricHeatCapacity}/m3. Isolation: {isolation:P1}.";
     }
 }

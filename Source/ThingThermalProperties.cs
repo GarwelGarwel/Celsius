@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using UnityEngine;
+using Verse;
 
 namespace Celsius
 {
@@ -34,7 +35,7 @@ namespace Celsius
             }
 
             float airflow = open ? airflowWhenOpen : this.airflow;
-            return new ThermalProps((stuffProps.volumetricHeatCapacity - 1) * volume + 1, isolation, airflow);
+            return new ThermalProps(Mathf.Lerp(1, stuffProps.volumetricHeatCapacity, volume), isolation * stuffProps.isolation, airflow);
         }
 
         public void Reset() => defaultProps = null;
