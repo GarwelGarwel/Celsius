@@ -11,27 +11,28 @@ namespace Celsius
         [Unsaved]
         ThermalProps thermalPropsOpen;
 
-        bool IsOpen => (parent is Building_Door door && door.Open) || (parent is Building_Vent && parent.GetComp<CompFlickable>()?.SwitchIsOn == true);
+        public bool IsOpen => (parent is Building_Door door && door.Open) || (parent is Building_Vent && parent.GetComp<CompFlickable>()?.SwitchIsOn == true);
 
         ThermalProps GetCachedThermalProps(bool open) => open ? thermalPropsOpen : thermalProps;
+
+        public ThingThermalProperties ThingThermalProperties => parent.def.GetModExtension<ThingThermalProperties>();
+
+        public StuffThermalProperties StuffThermalProperties =>
+            ThingThermalProperties.volume > 0
+            ? parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
+            : null;
 
         public ThermalProps ThermalProperties
         {
             get
             {
-                // Checking if thermal props already cached
                 bool open = IsOpen;
                 ThermalProps cachedProps = GetCachedThermalProps(open);
                 if (cachedProps != null)
                     return cachedProps;
-
-                ThingThermalProperties thingThermalProps = parent.def.GetModExtension<ThingThermalProperties>();
-                StuffThermalProperties stuffProps = thingThermalProps.volume > 0
-                    ? parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
-                    : null;
                 if (open)
-                    thermalPropsOpen = thingThermalProps.GetCellThermalProps(stuffProps, true);
-                else thermalProps = thingThermalProps.GetCellThermalProps(stuffProps, false);
+                    thermalPropsOpen = ThingThermalProperties.GetThermalProps(StuffThermalProperties, true);
+                else thermalProps = ThingThermalProperties.GetThermalProps(StuffThermalProperties, false);
                 return GetCachedThermalProps(open);
             }
         }
