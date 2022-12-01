@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
-using Verse.Noise;
 
 namespace Celsius
 {
@@ -11,9 +10,9 @@ namespace Celsius
         public static IEnumerable<IntVec3> AdjacentCells(this IntVec3 cell)
         {
             yield return cell + IntVec3.North;
+            yield return cell + IntVec3.East;
             yield return cell + IntVec3.South;
             yield return cell + IntVec3.West;
-            yield return cell + IntVec3.East;
         }
 
         /// <summary>
