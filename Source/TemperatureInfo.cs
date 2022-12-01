@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,6 +12,12 @@ namespace Celsius
     {
         // Ticks between full map updates
         public const int TicksPerUpdate = 120;
+
+        // Number of "slices": parts the full update is divided into
+        public const int SliceCount = 4;
+
+        // Ticks between partial updates (slices)
+        public const int TicksPerSlice = TicksPerUpdate / SliceCount;
 
         // Updates happen when tick % TicksPerUpdate = this value
         const int UpdateTickOffset = 18;
@@ -30,6 +37,8 @@ namespace Celsius
         const float MinMaxTemperatureAdjustmentStep = 1;
 
         bool initialized;
+        int slice;
+
         float[,] temperatures;
         float[,] terrainTemperatures;
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
@@ -40,6 +49,8 @@ namespace Celsius
         static readonly Color minComfortableColor = new Color(0, 1, 0.5f);
         static readonly Color maxComfortableColor = new Color(0.5f, 1, 0);
         static readonly Color maxColor = Color.red;
+
+        float[] minTemperatures = new float[SliceCount], maxTemperatures = new float[SliceCount];
 
         float minTemperature = minComfortableTemperature - 5, maxTemperature = maxComfortableTemperature + 5;
         CellBoolDrawer overlayDrawer;
@@ -85,12 +96,20 @@ namespace Celsius
 
             minComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
             maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
+
+            for (int i = 0; i < SliceCount; i++)
+            {
+                minTemperatures[i] = minComfortableTemperature - 5;
+                maxTemperatures[i] = maxComfortableTemperature + 5;
+            }
+
             overlayDrawer = new CellBoolDrawer(
                 index => !map.fogGrid.IsFogged(index),
                 () => Color.white,
                 index => TemperatureColorForCell(index),
                 map.Size.x,
                 map.Size.z);
+            slice = Find.TickManager.TicksGame / TicksPerSlice % SliceCount;
             initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
@@ -164,7 +183,7 @@ namespace Celsius
             if (!initialized)
                 FinalizeInit();
 
-            if (Find.TickManager.TicksGame % TicksPerUpdate != UpdateTickOffset)
+            if (Find.TickManager.TicksGame % TicksPerSlice != UpdateTickOffset)
                 return;
 
 #if DEBUG
@@ -173,18 +192,18 @@ namespace Celsius
 
             IntVec3 mouseCell = UI.MouseCell();
             bool log;
-            float[,] newTemperatures = (float[,])temperatures.Clone();
             roomTemperatures.Clear();
+
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
             float outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? SnowMeltCoefficientRain : SnowMeltCoefficient;
-            if (minTemperature < minComfortableTemperature + 5)
-                minTemperature += MinMaxTemperatureAdjustmentStep;
-            if (maxTemperature > maxComfortableTemperature - 5)
-                maxTemperature -= MinMaxTemperatureAdjustmentStep;
+            if (minTemperatures[slice] < minComfortableTemperature + 5)
+                minTemperatures[slice] += MinMaxTemperatureAdjustmentStep;
+            if (maxTemperatures[slice] > maxComfortableTemperature - 5)
+                maxTemperatures[slice] -= MinMaxTemperatureAdjustmentStep;
 
             // Main loop
-            for (int x = 0; x < map.Size.x; x++)
-                for (int z = 0; z < map.Size.z; z++)
+            for (int x = slice / 2; x < map.Size.x; x += 2)
+                for (int z = slice % 2; z < map.Size.z; z += 2)
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
                     log = Prefs.DevMode && Settings.DebugMode && cell == mouseCell && Find.PlaySettings.showTemperatureOverlay;
@@ -234,8 +253,10 @@ namespace Celsius
                     // Applying heat transfer
                     float equilibriumDifference = energy / heatFlow;
                     if (log)
-                        LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {newTemperatures[x, z] + equilibriumDifference:F1}C.");
-                    newTemperatures[x, z] += equilibriumDifference * cellProps.Conductivity;
+                        LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {temperature + equilibriumDifference:F1}C.");
+
+                    temperature += equilibriumDifference * cellProps.Conductivity;
+                    temperatures[x, z] = temperature;
 
                     // Snow melting
                     if (temperature > 0 && cell.GetSnowDepth(map) > 0)
@@ -270,20 +291,23 @@ namespace Celsius
                     }
 
                     if (!Settings.UseVanillaTemperatureColors)
-                        if (newTemperatures[x, z] < minTemperature)
-                            minTemperature = newTemperatures[x, z];
-                        else if (newTemperatures[x, z] > maxTemperature)
-                            maxTemperature = newTemperatures[x, z];
+                        if (temperature < minTemperatures[slice])
+                            minTemperatures[slice] = temperature;
+                        else if (temperature > maxTemperatures[slice])
+                            maxTemperatures[slice] = temperature;
                 }
 
-            temperatures = newTemperatures;
+            slice = (slice + 1) % SliceCount;
+            minTemperature = Mathf.Min(minTemperatures);
+            maxTemperature = Mathf.Max(maxTemperatures);
             overlayDrawer.SetDirty();
 
 #if DEBUG
             if (Settings.DebugMode)
             {
                 updateStopwatch.Stop();
-                LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
+                if (slice == 0)
+                    LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
             }
 #endif
         }
