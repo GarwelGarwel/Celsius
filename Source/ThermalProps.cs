@@ -11,10 +11,13 @@ namespace Celsius
         public float airflow;
 
         public float heatflow;
+        public float heatflowNoConvection;
 
         public float Conductivity => Mathf.Pow(Settings.ConductivityPowerBase, isolation);
 
         public float HeatFlow => heatflow;
+
+        public float HeatFlowNoConvection => heatflowNoConvection;
 
         public bool IsAir => airflow == 1;
 
@@ -24,6 +27,7 @@ namespace Celsius
             this.isolation = TemperatureUtility.GetIsolationWithAirflow(isolation, airflow);
             this.airflow = airflow;
             heatflow = heatCapacity * Conductivity;
+            heatflowNoConvection = heatflow / Settings.ConvectionConductivityEffect;
         }
 
         public override string ToString() => $"Heat capacity: {heatCapacity}. Isolation: {isolation}. Conductivity: {Conductivity:P1}. Airflow: {airflow:P0}.";

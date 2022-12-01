@@ -76,13 +76,12 @@ namespace Celsius
 
         public static void CalculateHeatTransfer(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
         {
-            float hf = props.HeatFlow;
-            if (airflow != 1 || !props.IsAir)
-            {
-                if (airflow == 0 || props.airflow == 0)
-                    hf /= Settings.ConvectionConductivityEffect;
-                else hf /= Mathf.Pow(Settings.ConvectionConductivityEffect, 1 - airflow * props.airflow);
-            }
+            float hf;
+            if (airflow == 1 && props.IsAir)
+                hf = props.HeatFlow;
+            else if (airflow == 0 || props.airflow == 0)
+                hf = props.HeatFlowNoConvection;
+            else hf = props.HeatFlow * Mathf.Pow(Settings.ConvectionConductivityEffect, airflow * props.airflow - 1);
             if (log)
                 LogUtility.Log($"Interacting temperature: {interactingTemperature:F1}C. Mutual airflow: {airflow * props.airflow}. Heatflow: {hf}.");
             energy += (interactingTemperature - homeTemperature) * hf;
