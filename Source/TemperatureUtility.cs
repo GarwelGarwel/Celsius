@@ -88,6 +88,13 @@ namespace Celsius
             heatFlow += hf;
         }
 
+        public static void CalculateHeatTransferTerrain(float cellTemperature, float terrainTemperature, ThermalProps props, ref float energy, ref float heatFlow, bool log = false)
+        {
+            float hf = props.HeatFlowNoConvection;
+            energy += (terrainTemperature - cellTemperature) * hf;
+            heatFlow += hf;
+        }
+
         public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, ref float energy, ref float heatFlow, bool log = false)
         {
             float hf = props.HeatFlow * Settings.EnvironmentDiffusionFactor;
@@ -103,23 +110,23 @@ namespace Celsius
 
         #region THERMAL PROPERTIES
 
-        public static ThermalProps GetThermalProperties(this IntVec3 cell, Map map)
-        {
-            if (cell.InBounds(map))
-            {
-                List<Thing> thingsList = map.thingGrid.ThingsListAtFast(cell);
-                for (int i = 0; i < thingsList.Count; i++)
-                    if (CompThermal.ShouldApplyTo(thingsList[i].def))
-                    {
-                        ThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
-                        if (thermalProps != null)
-                            return thermalProps;
-                    }
-            }
-            return ThermalProps.Air;
-        }
+        //public static ThermalProps GetThermalProperties(this IntVec3 cell, Map map)
+        //{
+        //    if (cell.InBounds(map))
+        //    {
+        //        List<Thing> thingsList = map.thingGrid.ThingsListAtFast(cell);
+        //        for (int i = 0; i < thingsList.Count; i++)
+        //            if (CompThermal.ShouldApplyTo(thingsList[i].def))
+        //            {
+        //                ThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
+        //                if (thermalProps != null)
+        //                    return thermalProps;
+        //            }
+        //    }
+        //    return ThermalProps.Air;
+        //}
 
-        public static float GetHeatCapacity(this IntVec3 cell, Map map) => cell.GetThermalProperties(map).heatCapacity;
+        //public static float GetHeatCapacity(this IntVec3 cell, Map map) => map.TemperatureInfo().GetThermalPropertiesAt(cell).heatCapacity;
 
         public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
@@ -162,7 +169,7 @@ namespace Celsius
                 LogUtility.Log($"TemperatureInfo for {map} unavailable!", LogLevel.Warning);
                 return false;
             }
-            temperatureInfo.SetTemperatureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * Settings.HeatPushEffect / cell.GetHeatCapacity(map));
+            temperatureInfo.SetTemperatureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * Settings.HeatPushEffect / temperatureInfo.GetThermalPropertiesAt(cell).heatCapacity);
             return true;
         }
 
