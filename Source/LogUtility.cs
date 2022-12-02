@@ -1,10 +1,9 @@
-﻿using Verse;
-
-namespace Celsius
+﻿namespace Celsius
 {
     enum LogLevel
     {
         Message = 0,
+        Important,
         Warning,
         Error
     };
@@ -17,7 +16,7 @@ namespace Celsius
             switch (logLevel)
             {
                 case LogLevel.Message:
-                    if (Settings.DebugMode)
+                    if (Settings.DebugMode || logLevel == LogLevel.Important)
                         Verse.Log.Message(message);
                     break;
 

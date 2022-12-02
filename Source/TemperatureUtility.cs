@@ -110,24 +110,6 @@ namespace Celsius
 
         #region THERMAL PROPERTIES
 
-        //public static ThermalProps GetThermalProperties(this IntVec3 cell, Map map)
-        //{
-        //    if (cell.InBounds(map))
-        //    {
-        //        List<Thing> thingsList = map.thingGrid.ThingsListAtFast(cell);
-        //        for (int i = 0; i < thingsList.Count; i++)
-        //            if (CompThermal.ShouldApplyTo(thingsList[i].def))
-        //            {
-        //                ThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
-        //                if (thermalProps != null)
-        //                    return thermalProps;
-        //            }
-        //    }
-        //    return ThermalProps.Air;
-        //}
-
-        //public static float GetHeatCapacity(this IntVec3 cell, Map map) => map.TemperatureInfo().GetThermalPropertiesAt(cell).heatCapacity;
-
         public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
         public static float GetIsolationWithAirflow(float isolation, float airflow) => Mathf.Lerp(isolation, 1, airflow);
@@ -164,12 +146,13 @@ namespace Celsius
             if (Prefs.DevMode && UI.MouseCell() == cell)
                 LogUtility.Log($"Pushing {energy} heat at {cell}.");
             TemperatureInfo temperatureInfo = map.TemperatureInfo();
-            if (temperatureInfo == null)
+            if (temperatureInfo == null || !cell.InBounds(map))
             {
-                LogUtility.Log($"TemperatureInfo for {map} unavailable!", LogLevel.Warning);
+                LogUtility.Log($"TemperatureInfo for {map} unavailable or cell {cell} is outside map boundaries!", LogLevel.Warning);
                 return false;
             }
-            temperatureInfo.SetTemperatureForCell(cell, temperatureInfo.GetTemperatureForCell(cell) + energy * GenTicks.TicksPerRealSecond * Settings.HeatPushEffect / temperatureInfo.GetThermalPropertiesAt(cell).heatCapacity);
+            int index = map.cellIndices.CellToIndex(cell);
+            temperatureInfo.SetTemperatureForCell(index, temperatureInfo.GetTemperatureForCell(index) + energy * Settings.HeatPushEffect / temperatureInfo.GetThermalPropertiesAt(index).heatCapacity);
             return true;
         }
 

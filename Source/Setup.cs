@@ -22,6 +22,8 @@ namespace Celsius
             if (harmony != null)
                 return;
 
+            LogUtility.Log($"Initializing Celsius {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}...", LogLevel.Important);
+
             harmony = new Harmony("Garwel.Celsius");
             Type type = typeof(Setup);
 
