@@ -1,5 +1,4 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -94,8 +93,13 @@ namespace Celsius
                             temperatures[i, j] = map.mapTemperature.OutdoorTemp;
                         if (cell.HasTerrainTemperature(map))
                         {
-                            terrainTemperatures[i, j] = map.mapTemperature.SeasonalTemp;
                             hasTerrainTemperatures = true;
+                            terrainTemperatures[i, j] = map.mapTemperature.SeasonalTemp;
+                            TerrainDef terrain = cell.GetTerrain(map);
+                            if (terrain.IsWater && terrainTemperatures[i, j] < terrain.FreezingPoint())
+                                cell.FreezeTerrain(map);
+                            else if (terrain == TerrainDefOf.Ice && terrainTemperatures[i, j] > 0)
+                                cell.MeltTerrain(map, cell.BestUnderIceTerrain(map));
                         }
                     }
                 if (!hasTerrainTemperatures)
@@ -215,7 +219,7 @@ namespace Celsius
                 maxTemperatures[slice] -= MinMaxTemperatureAdjustmentStep;
 
             // Main loop
-            for (int x = slice / 2; x < map.Size.x; x += 2)
+            for (int x = (slice + 1) / 2; x < map.Size.x; x += 2)
                 for (int z = slice % 2; z < map.Size.z; z += 2)
                 {
                     IntVec3 cell = new IntVec3(x, 0, z);
@@ -292,19 +296,19 @@ namespace Celsius
                     if (Settings.AutoignitionEnabled && rareUpdateCounter == 0 && temperature > MinIgnitionTemperature)
                     {
                         float fireSize = 0;
-                        for (int i = 0; i < cell.GetThingList(map).Count; i++)
+                        List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                        for (int i = 0; i < things.Count; i++)
                         {
-                            Thing thing = cell.GetThingList(map)[i];
-                            if (thing is Fire || (thing.FireBulwark && thing.Spawned))
+                            if (things[i] is Fire || (things[i].FireBulwark && things[i].Spawned))
                             {
                                 fireSize = 0;
                                 break;
                             }
-                            float ignitionTemp = thing.GetStatValue(DefOf.IgnitionTemperature);
+                            float ignitionTemp = things[i].GetStatValue(DefOf.IgnitionTemperature);
                             if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
                             {
-                                LogUtility.Log($"{thing} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
-                                fireSize += 0.1f * thing.GetStatValue(StatDefOf.Flammability);
+                                LogUtility.Log($"{things[i]} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
+                                fireSize += 0.1f * things[i].GetStatValue(StatDefOf.Flammability);
                             }
                         }
 
@@ -365,8 +369,7 @@ namespace Celsius
         public bool TryGetEnvironmentTemperatureForCell(IntVec3 cell, out float temperature)
         {
             RoofDef roof = cell.GetRoof(map);
-            //if (cell.GetFirstMineable(map) != null && (roof == RoofDefOf.RoofRockThick || roof == RoofDefOf.RoofRockThin))
-            if (GetThermalPropertiesAt(cell) != ThermalProps.Air && cell.GetFirstMineable(map) != null && (roof == RoofDefOf.RoofRockThick || roof == RoofDefOf.RoofRockThin))
+            if ((roof == RoofDefOf.RoofRockThick || roof == RoofDefOf.RoofRockThin) && cell.GetFirstMineable(map) != null)
             {
                 temperature = MountainTemperature;
                 return true;
