@@ -33,7 +33,7 @@ namespace Celsius
                     Settings.MountainTemperatureMode = mode;
             }
 
-            AddMountainmodeOption(MountainTemperatureMode.Vanilla, "Mountains provide a stable underground temperature (similar to vanilla behaviour).");
+            AddMountainmodeOption(MountainTemperatureMode.Vanilla, "Mountains provide a constant underground temperature (similar to vanilla behaviour).");
             AddMountainmodeOption(MountainTemperatureMode.AnnualAverage, "Mountains provide a stable temperature throughout the year, which is defined by the map's climate.");
             AddMountainmodeOption(MountainTemperatureMode.SeasonAverage, "Mountains provide a temperature that gradually changes with season.");
             AddMountainmodeOption(MountainTemperatureMode.AmbientAir, "Mountains have no special thermal effect, their temperature is the same as outdoor temperature.");
