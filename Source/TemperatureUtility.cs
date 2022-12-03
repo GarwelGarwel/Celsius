@@ -120,22 +120,9 @@ namespace Celsius
 
         public static bool HasTerrainTemperature(this IntVec3 cell, Map map) => cell.GetTerrain(map).HasModExtension<ThingThermalProperties>();
 
-        public static float FreezingPoint(this TerrainDef water)
-        {
-            switch (water.defName)
-            {
-                case "WaterOceanDeep":
-                case "WaterOceanShallow":
-                    return -2;
+        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < 0 && terrain.IsWater;
 
-                case "WaterMovingChestDeep":
-                    return -3;
-
-                case "WaterMovingShallow":
-                    return -2;
-            }
-            return 0;
-        }
+        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > 0 && terrain == TerrainDefOf.Ice;
 
         #endregion TERRAIN
 
