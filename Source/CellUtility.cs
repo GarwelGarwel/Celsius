@@ -53,8 +53,9 @@ namespace Celsius
             map.terrainGrid.SetUnderTerrain(cell, terrain);
         }
 
-        public static void MeltTerrain(this IntVec3 cell, Map map, TerrainDef meltedTerrain, bool log = false)
+        public static void MeltTerrain(this IntVec3 cell, Map map, bool log = false)
         {
+            TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
             // Removing things that can't stay on the melted terrain
             List<Thing> things = cell.GetThingList(map);
             for (int i = things.Count - 1; i >= 0; i--)
