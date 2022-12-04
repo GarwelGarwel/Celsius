@@ -28,32 +28,42 @@ namespace Celsius
             Type type = typeof(Setup);
 
             harmony.Patch(
-                AccessTools.Method($"Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
+                AccessTools.Method("Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
                 prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_TryGetDirectAirTemperatureForCell")));
             harmony.Patch(
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
                 prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
             harmony.Patch(
-                AccessTools.Method($"Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
-                prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_PushHeat")));
+                AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
+                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat")));
             harmony.Patch(
-                AccessTools.Method($"Verse.GenTemperature:ControlTemperatureTempChange"),
-                postfix: new HarmonyMethod(type.GetMethod($"GenTemperature_ControlTemperatureTempChange")));
+                AccessTools.Method("Verse.GenTemperature:ControlTemperatureTempChange"),
+                postfix: new HarmonyMethod(type.GetMethod("GenTemperature_ControlTemperatureTempChange")));
             harmony.Patch(
-                AccessTools.Method($"RimWorld.SteadyEnvironmentEffects:MeltAmountAt"),
-                postfix: new HarmonyMethod(type.GetMethod($"SteadyEnvironmentEffects_MeltAmountAt")));
+                AccessTools.Method("RimWorld.SteadyEnvironmentEffects:MeltAmountAt"),
+                postfix: new HarmonyMethod(type.GetMethod("SteadyEnvironmentEffects_MeltAmountAt")));
             harmony.Patch(
-                AccessTools.Method($"Verse.AttachableThing:Destroy"),
-                prefix: new HarmonyMethod(type.GetMethod($"AttachableThing_Destroy")));
+                AccessTools.Method("Verse.AttachableThing:Destroy"),
+                prefix: new HarmonyMethod(type.GetMethod("AttachableThing_Destroy")));
             harmony.Patch(
-                AccessTools.Method($"RimWorld.JobGiver_SeekSafeTemperature:ClosestRegionWithinTemperatureRange"),
-                prefix: new HarmonyMethod(type.GetMethod($"JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange")));
+                AccessTools.Method("RimWorld.JobGiver_SeekSafeTemperature:ClosestRegionWithinTemperatureRange"),
+                prefix: new HarmonyMethod(type.GetMethod("JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange")));
             harmony.Patch(
-                AccessTools.Method($"Verse.DangerUtility:GetDangerFor"),
-                postfix: new HarmonyMethod(type.GetMethod($"DangerUtility_GetDangerFor")));
+                AccessTools.Method("Verse.DangerUtility:GetDangerFor"),
+                postfix: new HarmonyMethod(type.GetMethod("DangerUtility_GetDangerFor")));
             harmony.Patch(
-                AccessTools.Method($"Verse.MapTemperature:TemperatureUpdate"),
-                prefix: new HarmonyMethod(type.GetMethod($"MapTemperature_TemperatureUpdate")));
+                AccessTools.Method("Verse.MapTemperature:TemperatureUpdate"),
+                prefix: new HarmonyMethod(type.GetMethod("MapTemperature_TemperatureUpdate")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.Building_Door:DoorOpen"),
+                postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorOpen")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.Building_Door:DoorTryClose"),
+                postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorTryClose")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.CompFlickable:DoFlick"),
+                postfix: new HarmonyMethod(type.GetMethod("CompFlickable_DoFlick")));
+
             LogUtility.Log($"Harmony initialization complete.");
 
             // Adding CompThermal and ThingThermalProperties to all applicable Things
@@ -164,5 +174,44 @@ namespace Celsius
 
         // Disable MapTemperature.TemperatureUpdate, because vanilla temperature overlay is not used anymore
         public static bool MapTemperature_TemperatureUpdate() => false;
+
+        // When door is opening, update its state and thermal values
+        public static void Building_Door_DoorOpen(Building_Door __instance)
+        {
+            CompThermal compThermal = __instance.TryGetComp<CompThermal>();
+            if (compThermal != null)
+            {
+                LogUtility.Log($"{__instance} ({__instance.def.defName}) is opening.");
+                compThermal.IsOpen = true;
+            }
+        }
+
+        // When door is closing, update its state and thermal values
+        public static void Building_Door_DoorTryClose(Building_Door __instance, bool __result)
+        {
+            if (__result)
+            {
+                CompThermal compThermal = __instance.TryGetComp<CompThermal>();
+                if (compThermal != null)
+                {
+                    LogUtility.Log($"{__instance} ({__instance.def.defName}) is closing.");
+                    compThermal.IsOpen = false;
+                }
+            }
+        }
+
+        // When switching a vent on/off, update its state and thermal values
+        public static void CompFlickable_DoFlick(CompFlickable __instance)
+        {
+            if (__instance.parent is Building_Vent)
+            {
+                CompThermal compThermal = __instance.parent.TryGetComp<CompThermal>();
+                if (compThermal != null)
+                {
+                    LogUtility.Log($"Vent {__instance.parent} ({__instance.parent.def.defName}) was switched.");
+                    compThermal.IsOpen = __instance.SwitchIsOn;
+                }
+            }
+        }
     }
 }
