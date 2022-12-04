@@ -6,7 +6,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>75</heatCapacity>
+				<heatCapacity>105</heatCapacity>
 				<isolation>5</isolation>
 			</li>
 		</value>
@@ -16,7 +16,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>70</heatCapacity>
+				<heatCapacity>100</heatCapacity>
 				<isolation>5</isolation>
 			</li>
 		</value>
@@ -26,7 +26,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>70</heatCapacity>
+				<heatCapacity>105</heatCapacity>
 				<isolation>5</isolation>
 			</li>
 		</value>
@@ -36,7 +36,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>65</heatCapacity>
+				<heatCapacity>100</heatCapacity>
 				<isolation>5</isolation>
 			</li>
 		</value>
@@ -46,7 +46,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingChestDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>120</heatCapacity>
+				<heatCapacity>180</heatCapacity>
 				<isolation>5</isolation>
 			</li>
 		</value>
@@ -56,7 +56,7 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>100</heatCapacity>
+				<heatCapacity>150</heatCapacity>
 				<isolation>5</isolation>
 			</li>
 		</value>
@@ -66,7 +66,7 @@
 		<xpath>Defs/TerrainDef[defName="Marsh"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>50</heatCapacity>
+				<heatCapacity>70</heatCapacity>
 				<isolation>4.5</isolation>
 			</li>
 		</value>
@@ -76,7 +76,7 @@
 		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>35</heatCapacity>
+				<heatCapacity>50</heatCapacity>
 				<isolation>5.5</isolation>
 			</li>
 		</value>
