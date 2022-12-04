@@ -9,11 +9,11 @@
 		<xpath>Defs/ThingDef[defName="SimpleOpenWindow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>10000</heatCapacity>
-				<volume>5</volume>
-				<conductivity>1.5</conductivity>
-				<airflow>0.3</airflow>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>4</heatCapacity>
+				<volume>0.005</volume>
+				<isolation>4</isolation>
+				<airflow>0.1</airflow>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -23,11 +23,10 @@
 		<xpath>Defs/ThingDef[defName="OpenWindow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>10000</heatCapacity>
-				<volume>5</volume>
-				<conductivity>1.5</conductivity>
-				<airflow>0.1</airflow>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>4</heatCapacity>
+				<volume>0.005</volume>
+				<isolation>4</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -37,11 +36,10 @@
 		<xpath>Defs/ThingDef[defName="LargeOpenWindow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>11000</heatCapacity>
-				<volume>6</volume>
-				<conductivity>1.6</conductivity>
-				<airflow>0.1</airflow>
-				<airflowWhenOpen>0.65</airflowWhenOpen>
+				<heatCapacity>4.5</heatCapacity>
+				<volume>0.006</volume>
+				<isolation>3.75</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -51,11 +49,10 @@
 		<xpath>Defs/ThingDef[defName="HugeOpenWindow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>12000</heatCapacity>
-				<volume>7</volume>
-				<conductivity>1.7</conductivity>
-				<airflow>0.1</airflow>
-				<airflowWhenOpen>0.8</airflowWhenOpen>
+				<heatCapacity>5</heatCapacity>
+				<volume>0.007</volume>
+				<isolation>3.5</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -65,10 +62,10 @@
 		<xpath>Defs/ThingDef[defName="ReinforcedOpenWindow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>11000</heatCapacity>
-				<volume>6</volume>
-				<conductivity>1.6</conductivity>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>4.5</heatCapacity>
+				<volume>0.006</volume>
+				<isolation>4.5</isolation>
+				<airflowWhenOpen>0.7</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -78,11 +75,10 @@
 		<xpath>Defs/ThingDef[defName="LargeReinforcedOpenWindow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>12000</heatCapacity>
-				<volume>7</volume>
-				<conductivity>1.7</conductivity>
-				<airflow>0.1</airflow>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>5</heatCapacity>
+				<volume>0.007</volume>
+				<isolation>4.25</isolation>
+				<airflowWhenOpen>0.7</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>

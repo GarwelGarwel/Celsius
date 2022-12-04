@@ -11,8 +11,9 @@
 		<xpath>Defs/ThingDef[defName="INSWall_Biomass"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>21000</heatCapacity>
-				<conductivity>0.4</conductivity>
+				<heatCapacity>9</heatCapacity>
+				<!--conductivity>0.4</conductivity-->
+				<isolation>6</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -22,8 +23,9 @@
 		<xpath>Defs/ThingDef[defName="INSWall_Fibre"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>24000</heatCapacity>
-				<conductivity>0.3</conductivity>
+				<heatCapacity>10</heatCapacity>
+				<!--conductivity>0.3</conductivity-->
+				<isolation>7</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -33,8 +35,9 @@
 		<xpath>Defs/ThingDef[defName="INSWall_Polymer"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>27000</heatCapacity>
-				<conductivity>0.22</conductivity>
+				<heatCapacity>11</heatCapacity>
+				<!--conductivity>0.22</conductivity-->
+				<isolation>8</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -44,8 +47,9 @@
 		<xpath>Defs/ThingDef[defName="INSWall_Hyper"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>30000</heatCapacity>
-				<conductivity>0.16</conductivity>
+				<heatCapacity>12</heatCapacity>
+				<!--conductivity>0.16</conductivity-->
+				<isolation>9</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -55,9 +59,10 @@
 		<xpath>Defs/ThingDef[defName="INSDoorSimple_Biomass"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>17500</heatCapacity>
-				<conductivity>0.4</conductivity>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>7</heatCapacity>
+				<!--conductivity>0.4</conductivity-->
+				<isolation>6</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -67,9 +72,10 @@
 		<xpath>Defs/ThingDef[defName="INSDoorSimple_Fibre"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>20000</heatCapacity>
-				<conductivity>0.3</conductivity>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>8</heatCapacity>
+				<!--conductivity>0.3</conductivity-->
+				<isolation>7</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -79,9 +85,10 @@
 		<xpath>Defs/ThingDef[defName="INSDoorSimple_Polymer"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>22500</heatCapacity>
-				<conductivity>0.22</conductivity>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>9</heatCapacity>
+				<!--conductivity>0.22</conductivity-->
+				<isolation>8</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -91,9 +98,10 @@
 		<xpath>Defs/ThingDef[defName="INSDoorSimple_Hyper"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>25000</heatCapacity>
-				<conductivity>0.16</conductivity>
-				<airflowWhenOpen>0.5</airflowWhenOpen>
+				<heatCapacity>10</heatCapacity>
+				<!--conductivity>0.16</conductivity-->
+				<isolation>9</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -105,8 +113,9 @@
 		<xpath>Defs/ThingDef[defName="INSSlab_Biomass"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<volumetricHeatCapacity>1400</volumetricHeatCapacity>
-				<conductivity>0.4</conductivity>
+				<volumetricHeatCapacity>550</volumetricHeatCapacity>
+				<!--conductivity>0.4</conductivity-->
+				<isolation>1.6</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -116,8 +125,9 @@
 		<xpath>Defs/ThingDef[defName="INSSlab_Fibre"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<volumetricHeatCapacity>1600</volumetricHeatCapacity>
-				<conductivity>0.3</conductivity>
+				<volumetricHeatCapacity>600</volumetricHeatCapacity>
+				<!--conductivity>0.3</conductivity-->
+				<isolation>1.8</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -127,8 +137,9 @@
 		<xpath>Defs/ThingDef[defName="INSSlab_Polymer"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<volumetricHeatCapacity>1800</volumetricHeatCapacity>
-				<conductivity>0.22</conductivity>
+				<volumetricHeatCapacity>650</volumetricHeatCapacity>
+				<!--conductivity>0.22</conductivity-->
+				<isolation>2</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -138,8 +149,9 @@
 		<xpath>Defs/ThingDef[defName="INSSlab_Hyper"]</xpath>
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
-				<volumetricHeatCapacity>2000</volumetricHeatCapacity>
-				<conductivity>0.16</conductivity>
+				<volumetricHeatCapacity>700</volumetricHeatCapacity>
+				<!--conductivity>0.16</conductivity-->
+				<isolation>2.2</isolation>
 			</li>
 		</value>
 	</Operation>
