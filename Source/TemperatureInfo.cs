@@ -162,6 +162,13 @@ namespace Celsius
             }
         }
 
+        public override void MapRemoved()
+        {
+            base.MapRemoved();
+            TemperatureUtility.temperatureInfos.Remove(map);
+            LogUtility.Log($"Map {map} removed. TemperatureInfo cache now contains {TemperatureUtility.temperatureInfos.Count} records.");
+        }
+
         Color TemperatureColorForCell(int index)
         {
             if (Settings.UseVanillaTemperatureColors)
@@ -225,7 +232,7 @@ namespace Celsius
             updateStopwatch.Start();
 #endif
 
-            int mouseCell = map.cellIndices.CellToIndex(UI.MouseCell());
+            int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             bool log;
 
             if (rareUpdateCounter == 0)
@@ -246,7 +253,7 @@ namespace Celsius
             {
                 IntVec3 cell = map.cellsInRandomOrder.Get(j);
                 int i = map.cellIndices.CellToIndex(cell);
-                log = Prefs.DevMode && Settings.DebugMode && i == mouseCell && Find.PlaySettings.showTemperatureOverlay;
+                log = i == mouseCell;
                 float temperature = temperatures[i];
                 ThermalProps cellProps = GetThermalPropertiesAt(i);
                 if (log)

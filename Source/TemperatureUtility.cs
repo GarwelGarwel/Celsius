@@ -9,9 +9,18 @@ namespace Celsius
     static class TemperatureUtility
     {
         public const float TemperatureChangePrecision = 0.01f;
-        public const float MinFreezingTemperature = -3;
 
-        public static TemperatureInfo TemperatureInfo(this Map map) => map.GetComponent<TemperatureInfo>();
+        internal static Dictionary<Map, TemperatureInfo> temperatureInfos = new Dictionary<Map, TemperatureInfo>();
+
+        public static TemperatureInfo TemperatureInfo(this Map map)
+        {
+            if (temperatureInfos.TryGetValue(map, out TemperatureInfo temperatureInfo))
+                return temperatureInfo;
+            temperatureInfo = map.GetComponent<TemperatureInfo>();
+            if (temperatureInfo != null)
+                temperatureInfos.Add(map, temperatureInfo);
+            return temperatureInfo;
+        }
 
         internal static void SettingsChanged()
         {
@@ -76,32 +85,40 @@ namespace Celsius
 
         public static void CalculateHeatTransfer(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
         {
-            float hf;
+            // Air has heat capacity = 1 and conductivity = 1
             if (airflow == 1 && props.IsAir)
-                hf = props.HeatFlow;
-            else if (airflow == 0 || props.airflow == 0)
-                hf = props.HeatFlowNoConvection;
-            else hf = props.HeatFlow * Mathf.Pow(Settings.ConvectionConductivityEffect, airflow * props.airflow - 1);
+            {
+                energy += interactingTemperature - homeTemperature;
+                heatFlow++;
+                return;
+            }
+
+            // If one of the interacting cells is not air, need to take airflow into account
+            float hf = airflow == 0 || props.airflow == 0
+                ? props.HeatFlowNoConvection
+                : props.HeatFlow * Mathf.Pow(Settings.ConvectionConductivityEffect, airflow * props.airflow - 1);
             if (log)
                 LogUtility.Log($"Interacting temperature: {interactingTemperature:F1}C. Mutual airflow: {airflow * props.airflow}. Heatflow: {hf}.");
             energy += (interactingTemperature - homeTemperature) * hf;
             heatFlow += hf;
         }
 
-        public static void CalculateHeatTransferTerrain(float cellTemperature, float terrainTemperature, ThermalProps props, ref float energy, ref float heatFlow, bool log = false)
+        public static void CalculateHeatTransferTerrain(float cellTemperature, float terrainTemperature, ThermalProps props, ref float energy, ref float heatFlow)
         {
-            float hf = props.HeatFlowNoConvection;
-            energy += (terrainTemperature - cellTemperature) * hf;
-            heatFlow += hf;
+            energy += (terrainTemperature - cellTemperature) * props.HeatFlowNoConvection;
+            heatFlow += props.HeatFlowNoConvection;
         }
 
         public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, ref float energy, ref float heatFlow, bool log = false)
         {
-            float hf = props.HeatFlow * Settings.EnvironmentDiffusionFactor;
-            if (!props.IsAir)
-                hf /= Settings.ConvectionConductivityEffect;
-            if (log)
-                LogUtility.Log($"Environment temperature: {environmentTemperature:F1}C. Heatflow: {hf}.");
+            if (props.IsAir)
+            {
+                energy += (environmentTemperature - cellTemperature) * Settings.EnvironmentDiffusionFactor;
+                heatFlow += Settings.EnvironmentDiffusionFactor;
+            }
+            float hf = props.HeatFlow * Settings.EnvironmentDiffusionFactor / Settings.ConvectionConductivityEffect;
+            //if (log)
+            //    LogUtility.Log($"Environment temperature: {environmentTemperature:F1}C. Heatflow: {hf}.");
             energy += (environmentTemperature - cellTemperature) * hf;
             heatFlow += hf;
         }
@@ -130,7 +147,7 @@ namespace Celsius
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
-            if (Prefs.DevMode && UI.MouseCell() == cell)
+            if (Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay && UI.MouseCell() == cell)
                 LogUtility.Log($"Pushing {energy} heat at {cell}.");
             TemperatureInfo temperatureInfo = map.TemperatureInfo();
             if (temperatureInfo == null || !cell.InBounds(map))
