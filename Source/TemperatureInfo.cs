@@ -169,6 +169,13 @@ namespace Celsius
             LogUtility.Log($"Map {map} removed. TemperatureInfo cache now contains {TemperatureUtility.temperatureInfos.Count} records.");
         }
 
+        public void ResetAllThings()
+        {
+            List<Thing> things = map.listerThings.AllThings;
+            for (int i = 0; i < things.Count; i++)
+                things[i].TryGetComp<CompThermal>()?.Reset();
+        }
+
         Color TemperatureColorForCell(int index)
         {
             if (Settings.UseVanillaTemperatureColors)
