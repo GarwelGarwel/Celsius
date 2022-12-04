@@ -2,8 +2,6 @@
 
 <Patch>
 
-	<!-- Note: Heat capacity in J/C, conductivity in W/C, volume in liters. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
-
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
 		<value>
@@ -21,7 +19,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>5</heatCapacity>
 				<volume>0.0075</volume>
-				<!--conductivity>1.5</conductivity-->
 				<isolation>4</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -34,7 +31,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>5</heatCapacity>
 				<volume>0.0075</volume>
-				<!--conductivity>1.5</conductivity-->
 				<isolation>4</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -46,10 +42,9 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>3</heatCapacity>
-				<!--conductivity>2</conductivity-->
-				<isolation>3</isolation>
+				<isolation>3.5</isolation>
 				<airflow>0.1</airflow>
-				<airflowWhenOpen>0.8</airflowWhenOpen>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -60,7 +55,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>7</heatCapacity>
 				<volume>0.010</volume>
-				<!--conductivity>1</conductivity-->
 				<isolation>5</isolation>
 			</li>
 		</value>
@@ -71,9 +65,8 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>6</heatCapacity>
-				<!--conductivity>1.5</conductivity-->
 				<isolation>4</isolation>
-				<airflow>0.1</airflow>
+				<airflow>0.05</airflow>
 				<airflowWhenOpen>0.9</airflowWhenOpen>
 			</li>
 		</value>
@@ -84,7 +77,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>6</heatCapacity>
-				<!--conductivity>1.5</conductivity-->
 				<isolation>4</isolation>
 			</li>
 		</value>

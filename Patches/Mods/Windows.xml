@@ -11,9 +11,9 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>4</heatCapacity>
 				<volume>0.005</volume>
-				<isolation>3</isolation>
+				<isolation>4</isolation>
 				<airflow>0.1</airflow>
-				<airflowWhenOpen>0.8</airflowWhenOpen>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -25,8 +25,8 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>4</heatCapacity>
 				<volume>0.005</volume>
-				<isolation>3</isolation>
-				<airflowWhenOpen>0.8</airflowWhenOpen>
+				<isolation>4</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -38,8 +38,8 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>4.5</heatCapacity>
 				<volume>0.006</volume>
-				<isolation>2.75</isolation>
-				<airflowWhenOpen>0.85</airflowWhenOpen>
+				<isolation>3.75</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -51,8 +51,8 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>5</heatCapacity>
 				<volume>0.007</volume>
-				<isolation>2.5</isolation>
-				<airflowWhenOpen>0.9</airflowWhenOpen>
+				<isolation>3.5</isolation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -64,7 +64,7 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>4.5</heatCapacity>
 				<volume>0.006</volume>
-				<isolation>3.5</isolation>
+				<isolation>4.5</isolation>
 				<airflowWhenOpen>0.7</airflowWhenOpen>
 			</li>
 		</value>
@@ -77,8 +77,8 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>5</heatCapacity>
 				<volume>0.007</volume>
-				<isolation>2.75</isolation>
-				<airflowWhenOpen>0.75</airflowWhenOpen>
+				<isolation>4.25</isolation>
+				<airflowWhenOpen>0.7</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>

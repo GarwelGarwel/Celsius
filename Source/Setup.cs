@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using Verse;
 
@@ -60,9 +61,6 @@ namespace Celsius
             harmony.Patch(
                 AccessTools.Method("RimWorld.Building_Door:DoorTryClose"),
                 postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorTryClose")));
-            harmony.Patch(
-                AccessTools.Method("RimWorld.CompFlickable:DoFlick"),
-                postfix: new HarmonyMethod(type.GetMethod("CompFlickable_DoFlick")));
 
             LogUtility.Log($"Harmony initialization complete.");
 
@@ -181,7 +179,7 @@ namespace Celsius
             CompThermal compThermal = __instance.TryGetComp<CompThermal>();
             if (compThermal != null)
             {
-                LogUtility.Log($"{__instance} ({__instance.def.defName}) is opening.");
+                LogUtility.Log($"Door {__instance} ({__instance.def.defName}) is opening.");
                 compThermal.IsOpen = true;
             }
         }
@@ -194,22 +192,8 @@ namespace Celsius
                 CompThermal compThermal = __instance.TryGetComp<CompThermal>();
                 if (compThermal != null)
                 {
-                    LogUtility.Log($"{__instance} ({__instance.def.defName}) is closing.");
+                    LogUtility.Log($"Door {__instance} ({__instance.def.defName}) is closing.");
                     compThermal.IsOpen = false;
-                }
-            }
-        }
-
-        // When switching a vent on/off, update its state and thermal values
-        public static void CompFlickable_DoFlick(CompFlickable __instance)
-        {
-            if (__instance.parent is Building_Vent)
-            {
-                CompThermal compThermal = __instance.parent.TryGetComp<CompThermal>();
-                if (compThermal != null)
-                {
-                    LogUtility.Log($"Vent {__instance.parent} ({__instance.parent.def.defName}) was switched.");
-                    compThermal.IsOpen = __instance.SwitchIsOn;
                 }
             }
         }
