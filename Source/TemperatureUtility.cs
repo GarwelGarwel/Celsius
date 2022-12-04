@@ -27,17 +27,12 @@ namespace Celsius
             FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
 
-            // Resetting thermal props for all things and thingDefs
-            if (Find.Maps != null)
-                for (int m = 0; m < Find.Maps.Count; m++)
-                {
-                    List<Thing> things = Find.Maps[m]?.listerThings?.AllThings;
-                    if (things != null)
-                        for (int i = 0; i < things.Count; i++)
-                            things[i].TryGetComp<CompThermal>()?.Reset();
-                }
+            // Resetting thermal props for all ThingDefs & Things
             for (int i = 0; i < DefDatabase<ThingDef>.AllDefsListForReading.Count; i++)
                 DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
+            if (Find.Maps != null)
+                for (int m = 0; m < Find.Maps.Count; m++)
+                    Find.Maps[m]?.TemperatureInfo()?.ResetAllThings();
         }
 
         #region TEMPERATURE
@@ -58,7 +53,7 @@ namespace Celsius
             float sum = cell.GetTemperatureForCell(map);
             foreach (IntVec3 c in cell.AdjacentCells())
                 sum += c.InBounds(map) ? c.GetTemperatureForCell(map) : cell.GetTemperatureForCell(map);
-            return sum / 9;
+            return sum / 5;
         }
 
         public static float GetTemperature(this Room room)
