@@ -19,7 +19,7 @@ namespace Celsius
 
         public float HeatFlowNoConvection => heatflowNoConvection;
 
-        public bool IsAir => airflow == 1;
+        public bool IsAir => this == Air;
 
         public ThermalProps(float heatCapacity, float isolation, float airflow)
         {

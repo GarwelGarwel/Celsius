@@ -47,10 +47,6 @@ namespace Celsius
             content.Gap();
             content.Label($"Change the following values at your own risk.".Colorize(Color.red));
 
-            //content.Label($"Heat conductivity: {HeatConductivityMultiplier.ToStringPercent()}", tooltip: "How quickly heat travels and temperatures equalize.");
-            //HeatConductivityMultiplier = (float)Math.Round(content.Slider(HeatConductivityMultiplier, 0.1f, 2), 1);
-            //HeatConductivityFactor = HeatConductivityFactor_Base * HeatConductivityMultiplier;
-
             content.Label($"Convection conductivity effect: x{ConvectionConductivityEffect}", tooltip: $"How much air convection increases air conductivity. Recommended value: {ConvectionConductivityEffect_Default}.");
             ConvectionConductivityEffect = (float)Math.Round(content.Slider(ConvectionConductivityEffect, 1, 500));
 
@@ -60,11 +56,6 @@ namespace Celsius
             content.Label($"Heat push: {HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
             HeatPushMultiplier = (float)Math.Round(content.Slider(HeatPushMultiplier, 0, 5), 1);
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
-
-            //content.Label(
-            //    $"Air heat capacity: {AirHeatCapacity:N0} J/C",
-            //    tooltip: $"Heat capacity (how slowly air changes temperature) in Joules/Celsius. Recommended value: {AirHeatCapacity_Default:N0} J/C.");
-            //AirHeatCapacity = (float)Math.Round(content.Slider(AirHeatCapacity / 50, 600 / 50, 5000 / 50)) * 50;
 
             content.CheckboxLabeled("Debug logging mode", ref DebugMode, "Verbose logging of Celsius' work.");
 
