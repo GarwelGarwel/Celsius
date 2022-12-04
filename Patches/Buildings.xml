@@ -2,15 +2,13 @@
 
 <Patch>
 
-	<!-- Note: Heat capacity in J/C, conductivity in W/C, volume in liters. Figures can be taken e.g. here: https://www.engineeringtoolbox.com/specific-heat-solids-d_154.html -->
-
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>250000</heatCapacity>
-				<volume>500</volume>
-				<conductivity>1</conductivity>
+				<heatCapacity>100</heatCapacity>
+				<volume>0.5</volume>
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -19,9 +17,9 @@
 		<xpath>Defs/ThingDef[defName="Door"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>13500</heatCapacity>
-				<volume>7.5</volume>
-				<conductivity>1.5</conductivity>
+				<heatCapacity>5</heatCapacity>
+				<volume>0.0075</volume>
+				<isolation>4</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
@@ -31,9 +29,9 @@
 		<xpath>Defs/ThingDef[defName="Autodoor"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>13500</heatCapacity>
-				<volume>7.5</volume>
-				<conductivity>1.5</conductivity>
+				<heatCapacity>5</heatCapacity>
+				<volume>0.0075</volume>
+				<isolation>4</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
@@ -43,10 +41,10 @@
 		<xpath>Defs/ThingDef[defName="AnimalFlap"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>8000</heatCapacity>
-				<conductivity>2</conductivity>
-				<airflow>0.2</airflow>
-				<airflowWhenOpen>0.8</airflowWhenOpen>
+				<heatCapacity>3</heatCapacity>
+				<isolation>3.5</isolation>
+				<airflow>0.1</airflow>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
 	</Operation>
@@ -55,9 +53,9 @@
 		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>17000</heatCapacity>
-				<volume>10</volume>
-				<conductivity>1</conductivity>
+				<heatCapacity>7</heatCapacity>
+				<volume>0.010</volume>
+				<isolation>5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -66,9 +64,9 @@
 		<xpath>Defs/ThingDef[defName="Vent"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>15000</heatCapacity>
-				<conductivity>1.5</conductivity>
-				<airflow>0.1</airflow>
+				<heatCapacity>6</heatCapacity>
+				<isolation>4</isolation>
+				<airflow>0.05</airflow>
 				<airflowWhenOpen>0.9</airflowWhenOpen>
 			</li>
 		</value>
@@ -78,8 +76,8 @@
 		<xpath>Defs/ThingDef[defName="Cooler"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>15000</heatCapacity>
-				<conductivity>1.5</conductivity>
+				<heatCapacity>6</heatCapacity>
+				<isolation>4</isolation>
 			</li>
 		</value>
 	</Operation>
