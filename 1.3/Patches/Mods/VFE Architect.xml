@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- VANILLA FURNITURE EXPANDED - ARCHITECT -->
+
+	<!-- Thermal data -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_LogWall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>17000</heatCapacity>
+				<conductivity>0.5</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_HedgeWall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>8000</heatCapacity>
+				<conductivity>0.5</conductivity>
+				<airflow>0.5</airflow>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_ArmoredWall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>42000</heatCapacity>
+				<volume>12.5</volume>
+				<conductivity>1</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_ArmoredDoor"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>34000</heatCapacity>
+				<volume>10</volume>
+				<conductivity>1.5</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_SingleDoor"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>11000</heatCapacity>
+				<volume>6</volume>
+				<conductivity>1.5</conductivity>
+				<airflow>0.1</airflow>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- Stuff -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[@Name="FakeWoodBase"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>1400</volumetricHeatCapacity>
+				<conductivity>0.5</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- Ignition data -->
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_LogWall"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>300</IgnitionTemperature>
+			</statBases>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_HedgeWall"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>300</IgnitionTemperature>
+			</statBases>
+		</value>
+	</Operation>
+
+</Patch>
