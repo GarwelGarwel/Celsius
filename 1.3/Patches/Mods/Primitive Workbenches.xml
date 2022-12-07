@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- PRIMITIVE WORKBENCHES -->
+
+	<!-- Thermal data -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VBY_HayDoor"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>7000</heatCapacity>
+				<volume>7.5</volume>
+				<conductivity>0.5</conductivity>
+				<airflowWhenOpen>0.5</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VBY_Hay_Wall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>9000</heatCapacity>
+				<volume>10</volume>
+				<conductivity>0.3</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- Stuff -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VBY_PrimitiveFlint"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>1850</volumetricHeatCapacity>
+				<conductivity>1.5</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VBY_BlocksAdobe"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>1000</volumetricHeatCapacity>
+				<conductivity>1.2</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- Ignition data -->
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VBY_HayDoor"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>150</IgnitionTemperature>
+			</statBases>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VBY_Hay_Wall"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>150</IgnitionTemperature>
+			</statBases>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VBY_Haycloth"]</xpath>
+		<value>
+			<statBases>
+				<IgnitionTemperature>100</IgnitionTemperature>
+			</statBases>
+			<stuffProps>
+				<statOffsets>
+					<IgnitionTemperature>100</IgnitionTemperature>
+				</statOffsets>
+			</stuffProps>
+		</value>
+	</Operation>
+
+</Patch>

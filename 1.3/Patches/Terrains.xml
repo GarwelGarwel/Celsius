@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- Note: Taking only 5 cm layer of water/ice => heat capacity for 0.05 of a cubic meter. Conductivity is increased x6 to account for RimWorld's shorter year. -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>105000</heatCapacity>
+				<conductivity>2</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>100000</heatCapacity>
+				<conductivity>2</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterMovingChestDeep"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>150000</heatCapacity>
+				<conductivity>2</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>105000</heatCapacity>
+				<conductivity>2</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterOceanShallow"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>100000</heatCapacity>
+				<conductivity>2</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterMovingShallow"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>250000</heatCapacity>
+				<conductivity>2</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="Marsh"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>70000</heatCapacity>
+				<conductivity>2.5</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>50000</heatCapacity>
+				<conductivity>1.7</conductivity>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>
