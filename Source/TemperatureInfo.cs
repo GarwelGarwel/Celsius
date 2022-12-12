@@ -34,7 +34,7 @@ namespace Celsius
         const float MinMaxTemperatureAdjustmentStep = 1;
 
         bool initialized;
-        int UpdateTickOffset;
+        int updateTickOffset;
         int slice;
         int rareUpdateCounter;
 
@@ -133,7 +133,7 @@ namespace Celsius
                 map.Size.x,
                 map.Size.z);
 
-            UpdateTickOffset = map.generationTick % TicksPerSlice;
+            updateTickOffset = map.generationTick % TicksPerSlice;
             slice = Find.TickManager.TicksGame / TicksPerSlice % SliceCount;
             initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
@@ -239,7 +239,7 @@ namespace Celsius
             if (!initialized)
                 FinalizeInit();
 
-            if (Find.TickManager.TicksGame % TicksPerSlice != UpdateTickOffset)
+            if (Find.TickManager.TicksGame % TicksPerSlice != updateTickOffset)
                 return;
 
 #if DEBUG
@@ -249,17 +249,20 @@ namespace Celsius
             int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             bool log;
 
-            if (rareUpdateCounter == 0)
+            if (slice == 0)
             {
                 roomTemperatures.Clear();
-                mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
-                outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? SnowMeltCoefficientRain : SnowMeltCoefficient;
-                thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
+                if (rareUpdateCounter == 0)
+                {
+                    mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
+                    outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? SnowMeltCoefficientRain : SnowMeltCoefficient;
+                    thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
+                }
             }
 
-            if (minTemperatures[slice] < minComfortableTemperature + 5)
+            if (minTemperatures[slice] < minComfortableTemperature + 10)
                 minTemperatures[slice] += MinMaxTemperatureAdjustmentStep;
-            if (maxTemperatures[slice] > maxComfortableTemperature - 5)
+            if (maxTemperatures[slice] > maxComfortableTemperature - 10)
                 maxTemperatures[slice] -= MinMaxTemperatureAdjustmentStep;
 
             // Main loop
@@ -349,7 +352,7 @@ namespace Celsius
                     List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
                     for (int k = 0; k < things.Count; k++)
                     {
-                        if (things[k] is Fire || (things[k].FireBulwark && things[k].Spawned))
+                        if (things[k].FireBulwark || things[k] is Fire)
                         {
                             fireSize = 0;
                             break;
