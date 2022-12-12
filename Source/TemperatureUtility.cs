@@ -112,8 +112,6 @@ namespace Celsius
                 heatFlow += Settings.EnvironmentDiffusionFactor;
             }
             float hf = props.HeatFlow * Settings.EnvironmentDiffusionFactor / Settings.ConvectionConductivityEffect;
-            //if (log)
-            //    LogUtility.Log($"Environment temperature: {environmentTemperature:F1}C. Heatflow: {hf}.");
             energy += (environmentTemperature - cellTemperature) * hf;
             heatFlow += hf;
         }
@@ -130,7 +128,11 @@ namespace Celsius
 
         #region TERRAIN
 
-        public static bool HasTerrainTemperature(this IntVec3 cell, Map map) => cell.GetTerrain(map).HasModExtension<ThingThermalProperties>();
+        public static bool HasTemperature(this TerrainDef terrain)
+        {
+            ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
+            return terrainProps != null && terrainProps.heatCapacity > 0;
+        }
 
         public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < 0 && terrain.IsWater;
 

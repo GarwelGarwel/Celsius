@@ -21,7 +21,7 @@ namespace Celsius
         // Normal full updates between rare updates
         public const int RareUpdateInterval = 4;
 
-        // Relative amount of snow to be melted each update compared to vanilla (0.072)
+        // Amount of snow to be melted each update (to be similar to vanilla)
         const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
 
         // How quickly snow melts under rain
@@ -30,6 +30,7 @@ namespace Celsius
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
+        // How quickly min & max temperatures for temperature overlay adjust
         const float MinMaxTemperatureAdjustmentStep = 1;
 
         bool initialized;
@@ -50,9 +51,10 @@ namespace Celsius
         static readonly Color maxComfortableColor = new Color(0.5f, 1, 0);
         static readonly Color maxColor = Color.red;
 
-        float[] minTemperatures = new float[SliceCount], maxTemperatures = new float[SliceCount];
-
-        float minTemperature = minComfortableTemperature - 5, maxTemperature = maxComfortableTemperature + 5;
+        float[] minTemperatures = new float[SliceCount];
+        float[] maxTemperatures = new float[SliceCount];
+        float minTemperature = minComfortableTemperature - 10;
+        float maxTemperature = maxComfortableTemperature + 10;
         CellBoolDrawer overlayDrawer;
 
 #if DEBUG
@@ -74,8 +76,8 @@ namespace Celsius
             maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
             for (int i = 0; i < SliceCount; i++)
             {
-                minTemperatures[i] = minComfortableTemperature - 5;
-                maxTemperatures[i] = maxComfortableTemperature + 5;
+                minTemperatures[i] = minComfortableTemperature - 10;
+                maxTemperatures[i] = maxComfortableTemperature + 10;
             }
 
             // Initializing for the first run
@@ -100,16 +102,17 @@ namespace Celsius
                         minTemperature = temperatures[i];
                     else if (temperatures[i] > maxTemperature)
                         maxTemperature = temperatures[i];
-                    if (cell.HasTerrainTemperature(map))
+                    TerrainDef terrain = cell.GetTerrain(map);
+                    if (terrain.HasTemperature())
                     {
                         hasTerrainTemperatures = true;
                         terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
-                        TerrainDef terrain = cell.GetTerrain(map);
                         if (terrain.ShouldFreeze(terrainTemperatures[i]))
                             cell.FreezeTerrain(map);
                         else if (terrain.ShouldMelt(terrainTemperatures[i]))
                             cell.MeltTerrain(map);
                     }
+                    else terrainTemperatures[i] = float.NaN;
                 }
                 if (!hasTerrainTemperatures)
                 {
@@ -211,8 +214,12 @@ namespace Celsius
                 GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
                 string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
-                if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures && cell.HasTerrainTemperature(map))
-                    tooltip += $"\nTerrain: {GetTerrainTemperature(cell).ToStringTemperature()}";
+                if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
+                {
+                    float terrainTemperature = GetTerrainTemperature(cell);
+                    if (!float.IsNaN(terrainTemperature))
+                        tooltip += $"\nTerrain: {terrainTemperature.ToStringTemperature()}";
+                }
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
                 Text.Font = font;
             }
@@ -272,25 +279,32 @@ namespace Celsius
                 // Terrain temperature
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                 {
-                    TerrainDef terrain = cell.GetTerrain(map);
-                    ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
-                    if (terrainProps != null && terrainProps.heatCapacity > 0)
+                    float terrainTemperature = terrainTemperatures[i];
+                    if (!float.IsNaN(terrainTemperature))
                     {
-                        float terrainTemperature = terrainTemperatures[i];
-                        TemperatureUtility.CalculateHeatTransfer(temperature, terrainTemperature, terrainProps, 0, ref energy, ref heatFlow, log);
-                        float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
-                        if (log)
-                            LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
-                        terrainTemperature += terrainTempChange * terrainProps.Conductivity;
-                        terrainTemperatures[i] = terrainTemperature;
+                        TerrainDef terrain = cell.GetTerrain(map);
+                        ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
+                        if (terrainProps != null && terrainProps.heatCapacity > 0)
+                        {
+                            TemperatureUtility.CalculateHeatTransfer(temperature, terrainTemperature, terrainProps, 0, ref energy, ref heatFlow, log);
+                            float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
+                            if (log)
+                                LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
+                            terrainTemperature += terrainTempChange * terrainProps.Conductivity;
+                            terrainTemperatures[i] = terrainTemperature;
 
-                        // Freezing and melting (rarely)
-                        if (i % RareUpdateInterval == rareUpdateCounter)
-                            if (terrain.ShouldFreeze(terrainTemperature))
-                                cell.FreezeTerrain(map, log);
-                            else if (terrain.ShouldMelt(terrainTemperature))
-                                cell.MeltTerrain(map, log);
+                            // Freezing and melting (rarely)
+                            if (i % RareUpdateInterval == rareUpdateCounter)
+                                if (terrain.ShouldFreeze(terrainTemperature))
+                                    cell.FreezeTerrain(map, log);
+                                else if (terrain.ShouldMelt(terrainTemperature))
+                                    cell.MeltTerrain(map, log);
+                        }
+                        else terrainTemperatures[i] = float.NaN;
                     }
+                    // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
+                    else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature())
+                        terrainTemperatures[i] = temperature;
                 }
 
                 // Diffusion & convection
@@ -400,14 +414,12 @@ namespace Celsius
             return TemperatureTuning.DeepUndergroundTemperature;
         }
 
-        public float MountainTemperature => mountainTemperature;
-
         public bool TryGetEnvironmentTemperatureForCell(IntVec3 cell, out float temperature)
         {
             RoofDef roof = cell.GetRoof(map);
             if ((roof == RoofDefOf.RoofRockThick || roof == RoofDefOf.RoofRockThin) && cell.GetFirstMineable(map) != null)
             {
-                temperature = MountainTemperature;
+                temperature = mountainTemperature;
                 return true;
             }
             temperature = map.mapTemperature.OutdoorTemp;
