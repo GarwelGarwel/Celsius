@@ -41,23 +41,26 @@ namespace Celsius
             if (Settings.MountainTemperatureMode == MountainTemperatureMode.Manual)
             {
                 content.Label($"Temperature: {MountainTemperature.ToStringTemperature("F0")}");
-                MountainTemperature = (float)Math.Round(content.Slider(MountainTemperature, -100, 100));
+                MountainTemperature = Mathf.Round(content.Slider(MountainTemperature, -100, 100));
             }
 
             content.Gap();
-            content.Label($"Change the following values at your own risk.".Colorize(Color.red));
+            content.Label($"Change the values below at your own risk.".Colorize(Color.red));
+
+            content.Label($"Conductivity speed: {(1 / Mathf.Log(ConductivityPowerBase, ConductivityPowerBase_Default)).ToStringPercent()}", tooltip: $"How quickly temperature changes.");
+            ConductivityPowerBase = (float)Math.Round(content.Slider(ConductivityPowerBase, 0.1f, 0.9f), 2);
 
             content.Label($"Convection conductivity effect: x{ConvectionConductivityEffect}", tooltip: $"How much air convection increases air conductivity. Recommended value: {ConvectionConductivityEffect_Default}.");
-            ConvectionConductivityEffect = (float)Math.Round(content.Slider(ConvectionConductivityEffect, 1, 500));
+            ConvectionConductivityEffect = Mathf.Round(content.Slider(ConvectionConductivityEffect, 1, 50));
 
             content.Label($"Environment diffusion: {EnvironmentDiffusionFactor.ToStringPercent()}", tooltip: $"How strongly environment (e.g. outdoor) temperature affects cell temperatures. Recommended value: {EnvironmentDiffusionFactor_Default.ToStringPercent()}.");
-            EnvironmentDiffusionFactor = (float)Math.Round(content.Slider(EnvironmentDiffusionFactor, 0, 1), 1);
+            EnvironmentDiffusionFactor = Mathf.Round(content.Slider(EnvironmentDiffusionFactor, 0, 1) / 0.1f) * 0.1f;
 
-            content.Label($"Heat push: {HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
-            HeatPushMultiplier = (float)Math.Round(content.Slider(HeatPushMultiplier, 0, 5), 1);
+            content.Label($"Heat push: {HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (e.g. fires, heaters and coolers).");
+            HeatPushMultiplier = Mathf.Round(content.Slider(HeatPushMultiplier, 0, 2) / 0.1f) * 0.1f;
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
 
-            content.CheckboxLabeled("Debug logging mode", ref DebugMode, "Verbose logging of Celsius' work.");
+            content.CheckboxLabeled("Debug logging mode", ref DebugMode, "Verbose logging of Celsius' work. Necessary for bug reports.");
 
             if (content.ButtonText("Reset to default"))
                 Reset();
