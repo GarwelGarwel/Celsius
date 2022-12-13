@@ -3,7 +3,6 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using Verse;
 
@@ -55,6 +54,9 @@ namespace Celsius
             harmony.Patch(
                 AccessTools.Method("Verse.MapTemperature:TemperatureUpdate"),
                 prefix: new HarmonyMethod(type.GetMethod("MapTemperature_TemperatureUpdate")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.GlobalControls:TemperatureString"),
+                postfix: new HarmonyMethod(type.GetMethod("GlobalControls_TemperatureString")));
             harmony.Patch(
                 AccessTools.Method("RimWorld.Building_Door:DoorOpen"),
                 postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorOpen")));
@@ -173,15 +175,29 @@ namespace Celsius
         // Disable MapTemperature.TemperatureUpdate, because vanilla temperature overlay is not used anymore
         public static bool MapTemperature_TemperatureUpdate() => false;
 
+        // Replaces temperature display in the global controls view (bottom right)
+        public static string GlobalControls_TemperatureString(string result)
+        {
+            IntVec3 cell = UI.MouseCell();
+            TemperatureInfo temperatureInfo = Find.CurrentMap.TemperatureInfo();
+            if (temperatureInfo == null || !cell.InBounds(Find.CurrentMap) || cell.Fogged(Find.CurrentMap))
+                return result;
+            result = temperatureInfo.GetTemperatureForCell(cell).ToStringTemperature("F0");
+            if (temperatureInfo.HasTerrainTemperatures)
+            {
+                float terrainTemperature = temperatureInfo.GetTerrainTemperature(cell);
+                if (!float.IsNaN(terrainTemperature))
+                    result += $" / Terrain {terrainTemperature.ToStringTemperature("F0")}";
+            }
+            return result;
+        }
+
         // When door is opening, update its state and thermal values
         public static void Building_Door_DoorOpen(Building_Door __instance)
         {
             CompThermal compThermal = __instance.TryGetComp<CompThermal>();
             if (compThermal != null)
-            {
-                LogUtility.Log($"Door {__instance} ({__instance.def.defName}) is opening.");
                 compThermal.IsOpen = true;
-            }
         }
 
         // When door is closing, update its state and thermal values
@@ -191,10 +207,7 @@ namespace Celsius
             {
                 CompThermal compThermal = __instance.TryGetComp<CompThermal>();
                 if (compThermal != null)
-                {
-                    LogUtility.Log($"Door {__instance} ({__instance.def.defName}) is closing.");
                     compThermal.IsOpen = false;
-                }
             }
         }
     }
