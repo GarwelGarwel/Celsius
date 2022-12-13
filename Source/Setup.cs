@@ -22,36 +22,48 @@ namespace Celsius
             if (harmony != null)
                 return;
 
+            LogUtility.Log($"Initializing Celsius {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}...", LogLevel.Important);
+
             harmony = new Harmony("Garwel.Celsius");
             Type type = typeof(Setup);
 
             harmony.Patch(
-                AccessTools.Method($"Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
+                AccessTools.Method("Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
                 prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_TryGetDirectAirTemperatureForCell")));
             harmony.Patch(
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
                 prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
             harmony.Patch(
-                AccessTools.Method($"Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
-                prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_PushHeat")));
+                AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
+                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat")));
             harmony.Patch(
-                AccessTools.Method($"Verse.GenTemperature:ControlTemperatureTempChange"),
-                postfix: new HarmonyMethod(type.GetMethod($"GenTemperature_ControlTemperatureTempChange")));
+                AccessTools.Method("Verse.GenTemperature:ControlTemperatureTempChange"),
+                postfix: new HarmonyMethod(type.GetMethod("GenTemperature_ControlTemperatureTempChange")));
             harmony.Patch(
-                AccessTools.Method($"RimWorld.SteadyEnvironmentEffects:MeltAmountAt"),
-                postfix: new HarmonyMethod(type.GetMethod($"SteadyEnvironmentEffects_MeltAmountAt")));
+                AccessTools.Method("RimWorld.SteadyEnvironmentEffects:MeltAmountAt"),
+                postfix: new HarmonyMethod(type.GetMethod("SteadyEnvironmentEffects_MeltAmountAt")));
             harmony.Patch(
-                AccessTools.Method($"Verse.AttachableThing:Destroy"),
-                prefix: new HarmonyMethod(type.GetMethod($"AttachableThing_Destroy")));
+                AccessTools.Method("Verse.AttachableThing:Destroy"),
+                prefix: new HarmonyMethod(type.GetMethod("AttachableThing_Destroy")));
             harmony.Patch(
-                AccessTools.Method($"RimWorld.JobGiver_SeekSafeTemperature:ClosestRegionWithinTemperatureRange"),
-                prefix: new HarmonyMethod(type.GetMethod($"JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange")));
+                AccessTools.Method("RimWorld.JobGiver_SeekSafeTemperature:ClosestRegionWithinTemperatureRange"),
+                prefix: new HarmonyMethod(type.GetMethod("JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange")));
             harmony.Patch(
-                AccessTools.Method($"Verse.DangerUtility:GetDangerFor"),
-                postfix: new HarmonyMethod(type.GetMethod($"DangerUtility_GetDangerFor")));
+                AccessTools.Method("Verse.DangerUtility:GetDangerFor"),
+                postfix: new HarmonyMethod(type.GetMethod("DangerUtility_GetDangerFor")));
             harmony.Patch(
-                AccessTools.Method($"Verse.MapTemperature:TemperatureUpdate"),
-                prefix: new HarmonyMethod(type.GetMethod($"MapTemperature_TemperatureUpdate")));
+                AccessTools.Method("Verse.MapTemperature:TemperatureUpdate"),
+                prefix: new HarmonyMethod(type.GetMethod("MapTemperature_TemperatureUpdate")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.GlobalControls:TemperatureString"),
+                prefix: new HarmonyMethod(type.GetMethod("GlobalControls_TemperatureString")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.Building_Door:DoorOpen"),
+                postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorOpen")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.Building_Door:DoorTryClose"),
+                postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorTryClose")));
+
             LogUtility.Log($"Harmony initialization complete.");
 
             // Adding CompThermal and ThingThermalProperties to all applicable Things
@@ -162,5 +174,41 @@ namespace Celsius
 
         // Disable MapTemperature.TemperatureUpdate, because vanilla temperature overlay is not used anymore
         public static bool MapTemperature_TemperatureUpdate() => false;
+
+        // Replaces temperature display in the global controls view (bottom right)
+        public static bool GlobalControls_TemperatureString(ref string __result)
+        {
+            IntVec3 cell = UI.MouseCell();
+            TemperatureInfo temperatureInfo = Find.CurrentMap.TemperatureInfo();
+            if (temperatureInfo == null || !cell.InBounds(Find.CurrentMap) || cell.Fogged(Find.CurrentMap))
+                return true;
+            __result = temperatureInfo.GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString);
+            if (temperatureInfo.HasTerrainTemperatures)
+            {
+                float terrainTemperature = temperatureInfo.GetTerrainTemperature(cell);
+                if (!float.IsNaN(terrainTemperature))
+                    __result += $" / Terrain {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
+            }
+            return false;
+        }
+
+        // When door is opening, update its state and thermal values
+        public static void Building_Door_DoorOpen(Building_Door __instance)
+        {
+            CompThermal compThermal = __instance.TryGetComp<CompThermal>();
+            if (compThermal != null)
+                compThermal.IsOpen = true;
+        }
+
+        // When door is closing, update its state and thermal values
+        public static void Building_Door_DoorTryClose(Building_Door __instance, bool __result)
+        {
+            if (__result)
+            {
+                CompThermal compThermal = __instance.TryGetComp<CompThermal>();
+                if (compThermal != null)
+                    compThermal.IsOpen = false;
+            }
+        }
     }
 }

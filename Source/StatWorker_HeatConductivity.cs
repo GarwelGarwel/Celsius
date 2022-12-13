@@ -8,25 +8,35 @@ namespace Celsius
     {
         public override float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
         {
-            CellThermalProps thermalProps = req.Thing?.TryGetComp<CompThermal>()?.ThermalProperties;
-            if (thermalProps == null)
-                return 0;
-            float conductivity = thermalProps.conductivity * CellThermalProps.Air.conductivity;
-            if (thermalProps.airflow > 0)
-                conductivity *= Mathf.Pow(Settings.ConvectionConductivityEffect, thermalProps.airflow);
-            return conductivity;
+            ThermalProps thermalProps = req.Thing?.TryGetComp<CompThermal>()?.ThermalProperties;
+            return thermalProps == null ? 0 : thermalProps.Conductivity;
         }
 
         public override string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
         {
             string str = base.GetExplanationUnfinalized(req, numberSense);
-            CellThermalProps thermalProps = req.Thing?.TryGetComp<CompThermal>()?.ThermalProperties;
-            if (thermalProps == null)
+            CompThermal compThermal = req.Thing?.TryGetComp<CompThermal>();
+            if (compThermal == null)
                 return str;
-            str += $"\n{req.Thing.LabelCapNoCount} own conductivity: {thermalProps.conductivity.ToStringDecimalIfSmall()}";
-            str += $"\nAir conductivity: x{CellThermalProps.Air.conductivity.ToStringDecimalIfSmall()}";
-            if (thermalProps.airflow > 0)
-                str += $"\nConvection (air flow {thermalProps.airflow.ToStringPercent()}): x{Mathf.Pow(Settings.ConvectionConductivityEffect, thermalProps.airflow).ToStringDecimalIfSmall()}";
+            ThingThermalProperties thingThermalProperties = compThermal.ThingThermalProperties;
+            if (thingThermalProperties == null)
+                return str;
+            str += $"\n{req.Thing.def.LabelCap} insulation: {thingThermalProperties.insulation}";
+            StuffThermalProperties stuffThermalProperties = compThermal.StuffThermalProperties;
+            if (stuffThermalProperties != null)
+                str += $"\nStuff insulation: x{stuffThermalProperties.insulationFactor.ToStringPercent()}";
+            if (thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen && compThermal.IsOpen)
+                str += $"\nThe {req.Thing.LabelNoCount} is open.".Colorize(Color.yellow);
+            ThermalProps thermalProps = compThermal.ThermalProperties;
+            if (thermalProps != null)
+            {
+                if (thermalProps.airflow != 0)
+                {
+                    str += $"\nAirflow: {thermalProps.airflow.ToStringPercent()}";
+                    str += $"\nActual insulation: {thermalProps.insulation}";
+                }
+                str += $"\nConductivity: {Settings.ConductivityPowerBase} ^ {thermalProps.insulation} = {thermalProps.Conductivity.ToStringPercent()}";
+            }
             return str;
         }
     }

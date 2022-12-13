@@ -2,6 +2,8 @@
 using UnityEngine;
 using Verse;
 
+using static Celsius.Settings;
+
 namespace Celsius
 {
     public class CelsiusMod : Mod
@@ -15,10 +17,14 @@ namespace Celsius
             Listing_Standard content = new Listing_Standard();
             content.Begin(rect);
 
-            content.CheckboxLabeled("Use vanilla colors", ref Settings.UseVanillaTemperatureColors, "Use vanilla color scheme for heat overlay instead of Celsius'.");
-            content.CheckboxLabeled("Show temperature tooltip", ref Settings.ShowTemperatureTooltip, "When heat overlay is on, show a tooltip next to the cursor with the cell's exact temperature.");
-            content.CheckboxLabeled("Freezing and melting", ref Settings.FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
-            content.CheckboxLabeled("Advanced autoignition", ref Settings.AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.");
+            content.CheckboxLabeled("Use vanilla colors", ref UseVanillaTemperatureColors, "Use vanilla color scheme for heat overlay instead of Celsius'.");
+            content.CheckboxLabeled("Show temperature tooltip", ref ShowTemperatureTooltip, "When heat overlay is on, show a tooltip next to the cursor with the cell's exact temperature.");
+            content.CheckboxLabeled("Freezing and melting", ref FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
+            content.CheckboxLabeled("Advanced autoignition", ref AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.");
+
+            content.Label($"Temperature display digits: {TemperatureDisplayDigits}", tooltip: $"How many digits to print after point for temperatures. Default value: {TemperatureDisplayDigits_Default}.");
+            TemperatureDisplayDigits = Mathf.RoundToInt(content.Slider(TemperatureDisplayDigits, 0, 2));
+            TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
 
             content.Gap();
             content.Label("Mountain temperature:");
@@ -26,48 +32,42 @@ namespace Celsius
             void AddMountainmodeOption(MountainTemperatureMode mode, string tooltip)
             {
                 if (Find.CurrentMap?.TemperatureInfo() != null)
-                    tooltip += $"\nCurrently: {Find.CurrentMap.TemperatureInfo().GetMountainTemperatureFor(mode).ToStringTemperature()}";
+                    tooltip += $"\nCurrently: {Find.CurrentMap.TemperatureInfo().GetMountainTemperatureFor(mode).ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
                 if (content.RadioButton(GenText.SplitCamelCase(mode.ToStringSafe()), Settings.MountainTemperatureMode == mode, (int)mode, tooltip))
                     Settings.MountainTemperatureMode = mode;
             }
 
-            AddMountainmodeOption(MountainTemperatureMode.Vanilla, "Mountains provide a stable underground temperature (similar to vanilla behaviour).");
+            AddMountainmodeOption(MountainTemperatureMode.Vanilla, "Mountains provide a constant underground temperature (similar to vanilla behaviour).");
             AddMountainmodeOption(MountainTemperatureMode.AnnualAverage, "Mountains provide a stable temperature throughout the year, which is defined by the map's climate.");
             AddMountainmodeOption(MountainTemperatureMode.SeasonAverage, "Mountains provide a temperature that gradually changes with season.");
             AddMountainmodeOption(MountainTemperatureMode.AmbientAir, "Mountains have no special thermal effect, their temperature is the same as outdoor temperature.");
             AddMountainmodeOption(MountainTemperatureMode.Manual, "Set mountain temperature to your wishes.");
             if (Settings.MountainTemperatureMode == MountainTemperatureMode.Manual)
             {
-                content.Label($"Temperature: {Settings.MountainTemperature.ToStringTemperature("F0")}");
-                Settings.MountainTemperature = (float)Math.Round(content.Slider(Settings.MountainTemperature, -100, 100));
+                content.Label($"Temperature: {MountainTemperature.ToStringTemperature("F0")}");
+                MountainTemperature = Mathf.Round(content.Slider(MountainTemperature, -100, 100));
             }
 
             content.Gap();
-            content.Label($"Change the following values at your own risk.".Colorize(Color.red));
+            content.Label($"Change the values below at your own risk.".Colorize(Color.red));
 
-            content.Label($"Heat conductivity: {Settings.HeatConductivityMultiplier.ToStringPercent()}", tooltip: "How quickly heat travels and temperatures equalize.");
-            Settings.HeatConductivityMultiplier = (float)Math.Round(content.Slider(Settings.HeatConductivityMultiplier, 0.1f, 2), 1);
-            Settings.HeatConductivityFactor = Settings.HeatConductivityFactor_Base * Settings.HeatConductivityMultiplier;
+            content.Label($"Conductivity speed: {(1 / Mathf.Log(ConductivityPowerBase, ConductivityPowerBase_Default)).ToStringPercent()}", tooltip: $"How quickly temperature changes.");
+            ConductivityPowerBase = (float)Math.Round(content.Slider(ConductivityPowerBase, 0.1f, 0.9f), 2);
 
-            content.Label($"Convection conductivity effect: x{Settings.ConvectionConductivityEffect}", tooltip: $"How much air convection increases air conductivity. Recommended value: {Settings.ConvectionConductivityEffect_Default}.");
-            Settings.ConvectionConductivityEffect = (float)Math.Round(content.Slider(Settings.ConvectionConductivityEffect, 1, 500));
+            content.Label($"Convection conductivity effect: x{ConvectionConductivityEffect}", tooltip: $"How much air convection increases air conductivity. Recommended value: {ConvectionConductivityEffect_Default}.");
+            ConvectionConductivityEffect = Mathf.Round(content.Slider(ConvectionConductivityEffect, 1, 50));
 
-            content.Label($"Environment diffusion: {Settings.EnvironmentDiffusionFactor.ToStringPercent()}", tooltip: $"How strongly environment (e.g. outdoor) temperature affects cell temperatures. Recommended value: {Settings.EnvironmentDiffusionFactor_Default.ToStringPercent()}.");
-            Settings.EnvironmentDiffusionFactor = (float)Math.Round(content.Slider(Settings.EnvironmentDiffusionFactor, 0, 1), 1);
+            content.Label($"Environment diffusion: {EnvironmentDiffusionFactor.ToStringPercent()}", tooltip: $"How strongly environment (e.g. outdoor) temperature affects cell temperatures. Recommended value: {EnvironmentDiffusionFactor_Default.ToStringPercent()}.");
+            EnvironmentDiffusionFactor = Mathf.Round(content.Slider(EnvironmentDiffusionFactor, 0, 1) / 0.1f) * 0.1f;
 
-            content.Label($"Heat push: {Settings.HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (fires, heaters, coolers, pawns).");
-            Settings.HeatPushMultiplier = (float)Math.Round(content.Slider(Settings.HeatPushMultiplier, 0, 5), 1);
-            Settings.HeatPushEffect = Settings.HeatPushEffect_Base * Settings.HeatPushMultiplier;
+            content.Label($"Heat push: {HeatPushMultiplier.ToStringPercent()}", tooltip: "Effect of things that produce or reduce heat (e.g. fires, heaters and coolers).");
+            HeatPushMultiplier = Mathf.Round(content.Slider(HeatPushMultiplier, 0, 2) / 0.1f) * 0.1f;
+            HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
 
-            content.Label(
-                $"Air heat capacity: {Settings.AirHeatCapacity:N0} J/C",
-                tooltip: $"Heat capacity (how slowly air changes temperature) in Joules/Celsius. Recommended value: {Settings.AirHeatCapacity_Default:N0} J/C.");
-            Settings.AirHeatCapacity = (float)Math.Round(content.Slider(Settings.AirHeatCapacity / 50, 600 / 50, 5000 / 50)) * 50;
-
-            content.CheckboxLabeled("Debug logging mode", ref Settings.DebugMode, "Verbose logging of Celsius' work.");
+            content.CheckboxLabeled("Debug logging mode", ref DebugMode, "Verbose logging of Celsius' work. Necessary for bug reports.");
 
             if (content.ButtonText("Reset to default"))
-                Settings.Reset();
+                Reset();
 
             content.End();
         }
@@ -77,6 +77,8 @@ namespace Celsius
         public override void WriteSettings()
         {
             base.WriteSettings();
+            LogUtility.Log("Settings changed.");
+            Print();
             TemperatureUtility.SettingsChanged();
         }
     }
