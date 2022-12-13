@@ -89,18 +89,13 @@ namespace Celsius
                     LogUtility.Log($"{thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
                     thing.Destroy();
                 }
-                else if (thing is Filth filth && !FilthMaker.TerrainAcceptsFilth(meltedTerrain, thing.def))
-                {
-                    LogUtility.Log($"Removing filth {thing.Label} from {meltedTerrain.label}.");
-                    filth.Destroy();
-                }
             }
 
             // Changing terrain
             if (map.terrainGrid.UnderTerrainAt(cell) == null)
                 map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
             if (log)
-                LogUtility.Log($"Ice melts at {cell} into {map.terrainGrid.UnderTerrainAt(cell)?.defName}.");
+                LogUtility.Log($"Ice at {cell} melts into {meltedTerrain.defName}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
             map.snowGrid.SetDepth(cell, 0);
         }

@@ -27,7 +27,7 @@ namespace Celsius
         public static MountainTemperatureMode MountainTemperatureMode;
         public static float MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
         public static int TemperatureDisplayDigits;
-        public static string TemperatureDisplayFormatString = "F0";
+        public static string TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits_Default}";
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const float ConductivityPowerBase_Default = 0.5f;
@@ -57,6 +57,7 @@ namespace Celsius
 
         public static void Reset()
         {
+            Log("Settings reset.");
             UseVanillaTemperatureColors = false;
             ShowTemperatureTooltip = true;
             FreezingAndMeltingEnabled = true;

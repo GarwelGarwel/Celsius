@@ -48,12 +48,10 @@ namespace Celsius
                 switch (signal.ToLowerInvariant())
                 {
                     case "flickedon":
-                        LogUtility.Log($"Vent {parent} was opened.");
                         IsOpen = true;
                         break;
 
                     case "flickedoff":
-                        LogUtility.Log($"Vent {parent} was closed.");
                         IsOpen = false;
                         break;
                 }
@@ -63,13 +61,11 @@ namespace Celsius
                 {
                     case "airon":
                     case "bothon":
-                        LogUtility.Log($"Window {parent} was opened.");
                         IsOpen = true;
                         break;
 
                     case "airoff":
                     case "bothoff":
-                        LogUtility.Log($"Window {parent} was closed.");
                         IsOpen = false;
                         break;
                 }
