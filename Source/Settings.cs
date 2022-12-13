@@ -26,12 +26,15 @@ namespace Celsius
         public static float HeatPushEffect;
         public static MountainTemperatureMode MountainTemperatureMode;
         public static float MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
+        public static int TemperatureDisplayDigits;
+        public static string TemperatureDisplayFormatString = "F0";
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const float ConductivityPowerBase_Default = 0.5f;
         public const float ConvectionConductivityEffect_Default = 10;
         public const float EnvironmentDiffusionFactor_Default = 0.3f;
         public const float HeatPushEffect_Base = 0.15f;
+        public const int TemperatureDisplayDigits_Default = 0;
 
         public Settings() => Reset();
 
@@ -47,6 +50,8 @@ namespace Celsius
             Scribe_Values.Look(ref HeatPushMultiplier, "HeatPushMultiplier", 1);
             Scribe_Values.Look(ref MountainTemperatureMode, "MountainTemperatureMode", MountainTemperatureMode.Vanilla);
             Scribe_Values.Look(ref MountainTemperature, "MountainTemperature", TemperatureTuning.DeepUndergroundTemperature);
+            Scribe_Values.Look(ref TemperatureDisplayDigits, "TemperatureDisplayDigits", TemperatureDisplayDigits_Default);
+            TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
             Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
         }
 
@@ -63,6 +68,8 @@ namespace Celsius
             HeatPushEffect = HeatPushEffect_Base;
             MountainTemperatureMode = MountainTemperatureMode.Vanilla;
             MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
+            TemperatureDisplayDigits = TemperatureDisplayDigits_Default;
+            TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
             Print();
             TemperatureUtility.SettingsChanged();
         }
@@ -82,6 +89,7 @@ namespace Celsius
             Log($"HeatPushEffect: {HeatPushEffect}");
             Log($"MountainTemperatureMode: {MountainTemperatureMode}");
             Log($"MountainTemperature: {MountainTemperature.ToStringTemperature()}");
+            Log($"TemperatureDisplayDigits: {TemperatureDisplayDigits}");
         }
     }
 }

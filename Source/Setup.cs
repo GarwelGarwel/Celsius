@@ -182,12 +182,12 @@ namespace Celsius
             TemperatureInfo temperatureInfo = Find.CurrentMap.TemperatureInfo();
             if (temperatureInfo == null || !cell.InBounds(Find.CurrentMap) || cell.Fogged(Find.CurrentMap))
                 return result;
-            result = temperatureInfo.GetTemperatureForCell(cell).ToStringTemperature("F0");
+            result = temperatureInfo.GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString);
             if (temperatureInfo.HasTerrainTemperatures)
             {
                 float terrainTemperature = temperatureInfo.GetTerrainTemperature(cell);
                 if (!float.IsNaN(terrainTemperature))
-                    result += $" / Terrain {terrainTemperature.ToStringTemperature("F0")}";
+                    result += $" / Terrain {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
             }
             return result;
         }
