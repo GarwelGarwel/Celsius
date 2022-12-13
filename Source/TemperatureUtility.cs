@@ -122,7 +122,7 @@ namespace Celsius
 
         public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
-        public static float GetIsolationWithAirflow(float isolation, float airflow) => Mathf.Lerp(isolation, 1, airflow);
+        public static float GetInsulationWithAirflow(float insulation, float airflow) => Mathf.Lerp(insulation, 1, airflow);
 
         #endregion THERMAL PROPERTIES
 

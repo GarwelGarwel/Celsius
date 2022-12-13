@@ -274,7 +274,7 @@ namespace Celsius
                 float temperature = temperatures[i];
                 ThermalProps cellProps = GetThermalPropertiesAt(i);
                 if (log)
-                    LogUtility.Log($"Cell {cell}. Temperature: {temperature:F1}C. Capacity: {cellProps.heatCapacity}. Isolation: {cellProps.isolation}. Conductivity: {cellProps.Conductivity:P0}.");
+                    LogUtility.Log($"Cell {cell}. Temperature: {temperature:F1}C. Capacity: {cellProps.heatCapacity}. Insulation: {cellProps.insulation}. Conductivity: {cellProps.Conductivity:P0}.");
 
                 float energy = 0;
                 float heatFlow = cellProps.HeatFlow;
