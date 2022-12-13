@@ -12,7 +12,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>9</heatCapacity>
-				<!--conductivity>0.4</conductivity-->
 				<isolation>6</isolation>
 			</li>
 		</value>
@@ -24,7 +23,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>10</heatCapacity>
-				<!--conductivity>0.3</conductivity-->
 				<isolation>7</isolation>
 			</li>
 		</value>
@@ -36,7 +34,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>11</heatCapacity>
-				<!--conductivity>0.22</conductivity-->
 				<isolation>8</isolation>
 			</li>
 		</value>
@@ -48,7 +45,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>12</heatCapacity>
-				<!--conductivity>0.16</conductivity-->
 				<isolation>9</isolation>
 			</li>
 		</value>
@@ -60,7 +56,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>7</heatCapacity>
-				<!--conductivity>0.4</conductivity-->
 				<isolation>6</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -73,7 +68,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>8</heatCapacity>
-				<!--conductivity>0.3</conductivity-->
 				<isolation>7</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -86,7 +80,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>9</heatCapacity>
-				<!--conductivity>0.22</conductivity-->
 				<isolation>8</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -99,7 +92,6 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>10</heatCapacity>
-				<!--conductivity>0.16</conductivity-->
 				<isolation>9</isolation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -114,8 +106,7 @@
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
 				<volumetricHeatCapacity>550</volumetricHeatCapacity>
-				<!--conductivity>0.4</conductivity-->
-				<isolation>1.6</isolation>
+				<isolation>1.5</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -126,8 +117,7 @@
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
 				<volumetricHeatCapacity>600</volumetricHeatCapacity>
-				<!--conductivity>0.3</conductivity-->
-				<isolation>1.8</isolation>
+				<isolation>1.6</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -138,8 +128,7 @@
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
 				<volumetricHeatCapacity>650</volumetricHeatCapacity>
-				<!--conductivity>0.22</conductivity-->
-				<isolation>2</isolation>
+				<isolation>1.7</isolation>
 			</li>
 		</value>
 	</Operation>
@@ -150,8 +139,7 @@
 		<value>
 			<li Class="Celsius.StuffThermalProperties">
 				<volumetricHeatCapacity>700</volumetricHeatCapacity>
-				<!--conductivity>0.16</conductivity-->
-				<isolation>2.2</isolation>
+				<isolation>1.8</isolation>
 			</li>
 		</value>
 	</Operation>
