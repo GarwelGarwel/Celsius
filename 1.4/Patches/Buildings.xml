@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>100</heatCapacity>
+				<volume>0.5</volume>
+				<insulation>5</insulation>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Door"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>5</heatCapacity>
+				<volume>0.0075</volume>
+				<insulation>4</insulation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Autodoor"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>5</heatCapacity>
+				<volume>0.0075</volume>
+				<insulation>4</insulation>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="AnimalFlap"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>3</heatCapacity>
+				<insulation>3.5</insulation>
+				<airflow>0.1</airflow>
+				<airflowWhenOpen>0.75</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Wall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>7</heatCapacity>
+				<volume>0.010</volume>
+				<insulation>5</insulation>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Vent"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>6</heatCapacity>
+				<insulation>4</insulation>
+				<airflow>0.05</airflow>
+				<airflowWhenOpen>0.9</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Cooler"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>6</heatCapacity>
+				<insulation>4</insulation>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>

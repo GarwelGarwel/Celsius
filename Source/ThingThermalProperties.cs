@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using UnityEngine;
+using Verse;
 
 namespace Celsius
 {
@@ -6,54 +7,39 @@ namespace Celsius
     {
         public float heatCapacity;
         public float volume;
-        public float conductivity = 1;
+        public float insulation = 1;
         public float airflow;
         public float airflowWhenOpen;
 
-        CellThermalProps defaultProps;
+        ThermalProps defaultProps;
 
         public ThingThermalProperties()
         { }
 
-        public CellThermalProps GetCellThermalProps()
+        public ThermalProps GetThermalProps()
         {
             if (defaultProps == null)
-                defaultProps = new CellThermalProps()
-                {
-                    heatCapacity = heatCapacity,
-                    airflow = airflow,
-                    conductivity = conductivity * Settings.HeatConductivityFactor
-                };
+                defaultProps = new ThermalProps(heatCapacity, insulation, airflow);
             return defaultProps;
         }
 
-        public CellThermalProps GetCellThermalProps(StuffThermalProperties stuffProps, bool open)
+        public ThermalProps GetThermalProps(StuffThermalProperties stuffProps, bool open)
         {
-            if (stuffProps == null)
+            if (stuffProps == null || volume == 0)
             {
                 if (heatCapacity <= 0)
                     return null;
                 if (!open)
-                    return GetCellThermalProps();
-                return new CellThermalProps()
-                {
-                    heatCapacity = heatCapacity,
-                    airflow = airflowWhenOpen,
-                    conductivity = GenMath.WeightedAverage(CellThermalProps.Air.conductivity, airflowWhenOpen, conductivity * Settings.HeatConductivityFactor, 1 - airflowWhenOpen)
-                };
+                    return GetThermalProps();
+                return new ThermalProps(heatCapacity, insulation, airflowWhenOpen);
             }
 
             float airflow = open ? airflowWhenOpen : this.airflow;
-            return new CellThermalProps()
-            {
-                heatCapacity = stuffProps.volumetricHeatCapacity * volume + Settings.AirHeatCapacity * (1 - volume / 1000),
-                airflow = airflow,
-                conductivity = GenMath.WeightedAverage(CellThermalProps.Air.conductivity, airflow, conductivity * stuffProps.conductivity * Settings.HeatConductivityFactor, 1 - airflow)
-            };
+            return new ThermalProps(Mathf.Lerp(1, stuffProps.volumetricHeatCapacity, volume), insulation * stuffProps.insulationFactor, airflow);
         }
 
         public void Reset() => defaultProps = null;
 
-        public override string ToString() => $"Heat capacity: {heatCapacity} J/C. Volume: {volume} m^3. Conductivity: {conductivity} W/C. Airflow: {airflow:P0} ({airflowWhenOpen:P0} when open).";
+        public override string ToString() => $"Heat capacity: {heatCapacity}. Volume: {volume} m^3. Insulation: {insulation}. Conductivity: {GetThermalProps().Conductivity:P1}. Airflow: {airflow:P0} ({airflowWhenOpen:P0} when open).";
     }
 }
