@@ -22,7 +22,7 @@ namespace Celsius
             content.CheckboxLabeled("Freezing and melting", ref FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
             content.CheckboxLabeled("Advanced autoignition", ref AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.");
 
-            content.Label($"Temperature display digits: {TemperatureDisplayDigits}", tooltip: $"How many digits to print after point for temperature display in the bottom right corner. Default value: {TemperatureDisplayDigits_Default}.");
+            content.Label($"Temperature display digits: {TemperatureDisplayDigits}", tooltip: $"How many digits to print after point for temperatures. Default value: {TemperatureDisplayDigits_Default}.");
             TemperatureDisplayDigits = Mathf.RoundToInt(content.Slider(TemperatureDisplayDigits, 0, 2));
             TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
 
@@ -32,7 +32,7 @@ namespace Celsius
             void AddMountainmodeOption(MountainTemperatureMode mode, string tooltip)
             {
                 if (Find.CurrentMap?.TemperatureInfo() != null)
-                    tooltip += $"\nCurrently: {Find.CurrentMap.TemperatureInfo().GetMountainTemperatureFor(mode).ToStringTemperature()}";
+                    tooltip += $"\nCurrently: {Find.CurrentMap.TemperatureInfo().GetMountainTemperatureFor(mode).ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
                 if (content.RadioButton(GenText.SplitCamelCase(mode.ToStringSafe()), Settings.MountainTemperatureMode == mode, (int)mode, tooltip))
                     Settings.MountainTemperatureMode = mode;
             }
@@ -77,6 +77,7 @@ namespace Celsius
         public override void WriteSettings()
         {
             base.WriteSettings();
+            LogUtility.Log("Settings changed.");
             Print();
             TemperatureUtility.SettingsChanged();
         }
