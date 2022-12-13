@@ -22,6 +22,10 @@ namespace Celsius
             content.CheckboxLabeled("Freezing and melting", ref FreezingAndMeltingEnabled, "Water can freeze and ice can melt into water.");
             content.CheckboxLabeled("Advanced autoignition", ref AutoignitionEnabled, "Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.");
 
+            content.Label($"Temperature display digits: {TemperatureDisplayDigits}", tooltip: $"How many digits to print after point for temperature display in the bottom right corner. Default value: {TemperatureDisplayDigits_Default}.");
+            TemperatureDisplayDigits = Mathf.RoundToInt(content.Slider(TemperatureDisplayDigits, 0, 2));
+            TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
+
             content.Gap();
             content.Label("Mountain temperature:");
 

@@ -213,12 +213,12 @@ namespace Celsius
             {
                 GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
-                string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature()}";
+                string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                 {
                     float terrainTemperature = GetTerrainTemperature(cell);
                     if (!float.IsNaN(terrainTemperature))
-                        tooltip += $"\nTerrain: {terrainTemperature.ToStringTemperature()}";
+                        tooltip += $"\nTerrain: {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
                 }
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
                 Text.Font = font;
@@ -438,7 +438,7 @@ namespace Celsius
             if (room == null || room.ID == -1 || roomTemperatures == null)
             {
                 LogUtility.Log($"Could not get temperature for room {room?.ToString() ?? "null"}.", LogLevel.Error);
-                return TemperatureTuning.DefaultTemperature;
+                return map.mapTemperature.OutdoorTemp;
             }
             if (roomTemperatures.TryGetValue(room.ID, out float temperature))
                 return temperature;
