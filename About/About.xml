@@ -13,27 +13,15 @@
 
 Main features:
 
-- Temperature is tracked and accurately represented for every map cell (loosely) based on real-world thermal properties.
+- Temperature is simulated for every map cell (as opposed to vanilla's room-level abstraction). It is hot near fires and geyzers. Various building materials have different isolation properties based on their real-world counterparts. Mountains provide more stable temperature (which you can adjust) as do large bodies of water.
 
-- Water can freeze and ice can melt.
+- Water can freeze, and ice can melt. Rivers, seas and marshes may turn into icy plains in the winter and melt again in the summer. Setting up fires on glaciers can uncover water or ground underneath. Be careful, so that your pawns don't drown in deep water. 
 
-- Flammable things may spontaneously ignite when it gets extremely hot.
+- Flammable things may spontaneously ignite when it gets extremely hot. Different materials have different ignition temperatures, and it can affect buildings, manufactured items, plants and more.
+
+- Small tweaks to various related features, such as snow melting faster under rain.
 
 Celsius opens up many new challenges and ways to play RimWorld. Forgo houses and warm colonists at campfires, melt ice sheets or unleash deadly firestorms on your enemies!
-
-Some vanilla shortcuts and assumptions have been removed, which affected balance of many things (e.g. the size of rooms heated by a firplace).
-
-I worked hard to optimize the mod, and it shouldn't seriously slow down the game. You may disable or tweak its features to your liking.
-
-You can install it in an ongoing game. Removal mid-game is also theoretically possible but untested.
-
-DLCs are supported. Mods support is an ongoing effort. Mod authors can provide patches on their side or submit PRs in Github.
-
-For issue reports, suggestions and pull requests, visit Github: https://github.com/GarwelGarwel/Celsius
-
-Dependencies:
-- Harmony
-- XML Extensions
 
 Currently supported mods:
 - Insulation
@@ -41,9 +29,30 @@ Currently supported mods:
 - Vanilla Furniture Extended: base mod, Architect, Medical, Security
 - Windows
 
-Conflicts:
-- Any mod that alters temperature-related things in the game is likely to cause issues. 
-- Heat Map, Proxy Heat are not needed, because Celsius does everything these mod do (and much more)</description>
+All DLCs are supported. Mod authors can provide patches on their side or submit PRs in Github.
+
+FAQ:
+
+- Can I install the mod in an existing save? Can I remove it?
+
+Celsius can be installed in an ongoing game. It may take a few seasons for all the temperatures to adjust.  Note that Celsius deeply changes temperature-related gameplay in RimWorld, so you will almost certainly need to adapt both your base and your play style. Removal mid-game is also theoretically possible but untested. 
+
+- How does it affect performance?
+
+I worked hard to optimize the mod, and it shouldn't seriously slow down your game. In my tests on a rather ordinary laptop I haven't noticed any impact at all. Old machines and multiple or very big maps may have a different experience, but it shouldn't brick your computer.
+
+- Any known incompatibilities?
+
+Heat Map, Proxy Heat and similar mods are not needed, because Celsius does everything these mods do (and much more). Other mods that also change temperature-related mechanics will also probably conflict.
+
+Some modded vents, coolers and the like may experience issues or be unbalanced. There have been reported problems with Vanilla Expanded reactors and Android Tiers cores overheating.
+
+- How do I report issues or share feedback?
+
+The best option is to use Github: https://github.com/GarwelGarwel/Celsius/issues
+
+You may also leave comments on the Steam page. If you are reporting a bug, make sure to enable Debug Logging in the settings and attach the Player.log file.
+</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>
@@ -61,6 +70,8 @@ Conflicts:
 	<loadAfter>
 		<li>brrainz.harmony</li>
 		<li>Ludeon.RimWorld</li>
+		<li>Ludeon.RimWorld.Royalty</li>
+		<li>Ludeon.RimWorld.Ideology</li>
 		<li>imranfish.xmlextensions</li>
 	</loadAfter>
 </ModMetaData>
