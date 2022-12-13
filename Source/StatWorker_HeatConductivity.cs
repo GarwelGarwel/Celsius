@@ -21,10 +21,10 @@ namespace Celsius
             ThingThermalProperties thingThermalProperties = compThermal.ThingThermalProperties;
             if (thingThermalProperties == null)
                 return str;
-            str += $"\n{req.Thing.def.LabelCap} isolation: {thingThermalProperties.isolation}";
+            str += $"\n{req.Thing.def.LabelCap} insulation: {thingThermalProperties.insulation}";
             StuffThermalProperties stuffThermalProperties = compThermal.StuffThermalProperties;
             if (stuffThermalProperties != null)
-                str += $"\nStuff isolation: x{stuffThermalProperties.isolation.ToStringPercent()}";
+                str += $"\nStuff insulation: x{stuffThermalProperties.insulationFactor.ToStringPercent()}";
             if (thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen && compThermal.IsOpen)
                 str += $"\nThe {req.Thing.LabelNoCount} is open.".Colorize(Color.yellow);
             ThermalProps thermalProps = compThermal.ThermalProperties;
@@ -33,9 +33,9 @@ namespace Celsius
                 if (thermalProps.airflow != 0)
                 {
                     str += $"\nAirflow: {thermalProps.airflow.ToStringPercent()}";
-                    str += $"\nActual isolation: {thermalProps.isolation}";
+                    str += $"\nActual insulation: {thermalProps.insulation}";
                 }
-                str += $"\nConductivity: {Settings.ConductivityPowerBase} ^ {thermalProps.isolation} = {thermalProps.Conductivity.ToStringPercent()}";
+                str += $"\nConductivity: {Settings.ConductivityPowerBase} ^ {thermalProps.insulation} = {thermalProps.Conductivity.ToStringPercent()}";
             }
             return str;
         }
