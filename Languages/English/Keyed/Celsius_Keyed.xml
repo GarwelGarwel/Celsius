@@ -39,6 +39,7 @@
     
     <Celsius_MapTempOverlay_Cell>Cell: {0}</Celsius_MapTempOverlay_Cell>
     <Celsius_MapTempOverlay_Terrain>Terrain: {0}</Celsius_MapTempOverlay_Terrain>
+    <Celsius_string_Terrain>Terrain</Celsius_string_Terrain>
     
     <Celsius_Stat_HeatCapacity_insulation>{0} insulation: {1}</Celsius_Stat_HeatCapacity_insulation>
     <Celsius_Stat_HeatCapacity_Stuffinsulation>Stuff insulation:</Celsius_Stat_HeatCapacity_Stuffinsulation>
