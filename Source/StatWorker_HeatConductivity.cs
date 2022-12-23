@@ -21,21 +21,27 @@ namespace Celsius
             ThingThermalProperties thingThermalProperties = compThermal.ThingThermalProperties;
             if (thingThermalProperties == null)
                 return str;
-            str += $"\n{req.Thing.def.LabelCap} insulation: {thingThermalProperties.insulation}";
+            // Localization Key: Celsius_Stat_HeatCapacity_insulation - {req.Thing.def.LabelCap} insulation: {thingThermalProperties.insulation}
+            str += $"\n{"Celsius_Stat_HeatCapacity_insulation".Translate(req.Thing.def.LabelCap, thingThermalProperties.insulation)}";
             StuffThermalProperties stuffThermalProperties = compThermal.StuffThermalProperties;
             if (stuffThermalProperties != null)
-                str += $"\nStuff insulation: x{stuffThermalProperties.insulationFactor.ToStringPercent()}";
+                // Localization Key: Celsius_Stat_HeatCapacity_Stuffinsulation - Stuff insulation: x{stuffThermalProperties.insulationFactor.ToStringPercent()}
+                str += $"\n{"Celsius_Stat_HeatCapacity_Stuffinsulation".Translate(stuffThermalProperties.insulationFactor.ToStringPercent())}";
             if (thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen && compThermal.IsOpen)
-                str += $"\nThe {req.Thing.LabelNoCount} is open.".Colorize(Color.yellow);
+                // Localization Key: Celsius_Stat_HeatCapacity_Airflowopen - The {req.Thing.LabelNoCount} is open.
+                str += $"\n{"Celsius_Stat_HeatCapacity_Airflowopen".Translate(req.Thing.LabelNoCount)}".Colorize(Color.yellow);
             ThermalProps thermalProps = compThermal.ThermalProperties;
             if (thermalProps != null)
             {
                 if (thermalProps.airflow != 0)
                 {
-                    str += $"\nAirflow: {thermalProps.airflow.ToStringPercent()}";
-                    str += $"\nActual insulation: {thermalProps.insulation}";
+                    // Localization Key: Celsius_Stat_HeatCapacity_Airflow - Airflow: {thermalProps.airflow.ToStringPercent()}
+                    str += $"\n{"Celsius_Stat_HeatCapacity_Airflow".Translate(thermalProps.airflow.ToStringPercent())}";
+                    // Localization Key: Celsius_Stat_HeatCapacity_ActualInsulation - Actual insulation: {thermalProps.insulation}
+                    str += $"\n{"Celsius_Stat_HeatCapacity_ActualInsulation".Translate(thermalProps.insulation)}";
                 }
-                str += $"\nConductivity: {Settings.ConductivityPowerBase} ^ {thermalProps.insulation} = {thermalProps.Conductivity.ToStringPercent()}";
+                // Localization Key: Celsius_Stat_HeatCapacity_Conductivity - Conductivity:
+                str += $"\n{"Celsius_Stat_HeatCapacity_Conductivity".Translate()} {Settings.ConductivityPowerBase} ^ {thermalProps.insulation} = {thermalProps.Conductivity.ToStringPercent()}";
             }
             return str;
         }

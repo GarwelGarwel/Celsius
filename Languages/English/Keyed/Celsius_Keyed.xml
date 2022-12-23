@@ -39,5 +39,12 @@
     
     <Celsius_MapTempOverlay_Cell>Cell: {0}</Celsius_MapTempOverlay_Cell>
     <Celsius_MapTempOverlay_Terrain>Terrain: {0}</Celsius_MapTempOverlay_Terrain>
+    
+    <Celsius_Stat_HeatCapacity_insulation>{0} insulation: {1}</Celsius_Stat_HeatCapacity_insulation>
+    <Celsius_Stat_HeatCapacity_Stuffinsulation>Stuff insulation: x{0}</Celsius_Stat_HeatCapacity_Stuffinsulation>
+    <Celsius_Stat_HeatCapacity_Airflowopen>The {0} is open.</Celsius_Stat_HeatCapacity_Airflowopen>
+    <Celsius_Stat_HeatCapacity_Airflow>Airflow: {0}</Celsius_Stat_HeatCapacity_Airflow>
+    <Celsius_Stat_HeatCapacity_ActualInsulation>Actual insulation: {0}</Celsius_Stat_HeatCapacity_ActualInsulation>
+    <Celsius_Stat_HeatCapacity_Conductivity>Conductivity:</Celsius_Stat_HeatCapacity_Conductivity>
 
 </LanguageData>
