@@ -26,7 +26,7 @@ namespace Celsius
             StuffThermalProperties stuffThermalProperties = compThermal.StuffThermalProperties;
             if (stuffThermalProperties != null)
                 // Localization Key: Celsius_Stat_HeatCapacity_Stuffinsulation - Stuff insulation: x{stuffThermalProperties.insulationFactor.ToStringPercent()}
-                str += $"\n{"Celsius_Stat_HeatCapacity_Stuffinsulation".Translate(stuffThermalProperties.insulationFactor.ToStringPercent())}";
+                str += $"\n{"Celsius_Stat_HeatCapacity_Stuffinsulation".Translate()} x{stuffThermalProperties.insulationFactor.ToStringPercent()}";
             if (thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen && compThermal.IsOpen)
                 // Localization Key: Celsius_Stat_HeatCapacity_Airflowopen - The {req.Thing.LabelNoCount} is open.
                 str += $"\n{"Celsius_Stat_HeatCapacity_Airflowopen".Translate(req.Thing.LabelNoCount)}".Colorize(Color.yellow);

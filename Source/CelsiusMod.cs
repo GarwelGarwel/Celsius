@@ -76,7 +76,7 @@ namespace Celsius
 
             // Localization key: Celsius_settings_ConvectionConductivityEffect - Convection conductivity effect: x{ConvectionConductivityEffect}
             //                   Celsius_settings_ConvectionConductivityEffect_tooltip - How much air convection increases air conductivity. Recommended value: {ConvectionConductivityEffect_Default}.
-            content.Label("Celsius_settings_ConvectionConductivityEffect".Translate(ConvectionConductivityEffect), tooltip: "Celsius_settings_ConvectionConductivityEffect_tooltip".Translate(ConvectionConductivityEffect_Default));
+            content.Label($"{"Celsius_settings_ConvectionConductivityEffect".Translate()} x{ ConvectionConductivityEffect}", tooltip: "Celsius_settings_ConvectionConductivityEffect_tooltip".Translate(ConvectionConductivityEffect_Default));
             ConvectionConductivityEffect = Mathf.Round(content.Slider(ConvectionConductivityEffect, 1, 50));
 
             // Localization key: Celsius_settings_EnvironmentDiffusion - Environment diffusion: {EnvironmentDiffusionFactor.ToStringPercent()}

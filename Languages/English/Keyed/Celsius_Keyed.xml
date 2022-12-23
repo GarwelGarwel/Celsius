@@ -27,7 +27,7 @@
     <Celsius_settings_TakeOwnRisk>Change the values below at your own risk.</Celsius_settings_TakeOwnRisk>
     <Celsius_settings_ConductivitySpeed>Conductivity speed: {0}</Celsius_settings_ConductivitySpeed>
     <Celsius_settings_ConductivitySpeed_tooltip>How quickly temperature changes.</Celsius_settings_ConductivitySpeed_tooltip>
-    <Celsius_settings_ConvectionConductivityEffect>Convection conductivity effect: x{0}</Celsius_settings_ConvectionConductivityEffect>
+    <Celsius_settings_ConvectionConductivityEffect>Convection conductivity effect:</Celsius_settings_ConvectionConductivityEffect>
     <Celsius_settings_ConvectionConductivityEffect_tooltip>How much air convection increases air conductivity. Recommended value: {0}.</Celsius_settings_ConvectionConductivityEffect_tooltip>
     <Celsius_settings_EnvironmentDiffusion>Environment diffusion: {0}</Celsius_settings_EnvironmentDiffusion>
     <Celsius_settings_EnvironmentDiffusion_tooltip>How strongly environment (e.g. outdoor) temperature affects cell temperatures. Recommended value: {0}.</Celsius_settings_EnvironmentDiffusion_tooltip>
@@ -41,7 +41,7 @@
     <Celsius_MapTempOverlay_Terrain>Terrain: {0}</Celsius_MapTempOverlay_Terrain>
     
     <Celsius_Stat_HeatCapacity_insulation>{0} insulation: {1}</Celsius_Stat_HeatCapacity_insulation>
-    <Celsius_Stat_HeatCapacity_Stuffinsulation>Stuff insulation: x{0}</Celsius_Stat_HeatCapacity_Stuffinsulation>
+    <Celsius_Stat_HeatCapacity_Stuffinsulation>Stuff insulation:</Celsius_Stat_HeatCapacity_Stuffinsulation>
     <Celsius_Stat_HeatCapacity_Airflowopen>The {0} is open.</Celsius_Stat_HeatCapacity_Airflowopen>
     <Celsius_Stat_HeatCapacity_Airflow>Airflow: {0}</Celsius_Stat_HeatCapacity_Airflow>
     <Celsius_Stat_HeatCapacity_ActualInsulation>Actual insulation: {0}</Celsius_Stat_HeatCapacity_ActualInsulation>
