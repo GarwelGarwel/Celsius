@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+    <Celsius_MountainTemperatureMode_Vanilla>Vanilla</Celsius_MountainTemperatureMode_Vanilla>
+    <Celsius_MountainTemperatureMode_Vanilla_tooltip>Mountains provide a constant underground temperature (similar to vanilla behaviour).</Celsius_MountainTemperatureMode_Vanilla_tooltip>
+    <Celsius_MountainTemperatureMode_AnnualAverage>Annual Average</Celsius_MountainTemperatureMode_AnnualAverage>
+    <Celsius_MountainTemperatureMode_AnnualAverage_tooltip>Mountains provide a stable temperature throughout the year, which is defined by the map's climate.</Celsius_MountainTemperatureMode_AnnualAverage_tooltip>
+    <Celsius_MountainTemperatureMode_SeasonAverage>Season Average</Celsius_MountainTemperatureMode_SeasonAverage>
+    <Celsius_MountainTemperatureMode_SeasonAverage_tooltip>Mountains provide a temperature that gradually changes with season.</Celsius_MountainTemperatureMode_SeasonAverage_tooltip>
+    <Celsius_MountainTemperatureMode_AmbientAir>Ambient Air</Celsius_MountainTemperatureMode_AmbientAir>
+    <Celsius_MountainTemperatureMode_AmbientAir_tooltip>Mountains have no special thermal effect, their temperature is the same as outdoor temperature.</Celsius_MountainTemperatureMode_AmbientAir_tooltip>
+    <Celsius_MountainTemperatureMode_Manual>Manual</Celsius_MountainTemperatureMode_Manual>
+    <Celsius_MountainTemperatureMode_Manual_tooltip>Set mountain temperature to your wishes.</Celsius_MountainTemperatureMode_Manual_tooltip>
+    <Celsius_settings_ManualTemperature>Temperature: {0}</Celsius_settings_ManualTemperature>
+
+    <Celsius_settings_Vanilla>Use vanilla colors</Celsius_settings_Vanilla>
+    <Celsius_settings_Vanilla_ToolTip>Use vanilla color scheme for heat overlay instead of Celsius'.</Celsius_settings_Vanilla_ToolTip>
+    <Celsius_settings_Showtemptooltip>Show temperature tooltip</Celsius_settings_Showtemptooltip>
+    <Celsius_settings_Showtemptooltip_ToolTip>When heat overlay is on, show a tooltip next to the cursor with the cell's exact temperature.</Celsius_settings_Showtemptooltip_ToolTip>
+    <Celsius_settings_FreezingAndMelting>Freezing and melting</Celsius_settings_FreezingAndMelting>
+    <Celsius_settings_FreezingAndMelting_ToolTip>Water can freeze and ice can melt into water.</Celsius_settings_FreezingAndMelting_ToolTip>
+    <Celsius_settings_AdvAutoignition>Advanced autoignition</Celsius_settings_AdvAutoignition>
+    <Celsius_settings_AdvAutoignition_ToolTip>Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.</Celsius_settings_AdvAutoignition_ToolTip>
+    <Celsius_settings_TempDisplayDigits>Temperature display digits: {0}</Celsius_settings_TempDisplayDigits>
+    <Celsius_settings_TempDisplayDigits_ToolTip>How many digits to print after point for temperatures. Default value: {0}</Celsius_settings_TempDisplayDigits_ToolTip>
+    <Celsius_settings_MountainTemp>Mountain temperature:</Celsius_settings_MountainTemp>
+    <Celsius_settings_CurrentMapTemptooltip>Currently: {0}</Celsius_settings_CurrentMapTemptooltip>
+    <Celsius_settings_TakeOwnRisk>Change the values below at your own risk.</Celsius_settings_TakeOwnRisk>
+    <Celsius_settings_ConductivitySpeed>Conductivity speed: {0}</Celsius_settings_ConductivitySpeed>
+    <Celsius_settings_ConductivitySpeed_tooltip>How quickly temperature changes.</Celsius_settings_ConductivitySpeed_tooltip>
+    <Celsius_settings_ConvectionConductivityEffect>Convection conductivity effect: x{0}</Celsius_settings_ConvectionConductivityEffect>
+    <Celsius_settings_ConvectionConductivityEffect_tooltip>How much air convection increases air conductivity. Recommended value: {0}.</Celsius_settings_ConvectionConductivityEffect_tooltip>
+    <Celsius_settings_EnvironmentDiffusion>Environment diffusion: {0}</Celsius_settings_EnvironmentDiffusion>
+    <Celsius_settings_EnvironmentDiffusion_tooltip>How strongly environment (e.g. outdoor) temperature affects cell temperatures. Recommended value: {0}.</Celsius_settings_EnvironmentDiffusion_tooltip>
+    <Celsius_settings_HeatPush>Heat push: {0}</Celsius_settings_HeatPush>
+    <Celsius_settings_HeatPush_tooltip>Effect of things that produce or reduce heat (e.g. fires, heaters and coolers).</Celsius_settings_HeatPush_tooltip>
+    <Celsius_settings_DebugMode>Debug logging mode</Celsius_settings_DebugMode>
+    <Celsius_settings_DebugMode_tooltip>Verbose logging of Celsius' work. Necessary for bug reports.</Celsius_settings_DebugMode_tooltip>
+    <Celsius_settings_ResetDefault>Reset to default</Celsius_settings_ResetDefault>
+    
+    <Celsius_MapTempOverlay_Cell>Cell: {0}</Celsius_MapTempOverlay_Cell>
+    <Celsius_MapTempOverlay_Terrain>Terrain: {0}</Celsius_MapTempOverlay_Terrain>
+
+</LanguageData>
