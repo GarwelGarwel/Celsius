@@ -6,8 +6,8 @@
 		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>105</heatCapacity>
-				<insulation>5</insulation>
+				<heatCapacity>240</heatCapacity>
+				<insulation>6</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -16,8 +16,8 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>100</heatCapacity>
-				<insulation>5</insulation>
+				<heatCapacity>220</heatCapacity>
+				<insulation>6</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -26,8 +26,8 @@
 		<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>105</heatCapacity>
-				<insulation>5</insulation>
+				<heatCapacity>220</heatCapacity>
+				<insulation>6</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -36,8 +36,8 @@
 		<xpath>Defs/TerrainDef[defName="WaterOceanShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>100</heatCapacity>
-				<insulation>5</insulation>
+				<heatCapacity>200</heatCapacity>
+				<insulation>6</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -46,8 +46,8 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingChestDeep"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>180</heatCapacity>
-				<insulation>5</insulation>
+				<heatCapacity>360</heatCapacity>
+				<insulation>6</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -56,8 +56,8 @@
 		<xpath>Defs/TerrainDef[defName="WaterMovingShallow"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>150</heatCapacity>
-				<insulation>5</insulation>
+				<heatCapacity>300</heatCapacity>
+				<insulation>6</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -66,8 +66,8 @@
 		<xpath>Defs/TerrainDef[defName="Marsh"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>70</heatCapacity>
-				<insulation>4.5</insulation>
+				<heatCapacity>150</heatCapacity>
+				<insulation>5.5</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -76,8 +76,8 @@
 		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>50</heatCapacity>
-				<insulation>5.5</insulation>
+				<heatCapacity>100</heatCapacity>
+				<insulation>6.5</insulation>
 			</li>
 		</value>
 	</Operation>

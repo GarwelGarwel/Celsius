@@ -5,15 +5,14 @@ using Verse;
 
 namespace Celsius
 {
-    static class CellUtility
+    static class FreezeMeltUtility
     {
-        public static IEnumerable<IntVec3> AdjacentCells(this IntVec3 cell)
-        {
-            yield return cell + IntVec3.North;
-            yield return cell + IntVec3.East;
-            yield return cell + IntVec3.South;
-            yield return cell + IntVec3.West;
-        }
+        public const float FreezeTemperature = -0.5f;
+        public const float MeltTemperature = 0.5f;
+
+        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < FreezeTemperature && terrain.IsWater;
+
+        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > MeltTemperature && terrain == TerrainDefOf.Ice;
 
         /// <summary>
         /// Returns best guess for what kind of water terrain should be placed in a cell (if Ice melts there)
@@ -25,7 +24,7 @@ namespace Celsius
                 return terrain;
 
             bool foundGround = false;
-            foreach (IntVec3 c in cell.AdjacentCells())
+            foreach (IntVec3 c in GenAdjFast.AdjacentCells8Way(cell))
             {
                 if (!c.InBounds(map))
                     continue;
@@ -38,7 +37,7 @@ namespace Celsius
                 if (terrain != TerrainDefOf.Ice || (underTerrain != null && underTerrain != TerrainDefOf.Ice))
                     foundGround = true;
             }
-            
+
             if (foundGround)
                 return map.Biome == BiomeDefOf.SeaIce ? TerrainDefOf.WaterOceanShallow : TerrainDefOf.WaterShallow;
             return map.Biome == BiomeDefOf.SeaIce ? TerrainDefOf.WaterOceanDeep : TerrainDefOf.WaterDeep;
@@ -61,9 +60,6 @@ namespace Celsius
             for (int i = things.Count - 1; i >= 0; i--)
             {
                 Thing thing = things[i];
-                TerrainAffordanceDef terrainAffordance = thing.TerrainAffordanceNeeded;
-                if (terrainAffordance != null)
-                    LogUtility.Log($"{thing.LabelCap}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}.");
                 if (meltedTerrain.passability == Traversability.Impassable)
                     if (thing is Pawn pawn)
                     {
@@ -84,10 +80,14 @@ namespace Celsius
                     grave.EjectContents();
                     grave.Destroy();
                 }
-                else if (terrainAffordance != null && !meltedTerrain.affordances.Contains(terrainAffordance))
+                else
                 {
-                    LogUtility.Log($"{thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
-                    thing.Destroy();
+                    TerrainAffordanceDef terrainAffordance = thing.TerrainAffordanceNeeded;
+                    if (terrainAffordance != null && !meltedTerrain.affordances.Contains(terrainAffordance))
+                    {
+                        LogUtility.Log($"{thing.LabelCap}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
+                        thing.Destroy();
+                    }
                 }
             }
 
