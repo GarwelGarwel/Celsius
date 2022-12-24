@@ -12,19 +12,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>7</heatCapacity>
-				<insulation>5</insulation>
-			</li>
-		</value>
-	</Operation>
-
-	<Operation Class="PatchOperationAddModExtension">
-		<success>Always</success>
-		<xpath>Defs/ThingDef[defName="VFEArch_HedgeWall"]</xpath>
-		<value>
-			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>3</heatCapacity>
-				<insulation>5</insulation>
-				<airflow>0.5</airflow>
+				<insulation>6.25</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -63,6 +51,19 @@
 				<insulation>3.5</insulation>
 				<airflow>0.1</airflow>
 				<airflowWhenOpen>0.8</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+	
+	<!-- VFE Architect Royalty patch -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="VFEArch_FineWall"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>7</heatCapacity>
+				<volume>0.010</volume>
+				<insulation>5</insulation>
 			</li>
 		</value>
 	</Operation>
