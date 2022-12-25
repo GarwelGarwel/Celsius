@@ -8,14 +8,22 @@ namespace Celsius
 {
     public class CelsiusMod : Mod
     {
+        Vector2 scrollPosition = new Vector2();
+        Rect viewRect;
+        Listing_Standard content = new Listing_Standard();
+
         public CelsiusMod(ModContentPack content)
             : base(content) =>
             GetSettings<Settings>();
 
         public override void DoSettingsWindowContents(Rect rect)
         {
-            Listing_Standard content = new Listing_Standard();
-            content.Begin(rect);
+            if (viewRect.height <= 0)
+                viewRect = new Rect(0, 0, rect.width - GenUI.ScrollBarWidth, 0);
+            Widgets.BeginScrollView(rect, ref scrollPosition, viewRect);
+            content.ColumnWidth = viewRect.width;
+            content.Begin(viewRect);
+
             // Localization key: Celsius_Settings_Vanilla - Use vanilla colors | Celsius_Settings_vanilla_tooltip - Use vanilla color scheme for heat overlay instead of Celsius'.
             content.CheckboxLabeled("Celsius_Settings_Vanilla".Translate(), ref UseVanillaTemperatureColors, "Celsius_Settings_Vanilla_tooltip".Translate());
             // Localization key: Celsius_Settings_ShowTempTooltip - Show temperature tooltip | Celsius_Settings_showtemptooltip_tooltip - When heat overlay is on, show a tooltip next to the cursor with the cell's exact temperature.
@@ -89,7 +97,9 @@ namespace Celsius
             if (content.ButtonText("Celsius_Settings_ResetDefault".Translate()))
                 Reset();
 
+            viewRect.height = content.MaxColumnHeightSeen + 40;
             content.End();
+            Widgets.EndScrollView();
         }
 
         public override string SettingsCategory() => "Celsius";
