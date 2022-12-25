@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace Celsius
@@ -65,7 +66,7 @@ namespace Celsius
                     {
                         LogUtility.Log($"{pawn.LabelCap} sinks in {meltedTerrain.label} and dies.");
                         if (pawn.Faction != null && pawn.Faction.IsPlayer)
-                            Find.LetterStack.ReceiveLetter($"{pawn.LabelShortCap} sunk", $"{pawn.NameShortColored} sunk in {meltedTerrain.label} when ice melted.", LetterDefOf.Death, new LookTargets(cell, map));
+                            Find.LetterStack.ReceiveLetter("Celsius_FreezeMelt_PawnSunk_title".Translate(pawn.LabelShortCap), "Celsius_FreezeMelt_PawnSunk_message".Translate(pawn.NameShortColored, meltedTerrain.label), LetterDefOf.Death, new LookTargets(cell, map));
                         pawn.Kill(null);
                         pawn.Corpse.Destroy();
                     }
@@ -99,5 +100,7 @@ namespace Celsius
             map.terrainGrid.RemoveTopLayer(cell, false);
             map.snowGrid.SetDepth(cell, 0);
         }
+
+        public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
     }
 }
