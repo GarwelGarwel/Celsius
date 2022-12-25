@@ -213,12 +213,14 @@ namespace Celsius
             {
                 GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
-                string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
+                // Localization key: Celsius_MapTempOverlay_Cell - Cell: {GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString)}
+                string tooltip = "Celsius_MapTempOverlay_Cell".Translate(GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                 {
                     float terrainTemperature = GetTerrainTemperature(cell);
                     if (!float.IsNaN(terrainTemperature))
-                        tooltip += $"\nTerrain: {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
+                        // Localization key: Celsius_MapTempOverlay_Terrain - Terrain: {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}
+                        tooltip += "\n" + "Celsius_MapTempOverlay_Terrain".Translate(terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 }
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
                 Text.Font = font;
