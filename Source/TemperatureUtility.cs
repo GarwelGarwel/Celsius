@@ -124,15 +124,11 @@ namespace Celsius
 
         #endregion DIFFUSION
 
-        #region THERMAL PROPERTIES
+        #region MISC UTILITIES
 
         public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
         public static float GetInsulationWithAirflow(float insulation, float airflow) => Mathf.Lerp(insulation, 1, airflow);
-
-        #endregion THERMAL PROPERTIES
-
-        #region HEAT PUSH AND SNOW MELTING
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
@@ -149,8 +145,6 @@ namespace Celsius
             return true;
         }
 
-        public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
-
-        #endregion HEAT PUSH AND SNOW MELTING
+        #endregion MISC UTILITIES
     }
 }

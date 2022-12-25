@@ -22,14 +22,14 @@ namespace Celsius
             if (thingThermalProperties == null)
                 return str;
             // Localization Key: Celsius_Stat_HeatCapacity_insulation - {req.Thing.def.LabelCap} insulation: {thingThermalProperties.insulation}
-            str += $"\n{"Celsius_Stat_HeatCapacity_insulation".Translate(req.Thing.def.LabelCap, thingThermalProperties.insulation)}";
+            str += $"\n{"Celsius_Stat_HeatCapacity_Insulation".Translate(req.Thing.def.LabelCap, thingThermalProperties.insulation)}";
             StuffThermalProperties stuffThermalProperties = compThermal.StuffThermalProperties;
             if (stuffThermalProperties != null)
                 // Localization Key: Celsius_Stat_HeatCapacity_Stuffinsulation - Stuff insulation: x{stuffThermalProperties.insulationFactor.ToStringPercent()}
-                str += $"\n{"Celsius_Stat_HeatCapacity_Stuffinsulation".Translate()} x{stuffThermalProperties.insulationFactor.ToStringPercent()}";
+                str += $"\n{"Celsius_Stat_HeatCapacity_StuffInsulation".Translate()} x{stuffThermalProperties.insulationFactor.ToStringPercent()}";
             if (thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen && compThermal.IsOpen)
                 // Localization Key: Celsius_Stat_HeatCapacity_Airflowopen - The {req.Thing.LabelNoCount} is open.
-                str += $"\n{"Celsius_Stat_HeatCapacity_Airflowopen".Translate(req.Thing.LabelNoCount)}".Colorize(Color.yellow);
+                str += $"\n{"Celsius_Stat_HeatCapacity_AirflowOpen".Translate(req.Thing.LabelNoCount)}".Colorize(Color.yellow);
             ThermalProps thermalProps = compThermal.ThermalProperties;
             if (thermalProps != null)
             {

@@ -187,8 +187,8 @@ namespace Celsius
             {
                 float terrainTemperature = temperatureInfo.GetTerrainTemperature(cell);
                 if (!float.IsNaN(terrainTemperature))
-                    // Localization Key: Celsius_string_Terrain - Terrain
-                    __result += $" / {"Celsius_string_Terrain".Translate()} {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
+                    // Localization Key: Celsius_Terrain - Terrain
+                    __result += $" / {"Celsius_Terrain".Translate()} {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
             }
             return false;
         }
