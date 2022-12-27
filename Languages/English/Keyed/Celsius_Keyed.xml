@@ -48,7 +48,4 @@
     <Celsius_Stat_HeatCapacity_ActualInsulation>Actual insulation: {0}</Celsius_Stat_HeatCapacity_ActualInsulation>
     <Celsius_Stat_HeatCapacity_Conductivity>Conductivity:</Celsius_Stat_HeatCapacity_Conductivity>
 	
-	<Celsius_FreezeMelt_PawnSunk_title>{0} sunk</Celsius_FreezeMelt_PawnSunk_title>
-	<Celsius_FreezeMelt_PawnSunk_message>{0} sunk in {1} when ice melted.</Celsius_FreezeMelt_PawnSunk_message>
-
 </LanguageData>

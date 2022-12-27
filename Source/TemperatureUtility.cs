@@ -32,7 +32,7 @@ namespace Celsius
                 DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
             if (Find.Maps != null)
                 for (int m = 0; m < Find.Maps.Count; m++)
-                    Find.Maps[m]?.TemperatureInfo()?.ResetAllThings();
+                    Find.Maps[m].TemperatureInfo()?.ResetAllThings();
         }
 
         #region TEMPERATURE
