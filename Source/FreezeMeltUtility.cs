@@ -64,11 +64,9 @@ namespace Celsius
                 if (meltedTerrain.passability == Traversability.Impassable)
                     if (thing is Pawn pawn)
                     {
-                        LogUtility.Log($"{pawn.LabelCap} sinks in {meltedTerrain.label} and dies.");
-                        if (pawn.Faction != null && pawn.Faction.IsPlayer)
-                            Find.LetterStack.ReceiveLetter("Celsius_FreezeMelt_PawnSunk_title".Translate(pawn.LabelShortCap), "Celsius_FreezeMelt_PawnSunk_message".Translate(pawn.NameShortColored, meltedTerrain.label), LetterDefOf.Death, new LookTargets(cell, map));
-                        pawn.Kill(null);
-                        pawn.Corpse.Destroy();
+                        LogUtility.Log($"{pawn.LabelCap} drowns in {meltedTerrain.label}.");
+                        pawn.health?.AddHediff(DefOf.Celsius_Hediff_Drown, dinfo: new DamageInfo(DefOf.Celsius_Damage_Drown, 1));
+                        pawn.Corpse?.Destroy();
                     }
                     else
                     {
