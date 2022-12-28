@@ -8,7 +8,7 @@ namespace Celsius
         public float offset;
 
         bool AppliesTo(StatRequest req) =>
-            Settings.PawnEnvironmentEffects && offset != 0 && (req.Thing as Pawn)?.needs?.mood?.thoughts?.memories?.GetFirstMemoryOfDef(ThoughtDefOf.SoakingWet) != null;
+            Settings.PawnWeatherEffects && offset != 0 && (req.Thing as Pawn)?.needs?.mood?.thoughts?.memories?.GetFirstMemoryOfDef(ThoughtDefOf.SoakingWet) != null;
 
         public override void TransformValue(StatRequest req, ref float val)
         {
