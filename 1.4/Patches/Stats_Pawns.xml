@@ -12,13 +12,8 @@
 				<offset>
 					<points>
 						<li>(0.1, 0)</li>
-<<<<<<< HEAD
 						<li>(0.5, 4)</li>
 						<li>(1, 6)</li>
-=======
-						<li>(0.4, 2)</li>
-						<li>(1, 5)</li>
->>>>>>> f9b5b7151e6c7b570905e3d31854f612e0ecde53
 						<li>(2, 8)</li>
 					</points>
 				</offset>
