@@ -32,7 +32,7 @@ namespace Celsius
             content.CheckboxLabeled("Celsius_Settings_FreezingAndMelting".Translate(), ref FreezingAndMeltingEnabled, "Celsius_Settings_FreezingAndMelting_tooltip".Translate());
             // Localization key: Celsius_Settings_AdvAutoignition - Advanced autoignition | Celsius_Settings_AdvAutoignition_tooltip - Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.
             content.CheckboxLabeled("Celsius_Settings_AdvAutoignition".Translate(), ref AutoignitionEnabled, "Celsius_Settings_AdvAutoignition_tooltip".Translate());
-            content.CheckboxLabeled("Celsius_Settings_PawnEnvironmentEffects".Translate(), ref PawnEnvironmentEffects, "Celsius_Settings_PawnEnvironmentEffects_tooltip".Translate());
+            content.CheckboxLabeled("Celsius_Settings_PawnWeatherEffects".Translate(), ref PawnWeatherEffects, "Celsius_Settings_PawnWeatherEffects_tooltip".Translate());
 
             // Localization key: Celsius_Settings_TempDisplayDigits - Temperature display digits:{TemperatureDisplayDigits} | Celsius_Settings_TempDisplayDigits_tooltip - How many digits to print after point for temperatures. Default value: {TemperatureDisplayDigits_Default}.
             content.Label("Celsius_Settings_TempDisplayDigits".Translate(TemperatureDisplayDigits), tooltip: "Celsius_Settings_TempDisplayDigits_tooltip".Translate(TemperatureDisplayDigits_Default));

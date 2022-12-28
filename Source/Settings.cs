@@ -19,7 +19,7 @@ namespace Celsius
         public static bool ShowTemperatureTooltip;
         public static bool FreezingAndMeltingEnabled;
         public static bool AutoignitionEnabled;
-        public static bool PawnEnvironmentEffects;
+        public static bool PawnWeatherEffects;
         public static float ConductivityPowerBase;
         public static float ConvectionConductivityEffect;
         public static float EnvironmentDiffusionFactor;
@@ -45,7 +45,7 @@ namespace Celsius
             Scribe_Values.Look(ref ShowTemperatureTooltip, "ShowTemperatureTooltip", true);
             Scribe_Values.Look(ref FreezingAndMeltingEnabled, "FreezingAndMeltingEnabled", true);
             Scribe_Values.Look(ref AutoignitionEnabled, "AutoignitionEnabled", true);
-            Scribe_Values.Look(ref PawnEnvironmentEffects, "PawnEnvironmentEffects", true);
+            Scribe_Values.Look(ref PawnWeatherEffects, "PawnWeatherEffects", true);
             Scribe_Values.Look(ref ConductivityPowerBase, "ConductivityPowerBase", ConductivityPowerBase_Default);
             Scribe_Values.Look(ref ConvectionConductivityEffect, "ConvectionConductivityEffect", ConvectionConductivityEffect_Default);
             Scribe_Values.Look(ref EnvironmentDiffusionFactor, "EnvironmentDiffusionFactor", EnvironmentDiffusionFactor_Default);
@@ -64,7 +64,7 @@ namespace Celsius
             ShowTemperatureTooltip = true;
             FreezingAndMeltingEnabled = true;
             AutoignitionEnabled = true;
-            PawnEnvironmentEffects = true;
+            PawnWeatherEffects = true;
             ConductivityPowerBase = ConductivityPowerBase_Default;
             ConvectionConductivityEffect = ConvectionConductivityEffect_Default;
             EnvironmentDiffusionFactor = EnvironmentDiffusionFactor_Default;
@@ -86,7 +86,7 @@ namespace Celsius
             Log($"ShowTemperatureTooltip: {ShowTemperatureTooltip}");
             Log($"FreezingAndMeltingEnabled: {FreezingAndMeltingEnabled}");
             Log($"AutoignitionEnabled: {AutoignitionEnabled}");
-            Log($"PawnEnvironmentEffects: {PawnEnvironmentEffects}");
+            Log($"PawnWeatherEffects: {PawnWeatherEffects}");
             Log($"ConductivityPowerBase: {ConductivityPowerBase}");
             Log($"ConvectionConductivityEffect: {ConvectionConductivityEffect}");
             Log($"EnvironmentDiffusionFactor: {EnvironmentDiffusionFactor}");
