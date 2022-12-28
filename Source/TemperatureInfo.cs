@@ -359,7 +359,7 @@ namespace Celsius
                             fireSize = 0;
                             break;
                         }
-                        float ignitionTemp = things[k].GetStatValue(DefOf.IgnitionTemperature);
+                        float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
                         if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
                         {
                             LogUtility.Log($"{things[k]} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
@@ -480,7 +480,7 @@ namespace Celsius
                     return 10000;
                 if (things[i].GetStatValue(StatDefOf.Flammability) > 0)
                 {
-                    float ignitionTemperature = things[i].GetStatValue(DefOf.IgnitionTemperature);
+                    float ignitionTemperature = things[i].GetStatValue(DefOf.Celsius_IgnitionTemperature);
                     if (ignitionTemperature >= MinIgnitionTemperature)
                         min = Mathf.Min(min, ignitionTemperature);
                 }

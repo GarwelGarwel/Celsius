@@ -12,7 +12,6 @@ namespace Celsius
 
         public static KeyBindingDef Celsius_SwitchTemperatureMap;
 
-        public static StatDef HeatCapacity;
-        public static StatDef IgnitionTemperature;
+        public static StatDef Celsius_IgnitionTemperature;
     }
 }

@@ -89,7 +89,7 @@
 		<xpath>Defs/ThingDef[defName="VFEArch_LogWall"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>300</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>300</Celsius_IgnitionTemperature>
 			</statBases>
 		</value>
 	</Operation>
@@ -99,7 +99,7 @@
 		<xpath>Defs/ThingDef[defName="VFEArch_HedgeWall"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>300</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>300</Celsius_IgnitionTemperature>
 			</statBases>
 		</value>
 	</Operation>

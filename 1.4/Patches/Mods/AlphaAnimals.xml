@@ -35,7 +35,7 @@
 		<xpath>Defs/ThingDef[defName="AA_BlueGelBattery"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>275</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>275</Celsius_IgnitionTemperature>
 			</statBases>
 		</value>
 	</Operation>
@@ -45,7 +45,7 @@
 		<xpath>Defs/ThingDef[defName="AA_HexaGelBattery"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>225</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>225</Celsius_IgnitionTemperature>
 			</statBases>
 		</value>
 	</Operation>
@@ -57,11 +57,11 @@
 		<xpath>Defs/ThingDef[defName="GU_RedWood"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>350</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>350</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>350</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>350</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>
@@ -72,11 +72,11 @@
 		<xpath>Defs/ThingDef[defName="AA_BlueGel"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>275</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>275</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>275</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>275</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>
@@ -87,11 +87,11 @@
 		<xpath>Defs/ThingDef[defName="AA_Hexagel"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>225</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>225</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>225</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>225</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>
@@ -102,11 +102,11 @@
 		<xpath>Defs/ThingDef[defName="AA_HexagelCore"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>300</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>300</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>300</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>300</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>
