@@ -19,8 +19,8 @@
     <Celsius_Settings_FreezingAndMelting_tooltip>Water can freeze, and ice can melt into water.</Celsius_Settings_FreezingAndMelting_tooltip>
     <Celsius_Settings_AdvAutoignition>Advanced autoignition</Celsius_Settings_AdvAutoignition>
     <Celsius_Settings_AdvAutoignition_tooltip>Flammable things can spontaneously catch fire when they get too hot. Replaces vanilla autoignition.</Celsius_Settings_AdvAutoignition_tooltip>
-	<Celsius_Settings_PawnEnvironmentEffects>Environment effects on pawns</Celsius_Settings_PawnEnvironmentEffects>
-	<Celsius_Settings_PawnEnvironmentEffects_tooltip>Wet pawns have their comfortable temperatures increased.</Celsius_Settings_PawnEnvironmentEffects_tooltip>
+	<Celsius_Settings_PawnWeatherEffects>Weather effects on pawns</Celsius_Settings_PawnWeatherEffects>
+	<Celsius_Settings_PawnWeatherEffects_tooltip>Wind chill and wetness affect comfortable temperatures.</Celsius_Settings_PawnWeatherEffects_tooltip>
     <Celsius_Settings_TempDisplayDigits>Temperature display digits: {0}</Celsius_Settings_TempDisplayDigits>
     <Celsius_Settings_TempDisplayDigits_tooltip>How many digits to print after point for temperatures. Default value: {0}</Celsius_Settings_TempDisplayDigits_tooltip>
     <Celsius_Settings_MountainTemp>Mountain temperature:</Celsius_Settings_MountainTemp>
@@ -51,5 +51,6 @@
     <Celsius_Stat_HeatCapacity_Conductivity>Conductivity:</Celsius_Stat_HeatCapacity_Conductivity>
 	
 	<Celsius_StatPart_Wetness_Explanation>Wet: {0}</Celsius_StatPart_Wetness_Explanation>
+	<Celsius_StatPart_WindSpeed_Explanation>Wind {0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
 
 </LanguageData>
