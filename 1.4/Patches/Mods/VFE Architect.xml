@@ -58,6 +58,7 @@
 	<!-- VFE Architect Royalty patch -->
 
 	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
 		<xpath>Defs/ThingDef[defName="VFEArch_FineWall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
