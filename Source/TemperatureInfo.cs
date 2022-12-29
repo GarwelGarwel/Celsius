@@ -213,12 +213,14 @@ namespace Celsius
             {
                 GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
-                string tooltip = $"Cell: {GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
+                // Localization key: Celsius_MapTempOverlay_Cell - Cell: {GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString)}
+                string tooltip = "Celsius_MapTempOverlay_Cell".Translate(GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                 {
                     float terrainTemperature = GetTerrainTemperature(cell);
                     if (!float.IsNaN(terrainTemperature))
-                        tooltip += $"\nTerrain: {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}";
+                        // Localization key: Celsius_MapTempOverlay_Terrain - Terrain: {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}
+                        tooltip += "\n" + "Celsius_MapTempOverlay_Terrain".Translate(terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 }
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
                 Text.Font = font;
@@ -341,8 +343,8 @@ namespace Celsius
                 if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                 {
                     if (log)
-                        LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {TemperatureUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
-                    map.snowGrid.AddDepth(cell, -TemperatureUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : outdoorSnowMeltRate));
+                        LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
+                    map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : outdoorSnowMeltRate));
                 }
 
                 // Autoignition
@@ -357,7 +359,7 @@ namespace Celsius
                             fireSize = 0;
                             break;
                         }
-                        float ignitionTemp = things[k].GetStatValue(DefOf.IgnitionTemperature);
+                        float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
                         if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
                         {
                             LogUtility.Log($"{things[k]} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
@@ -478,7 +480,7 @@ namespace Celsius
                     return 10000;
                 if (things[i].GetStatValue(StatDefOf.Flammability) > 0)
                 {
-                    float ignitionTemperature = things[i].GetStatValue(DefOf.IgnitionTemperature);
+                    float ignitionTemperature = things[i].GetStatValue(DefOf.Celsius_IgnitionTemperature);
                     if (ignitionTemperature >= MinIgnitionTemperature)
                         min = Mathf.Min(min, ignitionTemperature);
                 }

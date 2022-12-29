@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<DamageDef>
+		<defName>Celsius_Damage_Drown</defName>
+		<label>drowning</label>
+		<hasForcefulImpact>false</hasForcefulImpact>
+		<harmsHealth>false</harmsHealth>
+		<makesBlood>false</makesBlood>
+		<canUseDeflectMetalEffect>false</canUseDeflectMetalEffect>
+		<deathMessage>{0} suddenly fell into deep water and drowned.</deathMessage>
+		<defaultDamage>1</defaultDamage>
+		<hediff>Celsius_Hediff_Drown</hediff>
+	</DamageDef>
+
+</Defs>

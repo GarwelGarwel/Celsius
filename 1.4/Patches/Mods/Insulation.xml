@@ -151,11 +151,11 @@
 		<xpath>Defs/ThingDef[defName="INSSlab_Biomass"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>120</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>120</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>120</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>120</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>
@@ -166,11 +166,11 @@
 		<xpath>Defs/ThingDef[defName="INSSlab_Fibre"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>200</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>200</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>200</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>200</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>
@@ -181,11 +181,11 @@
 		<xpath>Defs/ThingDef[defName="INSSlab_Polymer"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>270</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>270</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>270</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>270</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>

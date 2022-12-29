@@ -3,7 +3,7 @@
 <Defs>
 
 	<StatDef>
-		<defName>HeatCapacity</defName>
+		<defName>Celsius_HeatCapacity</defName>
 		<label>heat capacity</label>
 		<description>How slowly the object changes its temperature.</description>
 		<category>Basics</category>
@@ -19,7 +19,7 @@
 	</StatDef>
 
 	<StatDef>
-		<defName>HeatConductivity</defName>
+		<defName>Celsius_HeatConductivity</defName>
 		<label>heat conductivity</label>
 		<description>How much energy the object exchanges with surrounding air.</description>
 		<category>Basics</category>
@@ -34,7 +34,7 @@
 	</StatDef>
 
 	<StatDef>
-		<defName>IgnitionTemperature</defName>
+		<defName>Celsius_IgnitionTemperature</defName>
 		<label>autoignition temperature</label>
 		<description>Minimum temperature when this thing ignites.</description>
 		<category>BasicsNonPawn</category>

@@ -62,7 +62,7 @@
 		<xpath>Defs/ThingDef[defName="VBY_HayDoor"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>150</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>150</Celsius_IgnitionTemperature>
 			</statBases>
 		</value>
 	</Operation>
@@ -72,7 +72,7 @@
 		<xpath>Defs/ThingDef[defName="VBY_Hay_Wall"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>150</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>150</Celsius_IgnitionTemperature>
 			</statBases>
 		</value>
 	</Operation>
@@ -82,11 +82,11 @@
 		<xpath>Defs/ThingDef[defName="VBY_Haycloth"]</xpath>
 		<value>
 			<statBases>
-				<IgnitionTemperature>100</IgnitionTemperature>
+				<Celsius_IgnitionTemperature>100</Celsius_IgnitionTemperature>
 			</statBases>
 			<stuffProps>
 				<statOffsets>
-					<IgnitionTemperature>100</IgnitionTemperature>
+					<Celsius_IgnitionTemperature>100</Celsius_IgnitionTemperature>
 				</statOffsets>
 			</stuffProps>
 		</value>
