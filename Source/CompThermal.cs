@@ -32,13 +32,17 @@ namespace Celsius
 
         internal void Reset() => thermalProps = ThingThermalProperties.GetThermalProps(StuffThermalProperties, IsOpen);
 
+        public override void Initialize(CompProperties props)
+        {
+            base.Initialize(props);
+            IsOpen |= (parent is Building_Door door && door.Open) || (parent is Building_Vent && parent.GetComp<CompFlickable>()?.SwitchIsOn == true);
+        }
+
         public override void PostExposeData()
         {
             Scribe_Values.Look(ref isOpen, "isOpen");
-            // For compatibility: trying to mark open doors and vents as such when loading Celsius pre-2.0 saves
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
-                isOpen |= (parent is Building_Door door && door.Open) || (parent is Building_Vent && parent.GetComp<CompFlickable>()?.SwitchIsOn == true);
-            Reset();
+                Reset();
         }
 
         public override void ReceiveCompSignal(string signal)
