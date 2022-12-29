@@ -57,8 +57,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FreezeMeltUtility.cs" />
+    <Compile Include="StatPart_Wetness.cs" />
+    <Compile Include="StatPart_WindSpeed.cs" />
     <Compile Include="ThermalProps.cs" />
-    <Compile Include="CellUtility.cs" />
     <Compile Include="CelsiusMod.cs" />
     <Compile Include="CompThermal.cs" />
     <Compile Include="DataUtility.cs" />

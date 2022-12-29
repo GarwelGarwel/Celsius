@@ -32,7 +32,7 @@ namespace Celsius
                 DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
             if (Find.Maps != null)
                 for (int m = 0; m < Find.Maps.Count; m++)
-                    Find.Maps[m]?.TemperatureInfo()?.ResetAllThings();
+                    Find.Maps[m].TemperatureInfo()?.ResetAllThings();
         }
 
         #region TEMPERATURE
@@ -51,7 +51,7 @@ namespace Celsius
             if (tempInfo == null || !cell.InBounds(map))
                 return map.mapTemperature.OutdoorTemp;
             float sum = cell.GetTemperatureForCell(map);
-            foreach (IntVec3 c in cell.AdjacentCells())
+            foreach (IntVec3 c in GenAdjFast.AdjacentCellsCardinal(cell))
                 sum += c.InBounds(map) ? c.GetTemperatureForCell(map) : cell.GetTemperatureForCell(map);
             return sum / 5;
         }
@@ -72,6 +72,12 @@ namespace Celsius
             if (room.TouchesMapEdge)
                 return room.Map.mapTemperature.OutdoorTemp;
             return temperatureInfo.GetRoomTemperature(room);
+        }
+
+        public static bool HasTemperature(this TerrainDef terrain)
+        {
+            ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
+            return terrainProps != null && terrainProps.heatCapacity > 0;
         }
 
         #endregion TEMPERATURE
@@ -118,29 +124,11 @@ namespace Celsius
 
         #endregion DIFFUSION
 
-        #region THERMAL PROPERTIES
+        #region MISC UTILITIES
 
         public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
         public static float GetInsulationWithAirflow(float insulation, float airflow) => Mathf.Lerp(insulation, 1, airflow);
-
-        #endregion THERMAL PROPERTIES
-
-        #region TERRAIN
-
-        public static bool HasTemperature(this TerrainDef terrain)
-        {
-            ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
-            return terrainProps != null && terrainProps.heatCapacity > 0;
-        }
-
-        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < 0 && terrain.IsWater;
-
-        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > 0 && terrain == TerrainDefOf.Ice;
-
-        #endregion TERRAIN
-
-        #region HEAT PUSH AND SNOW MELTING
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
@@ -157,8 +145,6 @@ namespace Celsius
             return true;
         }
 
-        public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
-
-        #endregion HEAT PUSH AND SNOW MELTING
+        #endregion MISC UTILITIES
     }
 }
