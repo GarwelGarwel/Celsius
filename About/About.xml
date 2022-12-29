@@ -19,11 +19,12 @@ Main features:
 
 - Flammable things may spontaneously ignite when it gets extremely hot. Different materials have different ignition temperatures, and it can affect buildings, manufactured items, plants and more.
 
-- Small tweaks to various related features, such as snow melting faster under rain.
+- Tweaks to various related features, such as wind and wetness affecting pawns' comfortable temperature and snow melting faster under rain.
 
 Celsius opens up many new challenges and ways to play RimWorld. Forgo houses and warm colonists at campfires, melt ice sheets or unleash deadly firestorms on your enemies!
 
-Currently supported mods:
+Supported mods:
+- Alpha Animals
 - Insulation
 - Primitive Workbenches
 - Vanilla Furniture Extended: base mod, Architect, Medical, Security
@@ -46,6 +47,8 @@ I worked hard to optimize the mod, and it shouldn't seriously slow down your gam
 Heat Map, Proxy Heat and similar mods are not needed, because Celsius does everything these mods do (and much more). Other mods that also change temperature-related mechanics will also probably conflict.
 
 Some modded vents, coolers and the like may experience issues or be unbalanced. There have been reported problems with Vanilla Expanded reactors and Android Tiers cores overheating.
+
+In general, mods that add walls, doors and building stuff may need patches. Celsius will do its best to adapt to them, but can't magically tell what thermal properties these things should have.
 
 - How do I report issues or share feedback?
 
