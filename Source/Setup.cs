@@ -63,6 +63,9 @@ namespace Celsius
             harmony.Patch(
                 AccessTools.Method("RimWorld.Building_Door:DoorTryClose"),
                 postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorTryClose")));
+            harmony.Patch(
+                AccessTools.Method("RimWorld.CompRitualFireOverlay:CompTick"),
+                postfix: new HarmonyMethod(type.GetMethod("CompRitualFireOverlay_CompTick")));
 
             LogUtility.Log($"Harmony initialization complete.");
 
@@ -210,6 +213,15 @@ namespace Celsius
                 if (compThermal != null)
                     compThermal.IsOpen = false;
             }
+        }
+
+        const float HeatPushPerFireSize = 21;
+
+        // Adds heat push to ritual fires
+        public static void CompRitualFireOverlay_CompTick(CompRitualFireOverlay __instance)
+        {
+            if (GenTicks.TicksAbs % 60 == 0 && __instance.FireSize > 0)
+                TemperatureUtility.TryPushHeat(__instance.parent.Position, __instance.parent.Map, __instance.FireSize * HeatPushPerFireSize);
         }
     }
 }
