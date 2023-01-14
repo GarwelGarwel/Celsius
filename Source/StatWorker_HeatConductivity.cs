@@ -9,35 +9,61 @@ namespace Celsius
     {
         public override float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
         {
-            ThermalProps thermalProps = req.Thing?.TryGetComp<CompThermal>()?.ThermalProperties;
+            ThermalProps thermalProps = req.HasThing
+                ? req.Thing.TryGetComp<CompThermal>()?.ThermalProperties
+                : req.Def?.GetModExtension<ThingThermalProperties>()?.GetThermalProps(req.StuffDef?.GetModExtension<StuffThermalProperties>());
             return thermalProps == null ? 0 : thermalProps.Conductivity;
         }
 
         public override string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
         {
-            StringBuilder explanation = new StringBuilder(base.GetExplanationUnfinalized(req, numberSense));
-            CompThermal compThermal = req.Thing?.TryGetComp<CompThermal>();
-            if (compThermal == null)
-                return explanation.ToString();
-            ThingThermalProperties thingThermalProperties = compThermal.ThingThermalProperties;
-            if (thingThermalProperties == null)
-                return explanation.ToString();
-            explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_Insulation".Translate(req.Thing.def.LabelCap, thingThermalProperties.insulation));
-            StuffThermalProperties stuffThermalProperties = compThermal.StuffThermalProperties;
-            if (stuffThermalProperties != null)
-                explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_StuffInsulation".Translate(stuffThermalProperties.insulationFactor.ToStringPercent()));
-            if (thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen && compThermal.IsOpen)
-                explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_AirflowOpen".Translate(req.Thing.LabelNoCount).Colorize(Color.yellow));
-            ThermalProps thermalProps = compThermal.ThermalProperties;
-            if (thermalProps != null)
+            ThingThermalProperties thingThermalProperties = null;
+            StuffThermalProperties stuffThermalProperties = null;
+            ThermalProps thermalProps = null;
+            bool isOpen = false;
+
+            if (req.HasThing)
             {
-                if (thermalProps.airflow != 0)
+                CompThermal compThermal = req.Thing.TryGetComp<CompThermal>();
+                if (compThermal != null)
                 {
-                    explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_Airflow".Translate(thermalProps.airflow.ToStringPercent()));
-                    explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_ActualInsulation".Translate(thermalProps.insulation.ToString("F2")));
+                    thingThermalProperties = compThermal.ThingThermalProperties;
+                    stuffThermalProperties = compThermal.StuffThermalProperties;
+                    thermalProps = compThermal.ThermalProperties;
+                    isOpen = compThermal.IsOpen;
                 }
-                explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_Conductivity".Translate(Settings.ConductivityPowerBase, thermalProps.insulation.ToString("F2"), thermalProps.Conductivity.ToStringPercent()));
             }
+
+            else if (req.Def != null)
+            {
+                thingThermalProperties = req.Def.GetModExtension<ThingThermalProperties>();
+                stuffThermalProperties = req.StuffDef?.GetModExtension<StuffThermalProperties>();
+                thermalProps = thingThermalProperties?.GetThermalProps(stuffThermalProperties);
+            }
+
+            if (thermalProps == null)
+                return base.GetExplanationUnfinalized(req, numberSense);
+
+            StringBuilder explanation = new StringBuilder("Celsius_Stat_HeatConductivity_BaseInsulation"
+                .Translate(req.Def.label, thingThermalProperties.insulation)
+                .CapitalizeFirst());
+            if (stuffThermalProperties != null)
+            {
+                explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_StuffInsulation".Translate(req.StuffDef.label).CapitalizeFirst());
+                explanation.Append($"x{stuffThermalProperties.insulationFactor.ToStringPercent()}");
+            }
+            if (isOpen && thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen)
+                explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_AirflowOpen".Translate(req.Def.label).Colorize(Color.yellow).CapitalizeFirst());
+            if (thermalProps.airflow != 0)
+            {
+                explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_Airflow".Translate(thermalProps.airflow.ToStringPercent()));
+                explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_ActualInsulation".Translate(thermalProps.insulation.ToString("F2")));
+            }
+            explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_Conductivity".Translate(
+                Settings.ConductivityPowerBase.ToString("0.##"),
+                thermalProps.insulation.ToString("F2"),
+                thermalProps.Conductivity.ToStringByStyle(stat.toStringStyle, numberSense)));
+
             return explanation.ToString();
         }
     }
