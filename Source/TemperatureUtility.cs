@@ -137,8 +137,6 @@ namespace Celsius
 
         #region MISC UTILITIES
 
-        public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
-
         public static float GetInsulationWithAirflow(float insulation, float airflow) => Mathf.Lerp(insulation, 1, airflow);
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)

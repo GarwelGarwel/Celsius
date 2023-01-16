@@ -38,7 +38,7 @@ namespace Celsius
                 thermalProps = thingThermalProperties?.GetThermalProps(stuffThermalProperties);
             }
 
-            if (thermalProps == null || stuffThermalProperties == null || thingThermalProperties.volume == 0)
+            if (thermalProps == null || stuffThermalProperties == null)
                 return base.GetExplanationUnfinalized(req, numberSense);
 
             StringBuilder explanation = new StringBuilder("Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity".Translate(req.StuffDef.label, stuffThermalProperties.volumetricHeatCapacity).CapitalizeFirst());
