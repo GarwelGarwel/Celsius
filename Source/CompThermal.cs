@@ -23,7 +23,7 @@ namespace Celsius
 
         public StuffThermalProperties StuffThermalProperties =>
             ThingThermalProperties.volume > 0
-            ? parent.GetUnderlyingStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
+            ? parent.Stuff?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
             : null;
 
         public ThermalProps ThermalProperties => thermalProps ?? (thermalProps = ThingThermalProperties.GetThermalProps(StuffThermalProperties, IsOpen));
@@ -59,6 +59,7 @@ namespace Celsius
                         IsOpen = false;
                         break;
                 }
+
             // Windows mod
             else if (parent.GetType().FullName == "OpenTheWindows.Building_Window")
                 switch (signal.ToLowerInvariant())
