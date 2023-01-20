@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -10,6 +11,11 @@ namespace Celsius
     {
         public const float FreezeTemperature = -0.5f;
         public const float MeltTemperature = 0.5f;
+
+#if DEBUG
+        static Stopwatch stopwatch = new Stopwatch();
+        static int iterations;
+#endif
 
         public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < FreezeTemperature && terrain.IsWater;
 
@@ -46,15 +52,26 @@ namespace Celsius
 
         public static void FreezeTerrain(this IntVec3 cell, Map map, bool log = false)
         {
+#if DEBUG
+            stopwatch.Start();
+#endif
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
                 LogUtility.Log($"{terrain} freezes at {cell}.");
             map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
+#if DEBUG
+            stopwatch.Stop();
+            if (++iterations % 100 == 0)
+                LogUtility.Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+#endif
         }
 
         public static void MeltTerrain(this IntVec3 cell, Map map, bool log = false)
         {
+#if DEBUG
+            stopwatch.Start();
+#endif
             TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
             // Removing things that can't stay on the melted terrain
             List<Thing> things = cell.GetThingList(map);
@@ -71,7 +88,13 @@ namespace Celsius
                     else
                     {
                         LogUtility.Log($"{thing.LabelCap} sinks in {meltedTerrain.label}.");
-                        thing.Destroy();
+                        CompDissolution compDissolution = thing.TryGetComp<CompDissolution>();
+                        if (compDissolution != null)
+                        {
+                            LogUtility.Log($"Applying dissolution effects of {thing.LabelCap} ({thing.def.defName}).");
+                            compDissolution.TriggerDissolutionEvent(thing.stackCount);
+                        }
+                        else thing.Destroy();
                     }
                 else if (thing is Building_Grave grave && grave.HasAnyContents)
                 {
@@ -97,6 +120,11 @@ namespace Celsius
                 LogUtility.Log($"Ice at {cell} melts into {meltedTerrain.defName}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
             map.snowGrid.SetDepth(cell, 0);
+#if DEBUG
+            stopwatch.Stop();
+            if (++iterations % 50 == 0)
+                LogUtility.Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+#endif
         }
 
         public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);

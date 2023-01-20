@@ -38,6 +38,7 @@
 		<label>autoignition temperature</label>
 		<description>Minimum temperature when this thing ignites.</description>
 		<category>BasicsNonPawn</category>
+		<hideAtValue>0</hideAtValue>
 		<showOnPawns>false</showOnPawns>
 		<showOnDefaultValue>false</showOnDefaultValue>
 		<displayPriorityInCategory>2990</displayPriorityInCategory>

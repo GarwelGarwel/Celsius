@@ -24,15 +24,26 @@ namespace Celsius
 
         internal static void SettingsChanged()
         {
-            FloatRange vanillaAutoIgnitionTemperatureRange = Settings.AutoignitionEnabled ? new FloatRange(10000, float.MaxValue) : new FloatRange(240, 1000);
-            AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, vanillaAutoIgnitionTemperatureRange);
+            LogUtility.Log("Mod settings have changed. Updating data.", LogLevel.Important);
+            AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, Settings.AutoignitionEnabled
+                ? new FloatRange(10000, float.MaxValue)
+                : new FloatRange(240, 1000));
 
             // Resetting thermal props for all ThingDefs & Things
             for (int i = 0; i < DefDatabase<ThingDef>.AllDefsListForReading.Count; i++)
                 DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
+
+            // Resetting maps' temperature info cache and re-initializing terrain temperatures
             if (Find.Maps != null)
                 for (int m = 0; m < Find.Maps.Count; m++)
-                    Find.Maps[m].TemperatureInfo()?.ResetAllThings();
+                {
+                    TemperatureInfo temperatureInfo = Find.Maps[m].TemperatureInfo();
+                    if (temperatureInfo == null)
+                        continue;
+                    temperatureInfo.ResetAllThings();
+                    if (Settings.FreezingAndMeltingEnabled && !temperatureInfo.HasTerrainTemperatures)
+                        temperatureInfo.InitializeTerrainTemperatures();
+                }
         }
 
         #region TEMPERATURE
@@ -125,8 +136,6 @@ namespace Celsius
         #endregion DIFFUSION
 
         #region MISC UTILITIES
-
-        public static ThingDef GetUnderlyingStuff(this Thing thing) => thing.Stuff ?? thing.def.defaultStuff;
 
         public static float GetInsulationWithAirflow(float insulation, float airflow) => Mathf.Lerp(insulation, 1, airflow);
 

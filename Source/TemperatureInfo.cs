@@ -34,7 +34,6 @@ namespace Celsius
         const float MinMaxTemperatureAdjustmentStep = 1;
 
         bool initialized;
-        int updateTickOffset;
         int slice;
         int rareUpdateCounter;
 
@@ -85,40 +84,21 @@ namespace Celsius
             {
                 LogUtility.Log($"Initializing temperatures for {map} for the first time.", LogLevel.Important);
                 temperatures = new float[map.Size.x * map.Size.z];
-                terrainTemperatures = new float[map.Size.x * map.Size.z];
-                bool hasTerrainTemperatures = false;
+                float outdoorTemperature = map.mapTemperature.OutdoorTemp;
                 for (int i = 0; i < temperatures.Length; i++)
                 {
                     IntVec3 cell = map.cellIndices.IndexToCell(i);
                     Room room = cell.GetRoomOrAdjacent(map);
                     if (room != null)
-                    {
-                        temperatures[i] = room.TempTracker.Temperature;
-                        roomTemperatures[room.ID] = temperatures[i];
-                    }
+                        roomTemperatures[room.ID] = temperatures[i] = room.TempTracker.Temperature;
                     else if (!TryGetEnvironmentTemperatureForCell(cell, out temperatures[i]))
-                        temperatures[i] = map.mapTemperature.OutdoorTemp;
+                        temperatures[i] = outdoorTemperature;
                     if (temperatures[i] < minTemperature)
                         minTemperature = temperatures[i];
                     else if (temperatures[i] > maxTemperature)
                         maxTemperature = temperatures[i];
-                    TerrainDef terrain = cell.GetTerrain(map);
-                    if (terrain.HasTemperature())
-                    {
-                        hasTerrainTemperatures = true;
-                        terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
-                        if (terrain.ShouldFreeze(terrainTemperatures[i]))
-                            cell.FreezeTerrain(map);
-                        else if (terrain.ShouldMelt(terrainTemperatures[i]))
-                            cell.MeltTerrain(map);
-                    }
-                    else terrainTemperatures[i] = float.NaN;
                 }
-                if (!hasTerrainTemperatures)
-                {
-                    LogUtility.Log("The map has no terrain temperatures.");
-                    terrainTemperatures = null;
-                }
+                InitializeTerrainTemperatures();
             }
             else
             {
@@ -133,10 +113,39 @@ namespace Celsius
                 map.Size.x,
                 map.Size.z);
 
-            updateTickOffset = map.generationTick % TicksPerSlice;
             slice = Find.TickManager.TicksGame / TicksPerSlice % SliceCount;
             initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
+        }
+
+        public void InitializeTerrainTemperatures()
+        {
+            if (!Settings.FreezingAndMeltingEnabled)
+                return;
+            LogUtility.Log($"Initializing terrain temperatures for {map}.");
+            if (terrainTemperatures == null)
+                terrainTemperatures = new float[temperatures.Length];
+            bool hasTerrainTemperatures = false;
+            for (int i = 0; i < terrainTemperatures.Length; i++)
+            {
+                IntVec3 cell = map.cellIndices.IndexToCell(i);
+                TerrainDef terrain = cell.GetTerrain(map);
+                if (terrain.HasTemperature())
+                {
+                    hasTerrainTemperatures = true;
+                    terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
+                    if (terrain.ShouldFreeze(terrainTemperatures[i]))
+                        cell.FreezeTerrain(map);
+                    else if (terrain.ShouldMelt(terrainTemperatures[i]))
+                        cell.MeltTerrain(map);
+                }
+                else terrainTemperatures[i] = float.NaN;
+            }
+            if (!hasTerrainTemperatures)
+            {
+                LogUtility.Log("The map has no terrain temperatures.");
+                terrainTemperatures = null;
+            }
         }
 
         public override void ExposeData()
@@ -150,10 +159,13 @@ namespace Celsius
             if (str != null)
                 temperatures = DataUtility.StringToArray(str);
 
-            str = DataUtility.ArrayToString(terrainTemperatures);
-            Scribe_Values.Look(ref str, "terrainTemperatures");
-            if (str != null)
-                terrainTemperatures = DataUtility.StringToArray(str);
+            if (Settings.FreezingAndMeltingEnabled)
+            {
+                str = DataUtility.ArrayToString(terrainTemperatures);
+                Scribe_Values.Look(ref str, "terrainTemperatures");
+                if (str != null)
+                    terrainTemperatures = DataUtility.StringToArray(str);
+            }
 
             // Transpose temperature arrays from pre-2.0 Celsius to adapt to the new format
             if (version == null && Scribe.mode == LoadSaveMode.LoadingVars)
@@ -241,7 +253,7 @@ namespace Celsius
             if (!initialized)
                 FinalizeInit();
 
-            if (Find.TickManager.TicksGame % TicksPerSlice != updateTickOffset)
+            if ((Find.TickManager.TicksGame - map.generationTick) % TicksPerSlice != 0)
                 return;
 
 #if DEBUG
@@ -291,7 +303,7 @@ namespace Celsius
                         ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
-                            TemperatureUtility.CalculateHeatTransfer(temperature, terrainTemperature, terrainProps, 0, ref energy, ref heatFlow, log);
+                            TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, terrainProps, ref energy, ref heatFlow);
                             float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
                             if (log)
                                 LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
@@ -392,7 +404,7 @@ namespace Celsius
             {
                 updateStopwatch.Stop();
                 if (slice == 0)
-                    LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:N0} ms.");
+                    LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:F1} ms.");
             }
 #endif
         }
