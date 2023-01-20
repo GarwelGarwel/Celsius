@@ -5,7 +5,7 @@ namespace Celsius
 {
     public class StatPart_WindSpeed : StatPart
     {
-        SimpleCurve offset;
+        public SimpleCurve offset;
 
         bool AppliesTo(StatRequest req) =>
             Settings.PawnWeatherEffects && offset != null && req.HasThing && req.Thing.Spawned && !req.Thing.Position.Roofed(req.Thing.Map);
