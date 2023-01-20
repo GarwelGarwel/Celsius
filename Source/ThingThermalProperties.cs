@@ -23,7 +23,7 @@ namespace Celsius
             return defaultProps;
         }
 
-        public ThermalProps GetThermalProps(StuffThermalProperties stuffProps, bool open)
+        public ThermalProps GetThermalProps(StuffThermalProperties stuffProps, bool open = false)
         {
             if (stuffProps == null || volume == 0)
             {

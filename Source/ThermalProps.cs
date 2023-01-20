@@ -31,9 +31,5 @@ namespace Celsius
         }
 
         public override string ToString() => $"Heat capacity: {heatCapacity}. Insulation: {insulation}. Conductivity: {Conductivity:P1}. Airflow: {airflow:P0}.";
-
-        public bool Equals(ThermalProps props) => props.heatCapacity == heatCapacity && props.insulation == insulation && props.airflow == airflow;
-
-        public override int GetHashCode() => (heatCapacity, insulation, airflow).GetHashCode();
     }
 }
