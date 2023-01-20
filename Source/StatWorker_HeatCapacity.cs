@@ -41,7 +41,9 @@ namespace Celsius
             if (thermalProps == null || stuffThermalProperties == null)
                 return base.GetExplanationUnfinalized(req, numberSense);
 
-            StringBuilder explanation = new StringBuilder("Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity".Translate(req.StuffDef.label, stuffThermalProperties.volumetricHeatCapacity).CapitalizeFirst());
+            StringBuilder explanation = new StringBuilder("Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity"
+                .Translate(req.StuffDef.label, stuffThermalProperties.volumetricHeatCapacity)
+                .CapitalizeFirst());
             explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_Volume".Translate(req.Def.label, thingThermalProperties.volume.ToString("F3")).CapitalizeFirst());
             explanation.AppendInNewLine("Celsius_Stat_HeatCapacity_AirHeatCapacity".Translate((1 - thingThermalProperties.volume).ToStringByStyle(stat.toStringStyle, numberSense)));
             explanation.AppendInNewLine(base.GetExplanationUnfinalized(req, numberSense));

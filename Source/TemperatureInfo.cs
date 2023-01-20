@@ -34,7 +34,6 @@ namespace Celsius
         const float MinMaxTemperatureAdjustmentStep = 1;
 
         bool initialized;
-        int updateTickOffset;
         int slice;
         int rareUpdateCounter;
 
@@ -85,17 +84,15 @@ namespace Celsius
             {
                 LogUtility.Log($"Initializing temperatures for {map} for the first time.", LogLevel.Important);
                 temperatures = new float[map.Size.x * map.Size.z];
+                float outdoorTemperature = map.mapTemperature.OutdoorTemp;
                 for (int i = 0; i < temperatures.Length; i++)
                 {
                     IntVec3 cell = map.cellIndices.IndexToCell(i);
                     Room room = cell.GetRoomOrAdjacent(map);
                     if (room != null)
-                    {
-                        temperatures[i] = room.TempTracker.Temperature;
-                        roomTemperatures[room.ID] = temperatures[i];
-                    }
+                        roomTemperatures[room.ID] = temperatures[i] = room.TempTracker.Temperature;
                     else if (!TryGetEnvironmentTemperatureForCell(cell, out temperatures[i]))
-                        temperatures[i] = map.mapTemperature.OutdoorTemp;
+                        temperatures[i] = outdoorTemperature;
                     if (temperatures[i] < minTemperature)
                         minTemperature = temperatures[i];
                     else if (temperatures[i] > maxTemperature)
@@ -116,7 +113,6 @@ namespace Celsius
                 map.Size.x,
                 map.Size.z);
 
-            updateTickOffset = map.generationTick % TicksPerSlice;
             slice = Find.TickManager.TicksGame / TicksPerSlice % SliceCount;
             initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
@@ -257,7 +253,7 @@ namespace Celsius
             if (!initialized)
                 FinalizeInit();
 
-            if (Find.TickManager.TicksGame % TicksPerSlice != updateTickOffset)
+            if ((Find.TickManager.TicksGame - map.generationTick) % TicksPerSlice != 0)
                 return;
 
 #if DEBUG
