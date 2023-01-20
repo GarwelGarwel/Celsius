@@ -62,7 +62,7 @@ namespace Celsius
             map.terrainGrid.SetUnderTerrain(cell, terrain);
 #if DEBUG
             stopwatch.Stop();
-            if (++iterations % 50 == 0)
+            if (++iterations % 100 == 0)
                 LogUtility.Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
 #endif
         }
@@ -88,7 +88,13 @@ namespace Celsius
                     else
                     {
                         LogUtility.Log($"{thing.LabelCap} sinks in {meltedTerrain.label}.");
-                        thing.Destroy();
+                        CompDissolution compDissolution = thing.TryGetComp<CompDissolution>();
+                        if (compDissolution != null)
+                        {
+                            LogUtility.Log($"Applying dissolution effects of {thing.LabelCap} ({thing.def.defName}).");
+                            compDissolution.TriggerDissolutionEvent(thing.stackCount);
+                        }
+                        else thing.Destroy();
                     }
                 else if (thing is Building_Grave grave && grave.HasAnyContents)
                 {
