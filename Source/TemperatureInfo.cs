@@ -91,7 +91,7 @@ namespace Celsius
                     Room room = cell.GetRoomOrAdjacent(map);
                     if (room != null)
                         roomTemperatures[room.ID] = temperatures[i] = room.TempTracker.Temperature;
-                    else if (!TryGetEnvironmentTemperatureForCell(cell, out temperatures[i]))
+                    else if (!TryGetEnvironmentTemperatureForCell(cell, ref temperatures[i]))
                         temperatures[i] = outdoorTemperature;
                     if (temperatures[i] < minTemperature)
                         minTemperature = temperatures[i];
@@ -303,19 +303,20 @@ namespace Celsius
                         ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
+                            // Thermal exchange with terrain
                             TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, terrainProps, ref energy, ref heatFlow);
                             float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
                             if (log)
                                 LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
                             terrainTemperature += terrainTempChange * terrainProps.Conductivity;
-                            terrainTemperatures[i] = terrainTemperature;
 
-                            // Freezing and melting (rarely)
-                            if (i % RareUpdateInterval == rareUpdateCounter)
-                                if (terrain.ShouldFreeze(terrainTemperature))
-                                    cell.FreezeTerrain(map, log);
-                                else if (terrain.ShouldMelt(terrainTemperature))
-                                    cell.MeltTerrain(map, log);
+                            // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
+                            if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature))
+                                cell.MeltTerrain(map, log);
+                            else if (terrainTemperatures[i] > FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature))
+                                cell.FreezeTerrain(map, log);
+
+                            terrainTemperatures[i] = terrainTemperature;
                         }
                         else terrainTemperatures[i] = float.NaN;
                     }
@@ -339,8 +340,9 @@ namespace Celsius
                 ProcessNeighbour(cell + IntVec3.South);
                 ProcessNeighbour(cell + IntVec3.West);
 
-                // Default environment temperature
-                if (TryGetEnvironmentTemperatureForCell(cell, out float environmentTemperature))
+                // Thermal exchange with the environment
+                float environmentTemperature = 0;
+                if (TryGetEnvironmentTemperatureForCell(cell, ref environmentTemperature))
                     TemperatureUtility.CalculateHeatTransferEnvironment(temperature, environmentTemperature, cellProps, ref energy, ref heatFlow, log);
 
                 // Applying heat transfer
@@ -403,8 +405,8 @@ namespace Celsius
             if (Settings.DebugMode)
             {
                 updateStopwatch.Stop();
-                if (slice == 0)
-                    LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / ++tickIterations:F1} ms.");
+                if (slice == 0 && ++tickIterations % 10 == 0)
+                    LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / tickIterations:F1} ms.");
             }
 #endif
         }
@@ -431,16 +433,20 @@ namespace Celsius
             return TemperatureTuning.DeepUndergroundTemperature;
         }
 
-        public bool TryGetEnvironmentTemperatureForCell(IntVec3 cell, out float temperature)
+        public bool TryGetEnvironmentTemperatureForCell(IntVec3 cell, ref float temperature)
         {
             RoofDef roof = cell.GetRoof(map);
-            if ((roof == RoofDefOf.RoofRockThick || roof == RoofDefOf.RoofRockThin) && cell.GetFirstMineable(map) != null)
+            if (roof == null)
+            {
+                temperature = map.mapTemperature.OutdoorTemp;
+                return true;
+            }
+            if (roof.isThickRoof && cell.GetFirstMineable(map) != null)
             {
                 temperature = mountainTemperature;
                 return true;
             }
-            temperature = map.mapTemperature.OutdoorTemp;
-            return roof == null;
+            return false;
         }
 
         public float GetTemperatureForCell(int index) => temperatures != null ? temperatures[index] : TemperatureTuning.DefaultTemperature;
