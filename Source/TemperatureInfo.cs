@@ -91,8 +91,7 @@ namespace Celsius
                     Room room = cell.GetRoomOrAdjacent(map);
                     if (room != null)
                         roomTemperatures[room.ID] = temperatures[i] = room.TempTracker.Temperature;
-                    else if (!TryGetEnvironmentTemperatureForCell(cell, ref temperatures[i]))
-                        temperatures[i] = outdoorTemperature;
+                    else temperatures[i] = GetEnvironmentTemperature(cell.GetRoof(map));
                     if (temperatures[i] < minTemperature)
                         minTemperature = temperatures[i];
                     else if (temperatures[i] > maxTemperature)
@@ -341,9 +340,8 @@ namespace Celsius
                 ProcessNeighbour(cell + IntVec3.West);
 
                 // Thermal exchange with the environment
-                float environmentTemperature = 0;
-                if (TryGetEnvironmentTemperatureForCell(cell, ref environmentTemperature))
-                    TemperatureUtility.CalculateHeatTransferEnvironment(temperature, environmentTemperature, cellProps, ref energy, ref heatFlow, log);
+                RoofDef roof = cell.GetRoof(map);
+                TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow, log);
 
                 // Applying heat transfer
                 float equilibriumDifference = energy / heatFlow;
@@ -433,21 +431,7 @@ namespace Celsius
             return TemperatureTuning.DeepUndergroundTemperature;
         }
 
-        public bool TryGetEnvironmentTemperatureForCell(IntVec3 cell, ref float temperature)
-        {
-            RoofDef roof = cell.GetRoof(map);
-            if (roof == null)
-            {
-                temperature = map.mapTemperature.OutdoorTemp;
-                return true;
-            }
-            if (roof.isThickRoof && cell.GetFirstMineable(map) != null)
-            {
-                temperature = mountainTemperature;
-                return true;
-            }
-            return false;
-        }
+        public float GetEnvironmentTemperature(RoofDef roof) => roof != null && roof.isThickRoof ? mountainTemperature : map.mapTemperature.OutdoorTemp;
 
         public float GetTemperatureForCell(int index) => temperatures != null ? temperatures[index] : TemperatureTuning.DefaultTemperature;
 
