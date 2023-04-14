@@ -28,6 +28,8 @@
 	<Celsius_Settings_CurrentMapTemp_tooltip>Currently: {0}</Celsius_Settings_CurrentMapTemp_tooltip>
 	<Celsius_Settings_ManualTemperature>Temperature: {0}</Celsius_Settings_ManualTemperature>
 	<Celsius_Settings_TakeOwnRisk>Change the values below at your own risk.</Celsius_Settings_TakeOwnRisk>
+	<Celsius_Settings_UpdateInterval>Update interval: {0} ticks</Celsius_Settings_UpdateInterval>
+	<Celsius_Settings_UpdateInterval_tooltip>How often map temperatures are updated. Lower values improve accuracy, higher values improve performance. 1 real time second = 60 ticks at normal speed. Recommended value: {0} ticks.</Celsius_Settings_UpdateInterval_tooltip>
 	<Celsius_Settings_ConductivitySpeed>Conductivity speed: {0}</Celsius_Settings_ConductivitySpeed>
 	<Celsius_Settings_ConductivitySpeed_tooltip>How quickly temperature changes.</Celsius_Settings_ConductivitySpeed_tooltip>
 	<Celsius_Settings_ConvectionConductivityEffect>Convection conductivity effect:</Celsius_Settings_ConvectionConductivityEffect>
