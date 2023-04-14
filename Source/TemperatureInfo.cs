@@ -10,22 +10,22 @@ namespace Celsius
     public class TemperatureInfo : MapComponent
     {
         // Ticks between full map updates
-        public const int TicksPerUpdate = 120;
+        //public const int TicksPerUpdate = 120;
 
         // Number of "slices": parts the full update is divided into
-        public const int SliceCount = 4;
+        //public const int SliceCount = 4;
 
         // Ticks between partial updates (slices)
-        public const int TicksPerSlice = TicksPerUpdate / SliceCount;
+        //public const int TicksPerSlice = TicksPerUpdate / SliceCount;
 
         // Normal full updates between rare updates
         public const int RareUpdateInterval = 4;
 
         // Amount of snow to be melted each update (to be similar to vanilla)
-        const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
+        //const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
 
         // How quickly snow melts under rain
-        const float SnowMeltCoefficientRain = SnowMeltCoefficient * 2;
+        //const float SnowMeltCoefficientRain = SnowMeltCoefficient * 2;
 
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
@@ -34,6 +34,7 @@ namespace Celsius
         const float MinMaxTemperatureAdjustmentStep = 1;
 
         bool initialized;
+        int tick;
         int slice;
         int rareUpdateCounter;
 
@@ -50,8 +51,8 @@ namespace Celsius
         static readonly Color maxComfortableColor = new Color(0.5f, 1, 0);
         static readonly Color maxColor = Color.red;
 
-        float[] minTemperatures = new float[SliceCount];
-        float[] maxTemperatures = new float[SliceCount];
+        float[] minTemperatures = new float[Settings.SliceCount];
+        float[] maxTemperatures = new float[Settings.SliceCount];
         float minTemperature = minComfortableTemperature - 10;
         float maxTemperature = maxComfortableTemperature + 10;
         CellBoolDrawer overlayDrawer;
@@ -73,7 +74,7 @@ namespace Celsius
             // Setting up min & max temperatures (for overlay)
             minComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
             maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
-            for (int i = 0; i < SliceCount; i++)
+            for (int i = 0; i < Settings.SliceCount; i++)
             {
                 minTemperatures[i] = minComfortableTemperature - 10;
                 maxTemperatures[i] = maxComfortableTemperature + 10;
@@ -112,7 +113,8 @@ namespace Celsius
                 map.Size.x,
                 map.Size.z);
 
-            slice = Find.TickManager.TicksGame / TicksPerSlice % SliceCount;
+            tick = (Find.TickManager.TicksGame - map.generationTick) % Settings.TicksPerSlice;
+            slice = (Find.TickManager.TicksGame - map.generationTick) / Settings.TicksPerSlice % Settings.SliceCount;
             initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
         }
@@ -252,7 +254,8 @@ namespace Celsius
             if (!initialized)
                 FinalizeInit();
 
-            if ((Find.TickManager.TicksGame - map.generationTick) % TicksPerSlice != 0)
+            //if ((Find.TickManager.TicksGame - map.generationTick) % Settings.TicksPerSlice != 0)
+            if (++tick < Settings.TicksPerSlice)
                 return;
 
 #if DEBUG
@@ -268,7 +271,7 @@ namespace Celsius
                 if (rareUpdateCounter == 0)
                 {
                     mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
-                    outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? SnowMeltCoefficientRain : SnowMeltCoefficient;
+                    outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? Settings.SnowMeltCoefficientRain : Settings.SnowMeltCoefficient;
                     thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
                 }
             }
@@ -279,7 +282,7 @@ namespace Celsius
                 maxTemperatures[slice] -= MinMaxTemperatureAdjustmentStep;
 
             // Main loop
-            for (int j = slice; j < temperatures.Length; j += SliceCount)
+            for (int j = slice; j < temperatures.Length; j += Settings.SliceCount)
             {
                 IntVec3 cell = map.cellsInRandomOrder.Get(j);
                 int i = map.cellIndices.CellToIndex(cell);
@@ -355,8 +358,8 @@ namespace Celsius
                 if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                 {
                     if (log)
-                        LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : SnowMeltCoefficientRain):F4}.");
-                    map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? SnowMeltCoefficient : outdoorSnowMeltRate));
+                        LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : Settings.SnowMeltCoefficientRain):F4}.");
+                    map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
                 }
 
                 // Autoignition
@@ -390,6 +393,7 @@ namespace Celsius
                         maxTemperatures[slice] = temperature;
             }
 
+            tick = 0;
             if (slice == 0)
             {
                 rareUpdateCounter = (rareUpdateCounter + 1) % RareUpdateInterval;
@@ -397,7 +401,7 @@ namespace Celsius
                 maxTemperature = Mathf.Max(maxTemperatures);
                 overlayDrawer.SetDirty();
             }
-            slice = (slice + 1) % SliceCount;
+            slice = (slice + 1) % Settings.SliceCount;
 
 #if DEBUG
             if (Settings.DebugMode)
