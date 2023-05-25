@@ -5,6 +5,8 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 
+using static Celsius.LogUtility;
+
 namespace Celsius
 {
     static class FreezeMeltUtility
@@ -57,13 +59,13 @@ namespace Celsius
 #endif
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
-                LogUtility.Log($"{terrain} freezes at {cell}.");
+                Log($"{terrain} freezes at {cell}.");
             map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
 #if DEBUG
             stopwatch.Stop();
             if (++iterations % 100 == 0)
-                LogUtility.Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
 #endif
         }
 
@@ -81,33 +83,32 @@ namespace Celsius
                 if (meltedTerrain.passability == Traversability.Impassable)
                     if (thing is Pawn pawn)
                     {
-                        LogUtility.Log($"{pawn.LabelCap} drowns in {meltedTerrain.label}.");
+                        Log($"{pawn.LabelCap} drowns in {meltedTerrain.label}.");
                         pawn.health?.AddHediff(DefOf.Celsius_Hediff_Drown, dinfo: new DamageInfo(DefOf.Celsius_Damage_Drown, 1));
                         pawn.Corpse?.Destroy();
                     }
                     else
                     {
-                        LogUtility.Log($"{thing.LabelCap} sinks in {meltedTerrain.label}.");
+                        Log($"{thing.LabelCap} sinks in {meltedTerrain.label}.");
                         CompDissolution compDissolution = thing.TryGetComp<CompDissolution>();
                         if (compDissolution != null)
                         {
-                            LogUtility.Log($"Applying dissolution effects of {thing.LabelCap} ({thing.def.defName}).");
+                            Log($"Applying dissolution effects of {thing.LabelCap} ({thing.def.defName}).");
                             compDissolution.TriggerDissolutionEvent(thing.stackCount);
                         }
                         else thing.Destroy();
                     }
-                else if (thing is Building_Grave grave && grave.HasAnyContents)
-                {
-                    LogUtility.Log($"Grave with {grave.ContainedThing?.LabelShort} is uncovered due to melting.");
-                    grave.EjectContents();
-                    grave.Destroy();
-                }
                 else
                 {
                     TerrainAffordanceDef terrainAffordance = thing.TerrainAffordanceNeeded;
                     if (terrainAffordance != null && !meltedTerrain.affordances.Contains(terrainAffordance))
                     {
-                        LogUtility.Log($"{thing.LabelCap}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
+                        Log($"{thing.LabelCap}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
+                        if (thing is Building_Grave grave && grave.HasAnyContents)
+                        {
+                            Log($"Grave with {grave.ContainedThing?.LabelShort} is uncovered due to melting.");
+                            grave.EjectContents();
+                        }
                         thing.Destroy();
                     }
                 }
@@ -117,13 +118,13 @@ namespace Celsius
             if (map.terrainGrid.UnderTerrainAt(cell) == null)
                 map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
             if (log)
-                LogUtility.Log($"Ice at {cell} melts into {meltedTerrain.defName}.");
+                Log($"Ice at {cell} melts into {meltedTerrain.defName}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
             map.snowGrid.SetDepth(cell, 0);
 #if DEBUG
             stopwatch.Stop();
             if (++iterations % 50 == 0)
-                LogUtility.Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
 #endif
         }
 
