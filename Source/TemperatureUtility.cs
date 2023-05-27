@@ -129,7 +129,7 @@ namespace Celsius
                 heatFlow += Settings.EnvironmentDiffusionFactor;
                 return;
             }
-            float hf = props.heatflowNoConvection * Settings.EnvironmentDiffusionFactor;
+            float hf = props.heatflowNoConvection * Settings.RoofDiffusionFactor;
             energy += (environmentTemperature - cellTemperature) * hf;
             heatFlow += hf;
         }

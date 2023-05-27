@@ -28,6 +28,8 @@ namespace Celsius
         public static float ConductivityPowerBase;
         public static float ConvectionConductivityEffect;
         public static float EnvironmentDiffusionFactor;
+        public static float RoofInsulation;
+        public static float RoofDiffusionFactor;
         public static float HeatPushMultiplier;
         public static float HeatPushEffect;
         public static MountainTemperatureMode MountainTemperatureMode;
@@ -45,6 +47,7 @@ namespace Celsius
         public const float ConductivityPowerBase_Default = 0.5f;
         public const float ConvectionConductivityEffect_Default = 10;
         public const float EnvironmentDiffusionFactor_Default = 0.3f;
+        public const float RoofInsulation_Default = 10;
         public const float HeatPushEffect_Base = 0.15f;
         public const int TemperatureDisplayDigits_Default = 0;
 
@@ -58,9 +61,9 @@ namespace Celsius
             Scribe_Values.Look(ref AutoignitionEnabled, "AutoignitionEnabled", true);
             Scribe_Values.Look(ref PawnWeatherEffects, "PawnWeatherEffects", true);
             Scribe_Values.Look(ref TicksPerUpdate, "TicksPerUpdate", TicksPerUpdate_Default);
-            //Scribe_Values.Look(ref ConductivityPowerBase, "ConductivityPowerBase", ConductivityPowerBase_Default);
             Scribe_Values.Look(ref ConvectionConductivityEffect, "ConvectionConductivityEffect", ConvectionConductivityEffect_Default);
             Scribe_Values.Look(ref EnvironmentDiffusionFactor, "EnvironmentDiffusionFactor", EnvironmentDiffusionFactor_Default);
+            Scribe_Values.Look(ref RoofInsulation, "RoofInsulation", RoofInsulation_Default);
             Scribe_Values.Look(ref HeatPushMultiplier, "HeatPushMultiplier", 1);
             Scribe_Values.Look(ref MountainTemperatureMode, "MountainTemperatureMode", MountainTemperatureMode.Vanilla);
             Scribe_Values.Look(ref MountainTemperature, "MountainTemperature", TemperatureTuning.DeepUndergroundTemperature);
@@ -80,9 +83,9 @@ namespace Celsius
             AutoignitionEnabled = true;
             PawnWeatherEffects = true;
             TicksPerUpdate = TicksPerUpdate_Default;
-            ConductivityPowerBase = ConductivityPowerBase_Default;
             ConvectionConductivityEffect = ConvectionConductivityEffect_Default;
             EnvironmentDiffusionFactor = EnvironmentDiffusionFactor_Default;
+            RoofInsulation = RoofInsulation_Default;
             HeatPushMultiplier = 1;
             MountainTemperatureMode = MountainTemperatureMode.Vanilla;
             MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
@@ -99,6 +102,7 @@ namespace Celsius
             SnowMeltCoefficient = TicksPerUpdate * 0.00006f;
             SnowMeltCoefficientRain = SnowMeltCoefficient * 2;
             ConductivityPowerBase = Mathf.Pow(ConductivityPowerBase_Default, (float)TicksPerUpdate_Default / TicksPerUpdate);
+            RoofDiffusionFactor = EnvironmentDiffusionFactor * Mathf.Pow(ConductivityPowerBase, RoofInsulation);
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
         }
 
@@ -115,6 +119,7 @@ namespace Celsius
             Log($"ConductivityPowerBase: {ConductivityPowerBase}");
             Log($"ConvectionConductivityEffect: {ConvectionConductivityEffect}");
             Log($"EnvironmentDiffusionFactor: {EnvironmentDiffusionFactor}");
+            Log($"RoofInsulation: {RoofInsulation}");
             Log($"HeatPushMultiplier: {HeatPushMultiplier.ToStringPercent()}");
             Log($"HeatPushEffect: {HeatPushEffect}");
             Log($"MountainTemperatureMode: {MountainTemperatureMode}");
