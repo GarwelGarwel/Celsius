@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FreezeMeltUtility.cs" />
+    <Compile Include="StatPart_DirectSunlight.cs" />
     <Compile Include="StatPart_Wetness.cs" />
     <Compile Include="StatPart_WindSpeed.cs" />
     <Compile Include="ThermalProps.cs" />

@@ -61,5 +61,6 @@
 	
 	<Celsius_StatPart_Wetness_Explanation>Wet: {0}</Celsius_StatPart_Wetness_Explanation>
 	<Celsius_StatPart_WindSpeed_Explanation>Wind {0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
+	<Celsius_StatPart_DirectSunlight_Explanation>Direct sunlight: {0}</Celsius_StatPart_DirectSunlight_Explanation>
 
 </LanguageData>

@@ -9,23 +9,8 @@ namespace Celsius
 {
     public class TemperatureInfo : MapComponent
     {
-        // Ticks between full map updates
-        //public const int TicksPerUpdate = 120;
-
-        // Number of "slices": parts the full update is divided into
-        //public const int SliceCount = 4;
-
-        // Ticks between partial updates (slices)
-        //public const int TicksPerSlice = TicksPerUpdate / SliceCount;
-
         // Normal full updates between rare updates
         public const int RareUpdateInterval = 4;
-
-        // Amount of snow to be melted each update (to be similar to vanilla)
-        //const float SnowMeltCoefficient = TicksPerUpdate * 0.0006f;
-
-        // How quickly snow melts under rain
-        //const float SnowMeltCoefficientRain = SnowMeltCoefficient * 2;
 
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
@@ -254,7 +239,6 @@ namespace Celsius
             if (!initialized)
                 FinalizeInit();
 
-            //if ((Find.TickManager.TicksGame - map.generationTick) % Settings.TicksPerSlice != 0)
             if (++tick < Settings.TicksPerSlice)
                 return;
 
