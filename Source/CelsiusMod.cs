@@ -87,6 +87,9 @@ namespace Celsius
             content.Label("Celsius_Settings_EnvironmentDiffusion".Translate(EnvironmentDiffusionFactor.ToStringPercent()), tooltip: "Celsius_Settings_EnvironmentDiffusion_tooltip".Translate(EnvironmentDiffusionFactor_Default.ToStringPercent()));
             EnvironmentDiffusionFactor = (float)Math.Round(content.Slider(EnvironmentDiffusionFactor, 0, 1), 1);
 
+            content.Label("Celsius_Settings_RoofInsulation".Translate(RoofInsulation), tooltip: "Celsius_Settings_RoofInsulation_tooltip".Translate(RoofInsulation_Default));
+            RoofInsulation = Mathf.Round(content.Slider(RoofInsulation, 0, 20));
+
             // Localization key: Celsius_Settings_HeatPush - Heat push: {HeatPushMultiplier.ToStringPercent()}
             //                   Celsius_Settings_HeatPush_tooltip - Effect of things that produce or reduce heat (e.g. fires, heaters and coolers).
             content.Label("Celsius_Settings_HeatPush".Translate(HeatPushMultiplier.ToStringPercent()), tooltip: "Celsius_Settings_HeatPush_tooltip".Translate());
