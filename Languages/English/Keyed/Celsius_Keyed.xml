@@ -44,9 +44,9 @@
 	<Celsius_MapTempOverlay_Terrain>Terrain: {0}</Celsius_MapTempOverlay_Terrain>
 	<Celsius_Terrain>Terrain</Celsius_Terrain>
 	
-	<Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>{0} volumetric heat capacity: {1}</Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>
-	<Celsius_Stat_HeatCapacity_Volume>{0} volume: {1} m^3</Celsius_Stat_HeatCapacity_Volume>
-	<Celsius_Stat_HeatCapacity_AirHeatCapacity>Air heat capacity: {0}</Celsius_Stat_HeatCapacity_AirHeatCapacity>
+	<Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>{0} volumetric heat capacity: {1} J/(K·m³)</Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>
+	<Celsius_Stat_HeatCapacity_Volume>{0} volume: {1} m³</Celsius_Stat_HeatCapacity_Volume>
+	<Celsius_Stat_HeatCapacity_AirHeatCapacity>Air heat capacity: {0} J/K</Celsius_Stat_HeatCapacity_AirHeatCapacity>
 	
 	<Celsius_Stat_HeatConductivity_BaseInsulation>{0} base insulation: {1}</Celsius_Stat_HeatConductivity_BaseInsulation>
 	<Celsius_Stat_HeatConductivity_StuffInsulation>{0} insulation: </Celsius_Stat_HeatConductivity_StuffInsulation>
