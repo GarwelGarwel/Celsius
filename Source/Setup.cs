@@ -135,8 +135,11 @@ namespace Celsius
                 if (temperatureInfo != null)
                 {
                     float temperature = temperatureInfo.GetIgnitionTemperatureForCell(__instance.Position);
-                    LogUtility.Log($"Setting temperature at {__instance.Position} to {temperature:F0}C...");
-                    temperatureInfo.SetTemperatureForCell(__instance.Position, Mathf.Min(temperatureInfo.GetTemperatureForCell(__instance.Position), temperature));
+                    if (temperature < temperatureInfo.GetTemperatureForCell(__instance.Position))
+                    {
+                        LogUtility.Log($"Setting temperature at {__instance.Position} to {temperature:F0}C...");
+                        temperatureInfo.SetTemperatureForCell(__instance.Position, temperature);
+                    }
                 }
             }
         }

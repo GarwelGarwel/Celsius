@@ -28,12 +28,16 @@
 	<Celsius_Settings_CurrentMapTemp_tooltip>Currently: {0}</Celsius_Settings_CurrentMapTemp_tooltip>
 	<Celsius_Settings_ManualTemperature>Temperature: {0}</Celsius_Settings_ManualTemperature>
 	<Celsius_Settings_TakeOwnRisk>Change the values below at your own risk.</Celsius_Settings_TakeOwnRisk>
+	<Celsius_Settings_UpdateInterval>Update interval: {0} ticks</Celsius_Settings_UpdateInterval>
+	<Celsius_Settings_UpdateInterval_tooltip>How often map temperatures are updated. Lower values improve accuracy, higher values improve performance. 1 real time second = 60 ticks at normal speed. Recommended value: {0} ticks.</Celsius_Settings_UpdateInterval_tooltip>
 	<Celsius_Settings_ConductivitySpeed>Conductivity speed: {0}</Celsius_Settings_ConductivitySpeed>
 	<Celsius_Settings_ConductivitySpeed_tooltip>How quickly temperature changes.</Celsius_Settings_ConductivitySpeed_tooltip>
 	<Celsius_Settings_ConvectionConductivityEffect>Convection conductivity effect:</Celsius_Settings_ConvectionConductivityEffect>
 	<Celsius_Settings_ConvectionConductivityEffect_tooltip>How much air convection increases air conductivity. Recommended value: {0}.</Celsius_Settings_ConvectionConductivityEffect_tooltip>
 	<Celsius_Settings_EnvironmentDiffusion>Environment diffusion: {0}</Celsius_Settings_EnvironmentDiffusion>
 	<Celsius_Settings_EnvironmentDiffusion_tooltip>How strongly environment (e.g. outdoor) temperature affects cell temperatures. Recommended value: {0}.</Celsius_Settings_EnvironmentDiffusion_tooltip>
+	<Celsius_Settings_RoofInsulation>Roof insulation: {0}</Celsius_Settings_RoofInsulation>
+	<Celsius_Settings_RoofInsulation_tooltip>How well roofs (constructed and natural) preserve indoor temperature. Recommended value: {0}.</Celsius_Settings_RoofInsulation_tooltip>
 	<Celsius_Settings_HeatPush>Heat push: {0}</Celsius_Settings_HeatPush>
 	<Celsius_Settings_HeatPush_tooltip>Effect of things that produce or reduce heat (e.g. fires, heaters and coolers).</Celsius_Settings_HeatPush_tooltip>
 	<Celsius_Settings_DebugMode>Debug logging mode</Celsius_Settings_DebugMode>
@@ -57,5 +61,6 @@
 	
 	<Celsius_StatPart_Wetness_Explanation>Wet: {0}</Celsius_StatPart_Wetness_Explanation>
 	<Celsius_StatPart_WindSpeed_Explanation>Wind {0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
+	<Celsius_StatPart_DirectSunlight_Explanation>Direct sunlight: {0}</Celsius_StatPart_DirectSunlight_Explanation>
 
 </LanguageData>

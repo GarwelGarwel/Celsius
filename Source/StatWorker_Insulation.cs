@@ -5,14 +5,14 @@ using Verse;
 
 namespace Celsius
 {
-    public class StatWorker_HeatConductivity : StatWorker
+    public class StatWorker_Insulation : StatWorker
     {
         public override float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
         {
             ThermalProps thermalProps = req.HasThing
                 ? req.Thing.TryGetComp<CompThermal>()?.ThermalProperties
                 : req.Def?.GetModExtension<ThingThermalProperties>()?.GetThermalProps(req.StuffDef?.GetModExtension<StuffThermalProperties>());
-            return thermalProps == null ? 0 : thermalProps.Conductivity;
+            return thermalProps != null ? thermalProps.insulation : 0;
         }
 
         public override string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
@@ -45,7 +45,7 @@ namespace Celsius
                 return base.GetExplanationUnfinalized(req, numberSense);
 
             StringBuilder explanation = new StringBuilder("Celsius_Stat_HeatConductivity_BaseInsulation"
-                .Translate(req.Def.label, thingThermalProperties.insulation)
+                .Translate(req.Def.label, thingThermalProperties.insulation.ToString("F1"))
                 .CapitalizeFirst());
             if (stuffThermalProperties != null)
             {
@@ -55,14 +55,7 @@ namespace Celsius
             if (isOpen && thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen)
                 explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_AirflowOpen".Translate(req.Def.label).Colorize(Color.yellow).CapitalizeFirst());
             if (thermalProps.airflow != 0)
-            {
                 explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_Airflow".Translate(thermalProps.airflow.ToStringPercent()));
-                explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_ActualInsulation".Translate(thermalProps.insulation.ToString("F2")));
-            }
-            explanation.AppendInNewLine("Celsius_Stat_HeatConductivity_Conductivity".Translate(
-                Settings.ConductivityPowerBase.ToString("0.##"),
-                thermalProps.insulation.ToString("F2"),
-                thermalProps.Conductivity.ToStringByStyle(stat.toStringStyle, numberSense)));
 
             return explanation.ToString();
         }
