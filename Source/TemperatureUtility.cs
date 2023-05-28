@@ -121,14 +121,15 @@ namespace Celsius
             heatFlow += props.HeatFlowNoConvection;
         }
 
-        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, ref float energy, ref float heatFlow, bool log = false)
+        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow, bool log = false)
         {
-            if (props.IsAir)
+            if (props.IsAir && !roofed)
             {
                 energy += (environmentTemperature - cellTemperature) * Settings.EnvironmentDiffusionFactor;
                 heatFlow += Settings.EnvironmentDiffusionFactor;
+                return;
             }
-            float hf = props.HeatFlow * Settings.EnvironmentDiffusionFactor / Settings.ConvectionConductivityEffect;
+            float hf = props.heatflowNoConvection * Settings.RoofDiffusionFactor;
             energy += (environmentTemperature - cellTemperature) * hf;
             heatFlow += hf;
         }

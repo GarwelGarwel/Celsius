@@ -7,8 +7,7 @@ namespace Celsius
     {
         public SimpleCurve offset;
 
-        bool AppliesTo(StatRequest req) =>
-            Settings.PawnWeatherEffects && offset != null && req.HasThing && req.Thing.Spawned && !req.Thing.Position.Roofed(req.Thing.Map);
+        bool AppliesTo(StatRequest req) => Settings.PawnWeatherEffects && req.HasThing && req.Thing.Spawned && !req.Thing.Position.Roofed(req.Thing.Map);
 
         public override void TransformValue(StatRequest req, ref float val)
         {
