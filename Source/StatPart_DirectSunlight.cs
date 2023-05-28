@@ -8,15 +8,13 @@ namespace Celsius
         public float minGlow = 1;
         public float offset;
 
-        public bool AtDirectSunlight(Thing thing) =>
-            thing != null
-            && thing.Spawned
-            && thing.Map != null
+        bool AtDirectSunlight(Thing thing) =>
+            thing.Spawned
             && thing.Map.skyManager.CurSkyGlow >= minGlow
             && thing.Map.weatherManager.curWeather == WeatherDefOf.Clear
             && !thing.Position.Roofed(thing.Map);
 
-        bool AppliesTo(StatRequest req) => Settings.PawnWeatherEffects && offset != 0 && AtDirectSunlight(req.Thing);
+        bool AppliesTo(StatRequest req) => Settings.PawnWeatherEffects && req.HasThing && AtDirectSunlight(req.Thing);
 
         public override void TransformValue(StatRequest req, ref float val)
         {
