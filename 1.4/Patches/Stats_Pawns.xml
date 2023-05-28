@@ -19,7 +19,7 @@
 				</offset>
 			</li>
 			<li Class="Celsius.StatPart_DirectSunlight">
-				<offset>-3</offset>
+				<offset>-2</offset>
 			</li>
 		</value>
 	</Operation>
@@ -31,7 +31,7 @@
 				<offset>5</offset>
 			</li>
 			<li Class="Celsius.StatPart_DirectSunlight">
-				<offset>-3</offset>
+				<offset>-2</offset>
 			</li>
 		</value>
 	</Operation>
