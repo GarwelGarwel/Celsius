@@ -72,11 +72,6 @@ namespace Celsius
             content.Label("Celsius_Settings_UpdateInterval".Translate(TicksPerUpdate), tooltip: "Celsius_Settings_UpdateInterval_tooltip".Translate(TicksPerUpdate_Default));
             TicksPerUpdate = (int)content.Slider(TicksPerUpdate, 60, 300) / 20 * 20;
 
-            // Localization key: Celsius_Settings_ConductivitySpeed - Conductivity speed: {(1 / Mathf.Log(ConductivityPowerBase, ConductivityPowerBase_Default)).ToStringPercent()}
-            //                   Celsius_Settings_ConductivitySpeed_tooltip - How quickly temperature changes.
-            //content.Label($"Celsius_Settings_ConductivitySpeed".Translate((1 / Mathf.Log(ConductivityPowerBase, ConductivityPowerBase_Default)).ToStringPercent()), tooltip: "Celsius_Settings_ConductivitySpeed_tooltip".Translate());
-            //ConductivityPowerBase = (float)Math.Round(content.Slider(ConductivityPowerBase, 0.1f, 0.9f), 2);
-
             // Localization key: Celsius_Settings_ConvectionConductivityEffect - Convection conductivity effect: x{ConvectionConductivityEffect}
             //                   Celsius_Settings_ConvectionConductivityEffect_tooltip - How much air convection increases air conductivity. Recommended value: {ConvectionConductivityEffect_Default}.
             content.Label($"{"Celsius_Settings_ConvectionConductivityEffect".Translate()} x{ConvectionConductivityEffect}", tooltip: "Celsius_Settings_ConvectionConductivityEffect_tooltip".Translate(ConvectionConductivityEffect_Default));

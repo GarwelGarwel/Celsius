@@ -30,8 +30,6 @@
 	<Celsius_Settings_TakeOwnRisk>Change the values below at your own risk.</Celsius_Settings_TakeOwnRisk>
 	<Celsius_Settings_UpdateInterval>Update interval: {0} ticks</Celsius_Settings_UpdateInterval>
 	<Celsius_Settings_UpdateInterval_tooltip>How often map temperatures are updated. Lower values improve accuracy, higher values improve performance. 1 real time second = 60 ticks at normal speed. Recommended value: {0} ticks.</Celsius_Settings_UpdateInterval_tooltip>
-	<Celsius_Settings_ConductivitySpeed>Conductivity speed: {0}</Celsius_Settings_ConductivitySpeed>
-	<Celsius_Settings_ConductivitySpeed_tooltip>How quickly temperature changes.</Celsius_Settings_ConductivitySpeed_tooltip>
 	<Celsius_Settings_ConvectionConductivityEffect>Convection conductivity effect:</Celsius_Settings_ConvectionConductivityEffect>
 	<Celsius_Settings_ConvectionConductivityEffect_tooltip>How much air convection increases air conductivity. Recommended value: {0}.</Celsius_Settings_ConvectionConductivityEffect_tooltip>
 	<Celsius_Settings_EnvironmentDiffusion>Environment diffusion: {0}</Celsius_Settings_EnvironmentDiffusion>
@@ -48,16 +46,14 @@
 	<Celsius_MapTempOverlay_Terrain>Terrain: {0}</Celsius_MapTempOverlay_Terrain>
 	<Celsius_Terrain>Terrain</Celsius_Terrain>
 	
-	<Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>{0} volumetric heat capacity: {1} J/(K·m³)</Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>
+	<Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>{0} volumetric heat capacity: {1}/m³</Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>
 	<Celsius_Stat_HeatCapacity_Volume>{0} volume: {1} m³</Celsius_Stat_HeatCapacity_Volume>
-	<Celsius_Stat_HeatCapacity_AirHeatCapacity>Air heat capacity: {0} J/K</Celsius_Stat_HeatCapacity_AirHeatCapacity>
+	<Celsius_Stat_HeatCapacity_AirHeatCapacity>Air heat capacity: {0}</Celsius_Stat_HeatCapacity_AirHeatCapacity>
 	
-	<Celsius_Stat_HeatConductivity_BaseInsulation>{0} base insulation: {1}</Celsius_Stat_HeatConductivity_BaseInsulation>
-	<Celsius_Stat_HeatConductivity_StuffInsulation>{0} insulation: </Celsius_Stat_HeatConductivity_StuffInsulation>
-	<Celsius_Stat_HeatConductivity_AirflowOpen>The {0} is open.</Celsius_Stat_HeatConductivity_AirflowOpen>
-	<Celsius_Stat_HeatConductivity_Airflow>Airflow: {0}</Celsius_Stat_HeatConductivity_Airflow>
-	<Celsius_Stat_HeatConductivity_ActualInsulation>Actual insulation: {0}</Celsius_Stat_HeatConductivity_ActualInsulation>
-	<Celsius_Stat_HeatConductivity_Conductivity>Conductivity: {0} ^ {1} = {2}</Celsius_Stat_HeatConductivity_Conductivity>
+	<Celsius_Stat_Insulation_BaseInsulation>{0} base insulation: {1}</Celsius_Stat_Insulation_BaseInsulation>
+	<Celsius_Stat_Insulation_StuffInsulation>{0} insulation: </Celsius_Stat_Insulation_StuffInsulation>
+	<Celsius_Stat_Insulation_AirflowOpen>The {0} is open.</Celsius_Stat_Insulation_AirflowOpen>
+	<Celsius_Stat_Insulation_Airflow>Airflow: {0}</Celsius_Stat_Insulation_Airflow>
 	
 	<Celsius_StatPart_Wetness_Explanation>Wet: {0}</Celsius_StatPart_Wetness_Explanation>
 	<Celsius_StatPart_WindSpeed_Explanation>Wind {0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
