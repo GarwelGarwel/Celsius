@@ -28,8 +28,6 @@
 	<Celsius_Settings_CurrentMapTemp_tooltip>Aktuell: {0}</Celsius_Settings_CurrentMapTemp_tooltip>
 	<Celsius_Settings_ManualTemperature>Temperatur: {0}</Celsius_Settings_ManualTemperature>
 	<Celsius_Settings_TakeOwnRisk>Ändern der nachfolgenden Werte auf eigene Gefahr!</Celsius_Settings_TakeOwnRisk>
-	<Celsius_Settings_ConductivitySpeed>Wäremeleitgeschwindigkeit: {0}</Celsius_Settings_ConductivitySpeed>
-	<Celsius_Settings_ConductivitySpeed_tooltip>Wie schnell sich die Temperatur im Laufe der Zeit ändert.</Celsius_Settings_ConductivitySpeed_tooltip>
 	<Celsius_Settings_ConvectionConductivityEffect>Konvektionsgeschwindigkeit:</Celsius_Settings_ConvectionConductivityEffect>
 	<Celsius_Settings_ConvectionConductivityEffect_tooltip>Wie stark Luftbewegungen die Wäremeleitgeschwindigkeit erhöhen. Empfohlener Wert: {0}.</Celsius_Settings_ConvectionConductivityEffect_tooltip>
 	<Celsius_Settings_EnvironmentDiffusion>Umgebungsdiffusion: {0}</Celsius_Settings_EnvironmentDiffusion>
@@ -44,17 +42,15 @@
 	<Celsius_MapTempOverlay_Terrain>Untergrund: {0}</Celsius_MapTempOverlay_Terrain>
 	<Celsius_Terrain>Untergrund</Celsius_Terrain>
 	
-	<Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>Wärmespeicherzahl von {0}: {1} J/(K·m³)</Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>
+	<Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>Wärmespeicherzahl von {0}: {1}/m³</Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>
 	<!-- Besser wäre hier: „Raumvolumen *der* Tür / *des* Sessels“ (benötigt Genitiv für eingefügte Objektnamen) -->
 	<Celsius_Stat_HeatCapacity_Volume>Raumvolumen von {0}: {1} m³</Celsius_Stat_HeatCapacity_Volume>
-	<Celsius_Stat_HeatCapacity_AirHeatCapacity>Wärmekapazität der Luft: {0} J/K</Celsius_Stat_HeatCapacity_AirHeatCapacity>
+	<Celsius_Stat_HeatCapacity_AirHeatCapacity>Wärmekapazität der Luft: {0}</Celsius_Stat_HeatCapacity_AirHeatCapacity>
 	
-	<Celsius_Stat_HeatConductivity_BaseInsulation>Grundwert für {0}: {1}</Celsius_Stat_HeatConductivity_BaseInsulation>
-	<Celsius_Stat_HeatConductivity_StuffInsulation>{0}-Wärmedämmung: </Celsius_Stat_HeatConductivity_StuffInsulation>
-	<Celsius_Stat_HeatConductivity_AirflowOpen>{0} ist offen.</Celsius_Stat_HeatConductivity_AirflowOpen>
-	<Celsius_Stat_HeatConductivity_Airflow>Luftstrom: {0}</Celsius_Stat_HeatConductivity_Airflow>
-	<Celsius_Stat_HeatConductivity_ActualInsulation>Tatsächliche Wärmedämmung: {0}</Celsius_Stat_HeatConductivity_ActualInsulation>
-	<Celsius_Stat_HeatConductivity_Conductivity>Wärmeleitfähigkeit: {0} ^ {1} = {2}</Celsius_Stat_HeatConductivity_Conductivity>
+	<Celsius_Stat_Insulation_BaseInsulation>Grundwert für {0}: {1}</Celsius_Stat_Insulation_BaseInsulation>
+	<Celsius_Stat_Insulation_StuffInsulation>{0}-Wärmedämmung: </Celsius_Stat_Insulation_StuffInsulation>
+	<Celsius_Stat_Insulation_AirflowOpen>{0} ist offen.</Celsius_Stat_Insulation_AirflowOpen>
+	<Celsius_Stat_Insulation_Airflow>Luftstrom: {0}</Celsius_Stat_Insulation_Airflow>
 	
 	<Celsius_StatPart_Wetness_Explanation>Nass: {0}</Celsius_StatPart_Wetness_Explanation>
 	<Celsius_StatPart_WindSpeed_Explanation>Wind x{0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
