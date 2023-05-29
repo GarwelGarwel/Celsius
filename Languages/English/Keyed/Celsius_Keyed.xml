@@ -45,7 +45,17 @@
 	<Celsius_MapTempOverlay_Cell>Cell: {0}</Celsius_MapTempOverlay_Cell>
 	<Celsius_MapTempOverlay_Terrain>Terrain: {0}</Celsius_MapTempOverlay_Terrain>
 	<Celsius_Terrain>Terrain</Celsius_Terrain>
-	
+
+	<!-- Translator hints:
+	Since the thermodynamics system implemented in Celsius is a simplification
+	of the one implemented in the universe containing Earth most of the
+	following stats are presented without use of SI units. The units most
+	similar to those on Earth are listed below for making it easier for
+	translators to figure out the most suitable thermal engineering vocabulary
+	in their languages however:
+	 * Volumetric heat capacity: J/(K·m³)
+	 * Air heat capacity: J/K
+	-->
 	<Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>{0} volumetric heat capacity: {1}/m³</Celsius_Stat_HeatCapacity_StuffVolumetricHeatCapacity>
 	<Celsius_Stat_HeatCapacity_Volume>{0} volume: {1} m³</Celsius_Stat_HeatCapacity_Volume>
 	<Celsius_Stat_HeatCapacity_AirHeatCapacity>Air heat capacity: {0}</Celsius_Stat_HeatCapacity_AirHeatCapacity>
