@@ -347,7 +347,7 @@ namespace Celsius
                 }
 
                 // Autoignition
-                if (Settings.AutoignitionEnabled && rareUpdateCounter == 0 && temperature > MinIgnitionTemperature)
+                if (temperature > MinIgnitionTemperature && Settings.AutoignitionEnabled)
                 {
                     float fireSize = 0;
                     List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
@@ -425,9 +425,9 @@ namespace Celsius
 
         public float GetTemperatureForCell(IntVec3 cell) => GetTemperatureForCell(map.cellIndices.CellToIndex(cell));
 
-        public float GetRoomTemperature(Room room)
+        public float GetRoomAverageTemperature(Room room)
         {
-            if (room == null || room.ID == -1 || roomTemperatures == null)
+            if (room.ID == -1 || roomTemperatures == null)
             {
                 LogUtility.Log($"Could not get temperature for room {room?.ToString() ?? "null"}.", LogLevel.Error);
                 return map.mapTemperature.OutdoorTemp;
