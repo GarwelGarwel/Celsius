@@ -3,7 +3,6 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Verse;
 
 namespace Celsius
@@ -94,7 +93,7 @@ namespace Celsius
         // Replaces Room.Temperature with room's average temperature (e.g. for displaying in the bottom right corner)
         public static bool Room_Temperature_get(ref float __result, Room __instance)
         {
-            if (__instance.Map.TemperatureInfo() == null)
+            if (__instance?.Map?.TemperatureInfo() == null)
                 return true;
             __result = __instance.GetTemperature();
             return false;
@@ -185,7 +184,7 @@ namespace Celsius
         public static bool GlobalControls_TemperatureString(ref string __result)
         {
             IntVec3 cell = UI.MouseCell();
-            TemperatureInfo temperatureInfo = Find.CurrentMap.TemperatureInfo();
+            TemperatureInfo temperatureInfo = Find.CurrentMap?.TemperatureInfo();
             if (temperatureInfo == null || !cell.InBounds(Find.CurrentMap) || cell.Fogged(Find.CurrentMap))
                 return true;
             __result = temperatureInfo.GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString);
@@ -202,7 +201,7 @@ namespace Celsius
         // When door is opening, update its state and thermal values
         public static void Building_Door_DoorOpen(Building_Door __instance)
         {
-            CompThermal compThermal = __instance.TryGetComp<CompThermal>();
+            CompThermal compThermal = __instance?.TryGetComp<CompThermal>();
             if (compThermal != null)
                 compThermal.IsOpen = true;
         }
@@ -212,7 +211,7 @@ namespace Celsius
         {
             if (__result)
             {
-                CompThermal compThermal = __instance.TryGetComp<CompThermal>();
+                CompThermal compThermal = __instance?.TryGetComp<CompThermal>();
                 if (compThermal != null)
                     compThermal.IsOpen = false;
             }
