@@ -76,5 +76,13 @@ You may also leave comments on the Steam page. If you are reporting a bug, make 
 		<li>Ludeon.RimWorld.Royalty</li>
 		<li>Ludeon.RimWorld.Ideology</li>
 		<li>imranfish.xmlextensions</li>
+		<li>sarg.alphaanimals</li>
+		<li>mlie.insulation</li>
+		<li>primitiveproduction.velcroboy333</li>
+		<li>vanillaexpanded.vfecore</li>
+		<li>vanillaexpanded.vfearchitect</li>
+		<li>vanillaexpanded.vfemedical</li>
+		<li>vanillaexpanded.vfesecurity</li>
+		<li>Owlchemist.Windows</li>
 	</loadAfter>
 </ModMetaData>
