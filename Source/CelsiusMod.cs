@@ -70,7 +70,7 @@ namespace Celsius
             content.Label("Celsius_Settings_TakeOwnRisk".Translate().Colorize(Color.red));
 
             content.Label("Celsius_Settings_UpdateInterval".Translate(TicksPerUpdate), tooltip: "Celsius_Settings_UpdateInterval_tooltip".Translate(TicksPerUpdate_Default));
-            TicksPerUpdate = (int)content.Slider(TicksPerUpdate, 60, 300) / 30 * 30;
+            TicksPerUpdate = (int)content.Slider(TicksPerUpdate, 60, 300) / 20 * 20;
 
             // Localization key: Celsius_Settings_ConvectionConductivityEffect - Convection conductivity effect: x{ConvectionConductivityEffect}
             //                   Celsius_Settings_ConvectionConductivityEffect_tooltip - How much air convection increases air conductivity. Recommended value: {ConvectionConductivityEffect_Default}.
