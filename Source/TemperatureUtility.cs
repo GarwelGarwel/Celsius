@@ -82,7 +82,7 @@ namespace Celsius
             }
             if (room.TouchesMapEdge)
                 return room.Map.mapTemperature.OutdoorTemp;
-            return temperatureInfo.GetRoomTemperature(room);
+            return temperatureInfo.GetRoomAverageTemperature(room);
         }
 
         public static bool HasTemperature(this TerrainDef terrain)
