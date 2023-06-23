@@ -28,10 +28,14 @@
 	<Celsius_Settings_CurrentMapTemp_tooltip>Aktuell: {0}</Celsius_Settings_CurrentMapTemp_tooltip>
 	<Celsius_Settings_ManualTemperature>Temperatur: {0}</Celsius_Settings_ManualTemperature>
 	<Celsius_Settings_TakeOwnRisk>Ändern der nachfolgenden Werte auf eigene Gefahr!</Celsius_Settings_TakeOwnRisk>
+	<Celsius_Settings_UpdateInterval>Aktualisierungsrate: {0} Ticks</Celsius_Settings_UpdateInterval>
+	<Celsius_Settings_UpdateInterval_tooltip>Häufigkeit mit der die Temperaturwerte auf der Karte aktualisiert werden. Niedrigere Werte erhöhen die Genauigkeit, höhere Werte reduzieren die benötigte Rechenleistung. 1 Sekunde = 60 Ticks bei normaler Spielgeschwindigkeit. Empfohlener Wert: {0} Ticks.</Celsius_Settings_UpdateInterval_tooltip>
 	<Celsius_Settings_ConvectionConductivityEffect>Konvektionsgeschwindigkeit:</Celsius_Settings_ConvectionConductivityEffect>
 	<Celsius_Settings_ConvectionConductivityEffect_tooltip>Wie stark Luftbewegungen die Wäremeleitgeschwindigkeit erhöhen. Empfohlener Wert: {0}.</Celsius_Settings_ConvectionConductivityEffect_tooltip>
 	<Celsius_Settings_EnvironmentDiffusion>Umgebungsdiffusion: {0}</Celsius_Settings_EnvironmentDiffusion>
 	<Celsius_Settings_EnvironmentDiffusion_tooltip>Wie stark die Umgebungs-/Außentemperatur die allgemeine Zellentemperatur beeinflusst. Empfohlener Wert: {0}.</Celsius_Settings_EnvironmentDiffusion_tooltip>
+	<Celsius_Settings_RoofInsulation>Dachisolierung: {0}</Celsius_Settings_RoofInsulation>
+	<Celsius_Settings_RoofInsulation_tooltip>Stärke mit der Dächer (ob durch Bewohner gebaut oder bereits vorhanden) die Innentemperatur in Räumen erhalten. Empfohlener Wert: {0}.</Celsius_Settings_RoofInsulation_tooltip>
 	<Celsius_Settings_HeatPush>Wärmedruck: {0}</Celsius_Settings_HeatPush>
 	<Celsius_Settings_HeatPush_tooltip>Intensität mit der Objekte (zB: Feuer, Heizungen und Kühlungen) Wärme erzeugen oder reduzieren.</Celsius_Settings_HeatPush_tooltip>
 	<Celsius_Settings_DebugMode>Debug-Logging-Modus</Celsius_Settings_DebugMode>
@@ -54,5 +58,6 @@
 	
 	<Celsius_StatPart_Wetness_Explanation>Nass: {0}</Celsius_StatPart_Wetness_Explanation>
 	<Celsius_StatPart_WindSpeed_Explanation>Wind x{0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
+	<Celsius_StatPart_DirectSunlight_Explanation>In der Sonne: {0}</Celsius_StatPart_DirectSunlight_Explanation>
 
 </LanguageData>
