@@ -1,6 +1,5 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -459,6 +458,11 @@ namespace Celsius
                 }
             return thermalProperties[index] = ThermalProps.Air;
         }
+
+        public void PushHeat(int index, float energy) =>
+          SetTemperatureForCell(index, temperatures[index] + energy * Settings.HeatPushEffect / GetThermalPropertiesAt(index).heatCapacity);
+
+        public void PushHeat(IntVec3 cell, float energy) => PushHeat(map.cellIndices.CellToIndex(cell), energy);
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
         {
