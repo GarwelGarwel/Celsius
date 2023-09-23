@@ -34,7 +34,10 @@ namespace Celsius
                 prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
             harmony.Patch(
                 AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
-                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat")));
+                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat_IntVec3")));
+            harmony.Patch(
+                AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(Thing), typeof(float) }),
+                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat_Thing")));
             harmony.Patch(
                 AccessTools.Method("Verse.GenTemperature:ControlTemperatureTempChange"),
                 postfix: new HarmonyMethod(type.GetMethod("GenTemperature_ControlTemperatureTempChange")));
@@ -100,7 +103,26 @@ namespace Celsius
         }
 
         // Replaces GenTemperature.PushHeat(IntVec3, Map, float) to change temperature at the specific cell instead of the whole room
-        public static bool GenTemperature_PushHeat(ref bool __result, IntVec3 c, Map map, float energy) => __result = TemperatureUtility.TryPushHeat(c, map, energy);
+        public static bool GenTemperature_PushHeat_IntVec3(ref bool __result, IntVec3 c, Map map, float energy) => __result = TemperatureUtility.TryPushHeat(c, map, energy);
+
+        // Replaces GenTemperature.PushHeat(Thing, float) to push heat evenly from big things (e.g. geysers)
+        public static bool GenTemperature_PushHeat_Thing(Thing t, float energy)
+        {
+            if (t.def.Size.x == 1 && t.def.Size.z == 1)
+                return !TemperatureUtility.TryPushHeat(t.PositionHeld, t.MapHeld, energy);
+            TemperatureInfo temperatureInfo = t?.MapHeld?.TemperatureInfo();
+            if (temperatureInfo == null)
+            {
+                LogUtility.Log($"TemperatureInfo unavailable for map {t.MapHeld} where {t} is held!", LogLevel.Warning);
+                return true;
+            }
+            CellRect cells = t.OccupiedRect();
+            energy /= cells.Area;
+            for (int x = cells.minX; x <= cells.maxX; x++)
+                for (int z = cells.minZ; z <= cells.maxZ; z++)
+                    temperatureInfo.PushHeat(new IntVec3(x, 0, z), energy);
+            return false;
+        }
 
         // Attaches to GenTemperature.ControlTemperatureTempChange to implement heat pushing for temperature control things (Heater, Cooler, Vent)
         public static float GenTemperature_ControlTemperatureTempChange(float result, IntVec3 cell, Map map, float energyLimit, float targetTemperature)

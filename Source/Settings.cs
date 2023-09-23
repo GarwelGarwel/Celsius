@@ -35,7 +35,7 @@ namespace Celsius
         public static MountainTemperatureMode MountainTemperatureMode;
         public static float MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
         public static int TemperatureDisplayDigits;
-        public static string TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits_Default}";
+        public static string TemperatureDisplayFormatString;
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const int TicksPerUpdate_Default = 120;
@@ -68,7 +68,6 @@ namespace Celsius
             Scribe_Values.Look(ref MountainTemperatureMode, "MountainTemperatureMode", MountainTemperatureMode.Vanilla);
             Scribe_Values.Look(ref MountainTemperature, "MountainTemperature", TemperatureTuning.DeepUndergroundTemperature);
             Scribe_Values.Look(ref TemperatureDisplayDigits, "TemperatureDisplayDigits", TemperatureDisplayDigits_Default);
-            TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
             Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
                 RecalculateValues();
@@ -90,7 +89,6 @@ namespace Celsius
             MountainTemperatureMode = MountainTemperatureMode.Vanilla;
             MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
             TemperatureDisplayDigits = TemperatureDisplayDigits_Default;
-            TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
             RecalculateValues();
             Print();
             TemperatureUtility.SettingsChanged();
@@ -98,6 +96,7 @@ namespace Celsius
 
         public static void RecalculateValues()
         {
+            TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
             TicksPerSlice = TicksPerUpdate / SliceCount;
             SnowMeltCoefficient = TicksPerUpdate * 0.00006f;
             SnowMeltCoefficientRain = SnowMeltCoefficient * 2;

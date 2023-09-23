@@ -142,16 +142,13 @@ namespace Celsius
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
-            if (Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay && UI.MouseCell() == cell)
-                LogUtility.Log($"Pushing {energy} heat at {cell}.");
             TemperatureInfo temperatureInfo = map.TemperatureInfo();
             if (temperatureInfo == null || !cell.InBounds(map))
             {
                 LogUtility.Log($"TemperatureInfo for {map} unavailable or cell {cell} is outside map boundaries!", LogLevel.Warning);
                 return false;
             }
-            int index = map.cellIndices.CellToIndex(cell);
-            temperatureInfo.SetTemperatureForCell(index, temperatureInfo.GetTemperatureForCell(index) + energy * Settings.HeatPushEffect / temperatureInfo.GetThermalPropertiesAt(index).heatCapacity);
+            temperatureInfo.PushHeat(map.cellIndices.CellToIndex(cell), energy);
             return true;
         }
 
