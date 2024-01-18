@@ -40,6 +40,6 @@ namespace Celsius
 
         public void Reset() => defaultProps = null;
 
-        public override string ToString() => $"Heat capacity: {heatCapacity}. Volume: {volume} m^3. Insulation: {insulation}. Conductivity: {GetThermalProps().Conductivity:P1}. Airflow: {airflow:P0} ({airflowWhenOpen:P0} when open).";
+        public override string ToString() => $"Heat capacity: {heatCapacity:F1}. Volume: {volume:F3} m^3. Insulation: {insulation:F1}. Conductivity: {GetThermalProps().Conductivity:P1}. Airflow: {airflow:P0} ({airflowWhenOpen:P0} when open).";
     }
 }
