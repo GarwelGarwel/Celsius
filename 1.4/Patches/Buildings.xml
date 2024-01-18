@@ -14,19 +14,7 @@
 	</Operation>
 
 	<Operation Class="PatchOperationAddModExtension">
-		<xpath>Defs/ThingDef[defName="Door"]</xpath>
-		<value>
-			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>5</heatCapacity>
-				<volume>0.0075</volume>
-				<insulation>4</insulation>
-				<airflowWhenOpen>0.75</airflowWhenOpen>
-			</li>
-		</value>
-	</Operation>
-
-	<Operation Class="PatchOperationAddModExtension">
-		<xpath>Defs/ThingDef[defName="Autodoor"]</xpath>
+		<xpath>Defs/ThingDef[defName="Door" or defName="Autodoor"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>5</heatCapacity>
@@ -66,7 +54,6 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>6</heatCapacity>
 				<insulation>4</insulation>
-				<airflow>0.05</airflow>
 				<airflowWhenOpen>0.9</airflowWhenOpen>
 			</li>
 		</value>
