@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- VANILLA VEHICLES EXPANDED -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VVE_GarageDoor" or defName="VVE_GarageDoorLarge" or defName="VVE_GarageAutoDoor" or defName="VVE_GarageAutoDoorLarge"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>5</heatCapacity>
+				<volume>0.0075</volume>
+				<insulation>4</insulation>
+				<airflowWhenOpen>0.80</airflowWhenOpen>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>
