@@ -68,6 +68,10 @@ namespace Celsius
             harmony.Patch(
                 AccessTools.Method("RimWorld.CompRitualFireOverlay:CompTick"),
                 postfix: new HarmonyMethod(type.GetMethod("CompRitualFireOverlay_CompTick")));
+            if (AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage") != null)
+                harmony.Patch(
+                    AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage"),
+                    postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
 
             LogUtility.Log($"Harmony initialization complete.");
 
@@ -246,6 +250,20 @@ namespace Celsius
         {
             if (GenTicks.TicksAbs % 60 == 0 && __instance.FireSize > 0)
                 TemperatureUtility.TryPushHeat(__instance.parent.Position, __instance.parent.Map, __instance.FireSize * HeatPushPerFireSize);
+        }
+
+        // Vanilla Vehicles Expanded: When opening or closing a garage door, update its state and thermal values
+        public static void VVE_GarageDoor_SpawnGarage(Building newGarage)
+        {
+            if (newGarage == null)
+            {
+                LogUtility.Log($"Error in VVE_GarageDoor_SpawnGarage: newGarage is null!", LogLevel.Error);
+                return;
+            }
+            CompThermal compThermal = newGarage.TryGetComp<CompThermal>();
+            if (compThermal != null)
+                compThermal.IsOpen = newGarage.def.defName.EndsWith("Opened");
+            else LogUtility.Log($"There is no CompThermal for {newGarage.ThingID}.", LogLevel.Warning);
         }
     }
 }
