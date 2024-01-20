@@ -84,6 +84,13 @@ namespace Celsius
                     LogUtility.Log($"{def.defName} has {ttpList.Count} ThingThermalProperties extensions:\n{ttpList.Select(ttp => ttp.ToString()).ToLineList("- ")}", LogLevel.Warning);
             }
 
+            if (Settings.DebugMode)
+                foreach (TerrainDef def in DefDatabase<TerrainDef>.AllDefs)
+                {
+                    if (def.Freezable() || def.Meltable())
+                        LogUtility.Log($"Terrain {def.defName}. Tags: {def.tags.ToCommaList()}.");
+                }
+
             TemperatureUtility.SettingsChanged();
         }
 
