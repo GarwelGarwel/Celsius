@@ -2,16 +2,21 @@
 
 <Patch>
 
-	<!-- INSULATION -->
+	<!-- INSULATION (CONTINUED) -->
 
 	<!-- Buildings (walls & doors) -->
 
-	<Operation Class="PatchOperationAddModExtension">
+	<!-- Note: Walls from Insulation (Continued) are not supported, because of the way they are defined in that mod (inherited directly from vanilla Wall
+	ThingDef). As a result, 2 DefModExtensions are added, which breaks compatibility. I haven't been able to figure it out without either a major rework of
+	Celsius or changing stuff within Insulation. Leaving this issue for now to the author of Insulation (Continued) and third-party mods. -->
+
+	<!--Operation Class="PatchOperationAddModExtension">
 		<success>Always</success>
 		<xpath>Defs/ThingDef[defName="INSWall_Biomass"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>9</heatCapacity>
+				<volume>0.010</volume>
 				<insulation>6</insulation>
 			</li>
 		</value>
@@ -23,6 +28,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>10</heatCapacity>
+				<volume>0.010</volume>
 				<insulation>7</insulation>
 			</li>
 		</value>
@@ -34,6 +40,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>11</heatCapacity>
+				<volume>0.010</volume>
 				<insulation>8</insulation>
 			</li>
 		</value>
@@ -45,10 +52,11 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>12</heatCapacity>
+				<volume>0.010</volume>
 				<insulation>9</insulation>
 			</li>
 		</value>
-	</Operation>
+	</Operation-->
 
 	<Operation Class="PatchOperationAddModExtension">
 		<success>Always</success>
@@ -56,6 +64,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>7</heatCapacity>
+				<volume>0.0075</volume>
 				<insulation>6</insulation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -68,6 +77,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>8</heatCapacity>
+				<volume>0.0075</volume>
 				<insulation>7</insulation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -80,6 +90,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>9</heatCapacity>
+				<volume>0.0075</volume>
 				<insulation>8</insulation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
@@ -92,6 +103,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>10</heatCapacity>
+				<volume>0.0075</volume>
 				<insulation>9</insulation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
