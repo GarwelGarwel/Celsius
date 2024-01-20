@@ -18,10 +18,13 @@ namespace Celsius
         static Stopwatch stopwatch = new Stopwatch();
         static int iterations;
 #endif
+        public static bool Freezable(this TerrainDef terrain) => terrain.HasTag("Freezable");
 
-        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < FreezeTemperature && terrain.IsWater;
+        public static bool Meltable(this TerrainDef terrain) => terrain.HasTag("Meltable");
 
-        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > MeltTemperature && terrain == TerrainDefOf.Ice;
+        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < FreezeTemperature && terrain.Freezable();
+
+        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > MeltTemperature && terrain.Meltable();
 
         /// <summary>
         /// Returns best guess for what kind of water terrain should be placed in a cell (if Ice melts there)
@@ -38,10 +41,10 @@ namespace Celsius
                 if (!c.InBounds(map))
                     continue;
                 terrain = c.GetTerrain(map);
-                if (terrain.IsWater)
+                if (terrain.Freezable())
                     return terrain;
                 underTerrain = map.terrainGrid.UnderTerrainAt(c);
-                if (underTerrain != null && underTerrain.IsWater)
+                if (underTerrain != null && underTerrain.Freezable())
                     return underTerrain;
                 if (terrain != TerrainDefOf.Ice || (underTerrain != null && underTerrain != TerrainDefOf.Ice))
                     foundGround = true;
