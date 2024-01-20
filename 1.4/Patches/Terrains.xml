@@ -2,7 +2,9 @@
 
 <Patch>
 
-	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+	<!-- Terrain tags (Freezable/Meltable) -->
+
+	<Operation Class="PatchOperationAdd">
 		<xpath>Defs/TerrainDef[@Name="WaterBase"]/tags</xpath>
 		<value>
 			<li>Freezable</li>
@@ -10,11 +12,15 @@
 	</Operation>
 
 	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-		<xpath>Defs/TerrainDef[defName="Ice"]/tags</xpath>
+		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
 		<value>
-			<li>Meltable</li>
+			<tags>
+				<li>Meltable</li>
+			</tags>
 		</value>
 	</Operation>
+
+	<!-- Terrain thermal properties -->
 
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>

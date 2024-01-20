@@ -46,7 +46,7 @@ namespace Celsius
                 underTerrain = map.terrainGrid.UnderTerrainAt(c);
                 if (underTerrain != null && underTerrain.Freezable())
                     return underTerrain;
-                if (terrain != TerrainDefOf.Ice || (underTerrain != null && underTerrain != TerrainDefOf.Ice))
+                if (!terrain.Meltable() || (underTerrain != null && !underTerrain.Meltable()))
                     foundGround = true;
             }
 
