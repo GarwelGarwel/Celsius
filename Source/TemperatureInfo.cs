@@ -211,16 +211,19 @@ namespace Celsius
             {
                 GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
-                // Localization key: Celsius_MapTempOverlay_Cell - Cell: {GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString)}
                 string tooltip = "Celsius_MapTempOverlay_Cell".Translate(GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                 {
                     float terrainTemperature = GetTerrainTemperature(cell);
                     if (!float.IsNaN(terrainTemperature))
-                        // Localization key: Celsius_MapTempOverlay_Terrain - Terrain: {terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString)}
                         tooltip += "\n" + "Celsius_MapTempOverlay_Terrain".Translate(terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 }
+#if DEBUG
+                Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 150, 100), $"{tooltip}\n{GetThermalPropertiesAt(map.cellIndices.CellToIndex(cell))}");
+
+#else
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
+#endif
                 Text.Font = font;
             }
         }
@@ -273,9 +276,6 @@ namespace Celsius
                 log = i == mouseCell;
                 float temperature = temperatures[i];
                 ThermalProps cellProps = GetThermalPropertiesAt(i);
-                if (log)
-                    LogUtility.Log($"Cell {cell}. Temperature: {temperature:F1}C. Capacity: {cellProps.heatCapacity}. Insulation: {cellProps.insulation}. Conductivity: {cellProps.Conductivity:P0}.");
-
                 float energy = 0;
                 float heatFlow = cellProps.HeatFlow;
 
@@ -450,7 +450,7 @@ namespace Celsius
             if (thermalProperties[index] != null)
                 return thermalProperties[index];
             List<Thing> thingsList = map.thingGrid.ThingsListAtFast(index);
-            for (int i = 0; i < thingsList.Count; i++)
+            for (int i = thingsList.Count - 1; i >= 0; i--)
                 if (CompThermal.ShouldApplyTo(thingsList[i].def))
                 {
                     ThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
@@ -459,6 +459,11 @@ namespace Celsius
                 }
             return thermalProperties[index] = ThermalProps.Air;
         }
+
+        public void PushHeat(int index, float energy) =>
+          SetTemperatureForCell(index, temperatures[index] + energy * Settings.HeatPushEffect / GetThermalPropertiesAt(index).heatCapacity);
+
+        public void PushHeat(IntVec3 cell, float energy) => PushHeat(map.cellIndices.CellToIndex(cell), energy);
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
         {
