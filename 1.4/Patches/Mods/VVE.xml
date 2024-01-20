@@ -6,7 +6,7 @@
 
 	<Operation Class="PatchOperationAddModExtension">
 		<success>Always</success>
-		<xpath>Defs/ThingDef[defName="VVE_GarageDoor" or defName="VVE_GarageDoorLarge" or defName="VVE_GarageAutoDoor" or defName="VVE_GarageAutoDoorLarge"]</xpath>
+		<xpath>Defs/ThingDef[@Name="VVE_GarageDoorAbstract"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>5</heatCapacity>
