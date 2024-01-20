@@ -73,17 +73,15 @@ namespace Celsius
                     AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage"),
                     postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
 
-            LogUtility.Log($"Harmony initialization complete.");
+            LogUtility.Log($"Harmony initialization complete.", LogLevel.Important);
 
-            // Adding CompThermal and ThingThermalProperties to all applicable Things
+            // Adding CompThermal to all applicable Things
+            List<ThingThermalProperties> ttpList;
             foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where(def => CompThermal.ShouldApplyTo(def)))
             {
-                if (def.IsMeat)
-                {
-                    if (def.modExtensions == null)
-                        def.modExtensions = new List<DefModExtension>();
-                }
                 def.comps.Add(new CompProperties(typeof(CompThermal)));
+                if ((ttpList = def.modExtensions.OfType<ThingThermalProperties>().ToList()).Count > 1)
+                    LogUtility.Log($"{def.defName} has {ttpList.Count} ThingThermalProperties extensions:\n{ttpList.Select(ttp => ttp.ToString()).ToLineList("- ")}", LogLevel.Warning);
             }
 
             TemperatureUtility.SettingsChanged();
