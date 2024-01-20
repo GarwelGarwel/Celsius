@@ -2,6 +2,20 @@
 
 <Patch>
 
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/TerrainDef[@Name="WaterBase"]/tags</xpath>
+		<value>
+			<li>Freezable</li>
+		</value>
+	</Operation>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/TerrainDef[defName="Ice"]/tags</xpath>
+		<value>
+			<li>Meltable</li>
+		</value>
+	</Operation>
+
 	<Operation Class="PatchOperationAddModExtension">
 		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
 		<value>
