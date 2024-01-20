@@ -25,9 +25,11 @@ Celsius opens up many new challenges and ways to play RimWorld. Forgo houses and
 
 Supported mods:
 - Alpha Animals
-- Insulation
+- Insulation (Continued) (except walls)
 - Primitive Workbenches
+- Replace Stuff
 - Vanilla Furniture Extended: base mod, Architect, Medical, Security
+- Vanilla Vehicles Extended
 - Windows
 
 All DLCs are supported. Mod authors can provide patches on their side or submit PRs in Github.
@@ -36,11 +38,11 @@ FAQ:
 
 - Can I install the mod in an existing save? Can I remove it?
 
-Celsius can be installed in an ongoing game. It may take a few seasons for all the temperatures to adjust.  Note that Celsius deeply changes temperature-related gameplay in RimWorld, so you will almost certainly need to adapt both your base and your play style. Removal mid-game is also theoretically possible but untested. 
+Celsius can be installed in an ongoing game. It may take a few seasons for all the temperatures to adjust.  Note that Celsius deeply changes temperature-related gameplay in RimWorld, so you will almost certainly need to adapt both your base and your play style. Removal mid-game should also be ok.
 
 - How does it affect performance?
 
-I worked hard to optimize the mod, and it shouldn't seriously slow down your game. In my tests on a rather ordinary laptop I haven't noticed any impact at all. Old machines and multiple or very big maps may have a different experience, but it shouldn't brick your computer.
+I worked hard to optimize the mod, and it shouldn't seriously slow down your game. In my tests on a rather ordinary laptop I haven't noticed any impact at all. The only remaining performance issue is stuttering or lag when large areas freeze or melt.
 
 - Any known incompatibilities?
 
@@ -49,6 +51,8 @@ Heat Map, Proxy Heat and similar mods are not needed, because Celsius does every
 Some modded vents, coolers and the like may experience issues or be unbalanced. There have been reported problems with Vanilla Expanded reactors and Android Tiers cores overheating.
 
 In general, mods that add walls, doors and building stuff may need patches. Celsius will do its best to adapt to them, but can't magically tell what thermal properties these things should have.
+
+You may check out Celsius Patches mod, maintained by Albinogod, for compatibility with more mods: https://steamcommunity.com/sharedfiles/filedetails/?id=3072081544 Note that we are not affiliated with one another.
 
 - How do I report issues or share feedback?
 
@@ -83,6 +87,7 @@ You may also leave comments on the Steam page. If you are reporting a bug, make 
 		<li>vanillaexpanded.vfearchitect</li>
 		<li>vanillaexpanded.vfemedical</li>
 		<li>vanillaexpanded.vfesecurity</li>
+		<li>OskarPotocki.VanillaVehiclesExpanded</li>
 		<li>Owlchemist.Windows</li>
 	</loadAfter>
 </ModMetaData>
