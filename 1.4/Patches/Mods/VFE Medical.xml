@@ -8,7 +8,7 @@
 
 	<Operation Class="PatchOperationAddModExtension">
 		<success>Always</success>
-		<xpath>Defs/ThingDef[@Name="SterileWallBase"]</xpath>
+		<xpath>Defs/ThingDef[defName="VFEM_Wall_Sterile"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>13</heatCapacity>
