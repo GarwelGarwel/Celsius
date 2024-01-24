@@ -24,6 +24,7 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>17</heatCapacity>
 				<volume>0.0125</volume>
+				<insulation>5.5</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -35,7 +36,7 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>17</heatCapacity>
 				<volume>0.010</volume>
-				<insulation>5</insulation>
+				<insulation>4.5</insulation>
 				<airflowWhenOpen>0.75</airflowWhenOpen>
 			</li>
 		</value>
