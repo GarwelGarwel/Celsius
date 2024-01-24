@@ -13,6 +13,7 @@
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>13</heatCapacity>
 				<volume>0.010</volume>
+				<insulation>5</insulation>
 			</li>
 		</value>
 	</Operation>
