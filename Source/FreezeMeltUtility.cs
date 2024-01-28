@@ -64,6 +64,9 @@ namespace Celsius
         }
 #endif
 
+        /// <summary>
+        /// Turns the given cell into ice
+        /// </summary>
         public static void FreezeTerrain(this IntVec3 cell, Map map, bool log = false)
         {
 #if DEBUG
@@ -79,6 +82,9 @@ namespace Celsius
 #endif
         }
 
+        /// <summary>
+        /// Turns the given cell into the appropriate kind of water terrain; 
+        /// </summary>
         public static void MeltTerrain(this IntVec3 cell, Map map, bool log = false)
         {
 #if DEBUG
@@ -103,7 +109,7 @@ namespace Celsius
                         CompDissolution compDissolution = thing.TryGetComp<CompDissolution>();
                         if (compDissolution != null)
                         {
-                            Log($"Applying dissolution effects of {thing.LabelCap} ({thing.def.defName}).");
+                            Log($"Applying dissolution effects of {thing.def}.");
                             compDissolution.TriggerDissolutionEvent(thing.stackCount);
                         }
                         else thing.Destroy();
@@ -113,7 +119,7 @@ namespace Celsius
                     TerrainAffordanceDef terrainAffordance = thing.TerrainAffordanceNeeded;
                     if (terrainAffordance != null && !meltedTerrain.affordances.Contains(terrainAffordance))
                     {
-                        Log($"{thing.LabelCap}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
+                        Log($"{thing.def}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
                         if (thing is Building_Grave grave && grave.HasAnyContents)
                         {
                             Log($"Grave with {grave.ContainedThing?.LabelShort} is uncovered due to melting.");
@@ -128,7 +134,7 @@ namespace Celsius
             if (map.terrainGrid.UnderTerrainAt(cell) == null)
                 map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
             if (log)
-                Log($"Ice at {cell} melts into {meltedTerrain.defName}.");
+                Log($"Ice at {cell} melts into {meltedTerrain}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
             map.snowGrid.SetDepth(cell, 0);
 #if DEBUG
