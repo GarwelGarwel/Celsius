@@ -353,21 +353,26 @@ namespace Celsius
                     List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
                     for (int k = 0; k < things.Count; k++)
                     {
-                        if (things[k].FireBulwark || things[k] is Fire)
+                        if (things[k].FireBulwark)
                         {
                             fireSize = 0;
                             break;
                         }
+                        if (things[k] is Fire fire)
+                        {
+                            fireSize -= fire.fireSize;
+                            continue;
+                        }
                         float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
                         if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
-                        {
-                            LogUtility.Log($"{things[k]} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
-                            fireSize += 0.1f * things[k].GetStatValue(StatDefOf.Flammability);
-                        }
+                            fireSize += Fire.MinFireSize * things[k].GetStatValue(StatDefOf.Flammability);
                     }
 
                     if (fireSize > 0)
+                    {
+                        LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
                         FireUtility.TryStartFireIn(cell, map, fireSize);
+                    }
                 }
 
                 if (!Settings.UseVanillaTemperatureColors)
