@@ -119,7 +119,7 @@ namespace Celsius
         {
             if (t.def.Size.x == 1 && t.def.Size.z == 1)
                 return !TemperatureUtility.TryPushHeat(t.PositionHeld, t.MapHeld, energy);
-            TemperatureInfo temperatureInfo = t?.MapHeld?.TemperatureInfo();
+            TemperatureInfo temperatureInfo = t.MapHeld?.TemperatureInfo();
             if (temperatureInfo == null)
             {
                 LogUtility.Log($"TemperatureInfo unavailable for map {t.MapHeld} where {t} is held!", LogLevel.Warning);
