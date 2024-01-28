@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- LAYERED WALL DESTRUCTION -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[@Name="LWD_Base_Shootable" or @Name="LWD_Base_Climbable"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>5.6</heatCapacity>
+				<volume>0.008</volume>
+				<insulation>5</insulation>
+				<airflow>0.40</airflow>
+			</li>
+		</value>
+	</Operation>
+
+	<!-- + VANILLA FURNITURE EXPANDED - ARCHITECT -->
+
+	<Operation Class="XmlExtensions.PatchOperationSafeReplace">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="VFEArch_LogWall_Destr_Shootable"]/modExtensions/li[@Class="Celsius.ThingThermalProperties"]</xpath>
+		<value>
+			<insulation>6.25</insulation>
+		</value>
+	</Operation>
+
+</Patch>
