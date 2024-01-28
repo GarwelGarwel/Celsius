@@ -55,6 +55,15 @@ namespace Celsius
             return map.Biome == BiomeDefOf.SeaIce ? TerrainDefOf.WaterOceanDeep : TerrainDefOf.WaterDeep;
         }
 
+#if DEBUG
+        static void LogStopwatch()
+        {
+            stopwatch.Stop();
+            if (++iterations == 0)
+                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+        }
+#endif
+
         public static void FreezeTerrain(this IntVec3 cell, Map map, bool log = false)
         {
 #if DEBUG
@@ -66,9 +75,7 @@ namespace Celsius
             map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
 #if DEBUG
-            stopwatch.Stop();
-            if (++iterations % 100 == 0)
-                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+            LogStopwatch();
 #endif
         }
 
@@ -125,9 +132,7 @@ namespace Celsius
             map.terrainGrid.RemoveTopLayer(cell, false);
             map.snowGrid.SetDepth(cell, 0);
 #if DEBUG
-            stopwatch.Stop();
-            if (++iterations % 50 == 0)
-                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+            LogStopwatch();
 #endif
         }
 
