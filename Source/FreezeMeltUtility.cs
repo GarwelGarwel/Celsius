@@ -18,10 +18,13 @@ namespace Celsius
         static Stopwatch stopwatch = new Stopwatch();
         static int iterations;
 #endif
+        public static bool Freezable(this TerrainDef terrain) => terrain.HasTag("Freezable");
 
-        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < FreezeTemperature && terrain.IsWater;
+        public static bool Meltable(this TerrainDef terrain) => terrain.HasTag("Meltable");
 
-        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > MeltTemperature && terrain == TerrainDefOf.Ice;
+        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < FreezeTemperature && terrain.Freezable();
+
+        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > MeltTemperature && terrain.Meltable();
 
         /// <summary>
         /// Returns best guess for what kind of water terrain should be placed in a cell (if Ice melts there)
@@ -38,12 +41,12 @@ namespace Celsius
                 if (!c.InBounds(map))
                     continue;
                 terrain = c.GetTerrain(map);
-                if (terrain.IsWater)
+                if (terrain.Freezable())
                     return terrain;
                 underTerrain = map.terrainGrid.UnderTerrainAt(c);
-                if (underTerrain != null && underTerrain.IsWater)
+                if (underTerrain != null && underTerrain.Freezable())
                     return underTerrain;
-                if (terrain != TerrainDefOf.Ice || (underTerrain != null && underTerrain != TerrainDefOf.Ice))
+                if (!terrain.Meltable() || (underTerrain != null && !underTerrain.Meltable()))
                     foundGround = true;
             }
 
@@ -52,6 +55,18 @@ namespace Celsius
             return map.Biome == BiomeDefOf.SeaIce ? TerrainDefOf.WaterOceanDeep : TerrainDefOf.WaterDeep;
         }
 
+#if DEBUG
+        static void LogStopwatch()
+        {
+            stopwatch.Stop();
+            if (++iterations == 0)
+                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+        }
+#endif
+
+        /// <summary>
+        /// Turns the given cell into ice
+        /// </summary>
         public static void FreezeTerrain(this IntVec3 cell, Map map, bool log = false)
         {
 #if DEBUG
@@ -63,12 +78,13 @@ namespace Celsius
             map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
 #if DEBUG
-            stopwatch.Stop();
-            if (++iterations % 100 == 0)
-                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+            LogStopwatch();
 #endif
         }
 
+        /// <summary>
+        /// Turns the given cell into the appropriate kind of water terrain; 
+        /// </summary>
         public static void MeltTerrain(this IntVec3 cell, Map map, bool log = false)
         {
 #if DEBUG
@@ -93,7 +109,7 @@ namespace Celsius
                         CompDissolution compDissolution = thing.TryGetComp<CompDissolution>();
                         if (compDissolution != null)
                         {
-                            Log($"Applying dissolution effects of {thing.LabelCap} ({thing.def.defName}).");
+                            Log($"Applying dissolution effects of {thing.def}.");
                             compDissolution.TriggerDissolutionEvent(thing.stackCount);
                         }
                         else thing.Destroy();
@@ -103,7 +119,7 @@ namespace Celsius
                     TerrainAffordanceDef terrainAffordance = thing.TerrainAffordanceNeeded;
                     if (terrainAffordance != null && !meltedTerrain.affordances.Contains(terrainAffordance))
                     {
-                        Log($"{thing.LabelCap}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
+                        Log($"{thing.def}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
                         if (thing is Building_Grave grave && grave.HasAnyContents)
                         {
                             Log($"Grave with {grave.ContainedThing?.LabelShort} is uncovered due to melting.");
@@ -118,13 +134,11 @@ namespace Celsius
             if (map.terrainGrid.UnderTerrainAt(cell) == null)
                 map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
             if (log)
-                Log($"Ice at {cell} melts into {meltedTerrain.defName}.");
+                Log($"Ice at {cell} melts into {meltedTerrain}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
             map.snowGrid.SetDepth(cell, 0);
 #if DEBUG
-            stopwatch.Stop();
-            if (++iterations % 50 == 0)
-                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
+            LogStopwatch();
 #endif
         }
 
