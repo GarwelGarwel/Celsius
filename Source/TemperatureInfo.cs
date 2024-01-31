@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -317,7 +318,7 @@ namespace Celsius
                     if (neighbour.InBounds(map))
                     {
                         int index = map.cellIndices.CellToIndex(neighbour);
-                        TemperatureUtility.CalculateHeatTransfer(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
+                        TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
                     }
                 }
 
@@ -328,7 +329,7 @@ namespace Celsius
 
                 // Thermal exchange with the environment
                 RoofDef roof = cell.GetRoof(map);
-                TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow, log);
+                TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow);
 
                 // Applying heat transfer
                 float equilibriumDifference = energy / heatFlow;
@@ -410,13 +411,13 @@ namespace Celsius
                     return TemperatureTuning.DeepUndergroundTemperature;
 
                 case MountainTemperatureMode.AnnualAverage:
-                    return Find.WorldGrid[map.Tile].temperature;
+                    return Find.WorldGrid[map.Tile].temperature + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.SeasonAverage:
-                    return GenTemperature.AverageTemperatureAtTileForTwelfth(map.Tile, GenLocalDate.Twelfth(map).PreviousTwelfth());
+                    return GenTemperature.AverageTemperatureAtTileForTwelfth(map.Tile, GenLocalDate.Twelfth(map).PreviousTwelfth()) + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.AmbientAir:
-                    return map.mapTemperature.OutdoorTemp;
+                    return map.mapTemperature.OutdoorTemp + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.Manual:
                     return Settings.MountainTemperature;

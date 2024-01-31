@@ -4,11 +4,11 @@
 	<Celsius_MountainTemperatureMode_Vanilla>Vanilla</Celsius_MountainTemperatureMode_Vanilla>
 	<Celsius_MountainTemperatureMode_Vanilla_tooltip>Mountains provide a constant underground temperature (similar to vanilla behaviour).</Celsius_MountainTemperatureMode_Vanilla_tooltip>
 	<Celsius_MountainTemperatureMode_AnnualAverage>Annual Average</Celsius_MountainTemperatureMode_AnnualAverage>
-	<Celsius_MountainTemperatureMode_AnnualAverage_tooltip>Mountains provide a stable temperature throughout the year, which is defined by the map's climate.</Celsius_MountainTemperatureMode_AnnualAverage_tooltip>
+	<Celsius_MountainTemperatureMode_AnnualAverage_tooltip>Mountains provide a stable temperature throughout the year, which is determined by the map's climate.</Celsius_MountainTemperatureMode_AnnualAverage_tooltip>
 	<Celsius_MountainTemperatureMode_SeasonAverage>Season Average</Celsius_MountainTemperatureMode_SeasonAverage>
 	<Celsius_MountainTemperatureMode_SeasonAverage_tooltip>Mountains provide a temperature that gradually changes with season.</Celsius_MountainTemperatureMode_SeasonAverage_tooltip>
-	<Celsius_MountainTemperatureMode_AmbientAir>Ambient Air</Celsius_MountainTemperatureMode_AmbientAir>
-	<Celsius_MountainTemperatureMode_AmbientAir_tooltip>Mountains have no special thermal effect, their temperature is the same as outdoor temperature.</Celsius_MountainTemperatureMode_AmbientAir_tooltip>
+	<Celsius_MountainTemperatureMode_AmbientAir>Outdoor Temperature</Celsius_MountainTemperatureMode_AmbientAir>
+	<Celsius_MountainTemperatureMode_AmbientAir_tooltip>Mountains have no special thermal effect, their temperature is the same as ambient outdoor temperature.</Celsius_MountainTemperatureMode_AmbientAir_tooltip>
 	<Celsius_MountainTemperatureMode_Manual>Manual</Celsius_MountainTemperatureMode_Manual>
 	<Celsius_MountainTemperatureMode_Manual_tooltip>Set mountain temperature to your wishes.</Celsius_MountainTemperatureMode_Manual_tooltip>
 
@@ -24,9 +24,10 @@
 	<Celsius_Settings_PawnWeatherEffects_tooltip>Wind chill and wetness affect comfortable temperatures.</Celsius_Settings_PawnWeatherEffects_tooltip>
 	<Celsius_Settings_TempDisplayDigits>Temperature display digits: {0}</Celsius_Settings_TempDisplayDigits>
 	<Celsius_Settings_TempDisplayDigits_tooltip>How many digits to print after point for temperatures. Default value: {0}.</Celsius_Settings_TempDisplayDigits_tooltip>
-	<Celsius_Settings_MountainTemp>Mountain temperature:</Celsius_Settings_MountainTemp>
+	<Celsius_Settings_MountainTemp>Deep mountain temperature:</Celsius_Settings_MountainTemp>
 	<Celsius_Settings_CurrentMapTemp_tooltip>Currently: {0}</Celsius_Settings_CurrentMapTemp_tooltip>
 	<Celsius_Settings_ManualTemperature>Temperature: {0}</Celsius_Settings_ManualTemperature>
+	<Celsius_Settings_MountainTempOffset>Offset mountain temperature by: {0}</Celsius_Settings_MountainTempOffset>
 	<Celsius_Settings_TakeOwnRisk>Change the values below at your own risk.</Celsius_Settings_TakeOwnRisk>
 	<Celsius_Settings_UpdateInterval>Update interval: {0} ticks</Celsius_Settings_UpdateInterval>
 	<Celsius_Settings_UpdateInterval_tooltip>How often map temperatures are updated. Lower values improve accuracy, higher values improve performance. 1 real time second = 60 ticks at normal speed. Recommended value: {0} ticks.</Celsius_Settings_UpdateInterval_tooltip>

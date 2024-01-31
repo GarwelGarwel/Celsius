@@ -34,6 +34,7 @@ namespace Celsius
         public static float HeatPushEffect;
         public static MountainTemperatureMode MountainTemperatureMode;
         public static float MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
+        public static float MountainTemperatureOffset;
         public static int TemperatureDisplayDigits;
         public static string TemperatureDisplayFormatString;
         public static bool DebugMode = Prefs.LogVerbose;
@@ -67,6 +68,7 @@ namespace Celsius
             Scribe_Values.Look(ref HeatPushMultiplier, "HeatPushMultiplier", 1);
             Scribe_Values.Look(ref MountainTemperatureMode, "MountainTemperatureMode", MountainTemperatureMode.Vanilla);
             Scribe_Values.Look(ref MountainTemperature, "MountainTemperature", TemperatureTuning.DeepUndergroundTemperature);
+            Scribe_Values.Look(ref MountainTemperatureOffset, "MountainTemperatureOffset");
             Scribe_Values.Look(ref TemperatureDisplayDigits, "TemperatureDisplayDigits", TemperatureDisplayDigits_Default);
             Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
@@ -88,6 +90,7 @@ namespace Celsius
             HeatPushMultiplier = 1;
             MountainTemperatureMode = MountainTemperatureMode.Vanilla;
             MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
+            MountainTemperatureOffset = 0;
             TemperatureDisplayDigits = TemperatureDisplayDigits_Default;
             RecalculateValues();
             Print();
@@ -123,6 +126,7 @@ namespace Celsius
             Log($"HeatPushEffect: {HeatPushEffect}");
             Log($"MountainTemperatureMode: {MountainTemperatureMode}");
             Log($"MountainTemperature: {MountainTemperature.ToStringTemperature()}");
+            Log($"MountainTemperatureOffset: {MountainTemperatureOffset.ToStringTemperatureOffset()}");
             Log($"TemperatureDisplayDigits: {TemperatureDisplayDigits}");
         }
     }
