@@ -13,22 +13,47 @@ namespace Celsius
     [StaticConstructorOnStartup]
     internal static class Setup
     {
-        static Harmony harmony;
+        internal static Harmony harmony;
 
         static Setup()
         {
-            // Setting up Harmony
             if (harmony != null)
                 return;
 
             LogUtility.Log($"Initializing Celsius {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}...", LogLevel.Important);
 
             harmony = new Harmony("Garwel.Celsius");
-            Type type = typeof(Setup);
+            ApplyHarmonyPatches();
+            LogUtility.Log($"Harmony initialization complete.", LogLevel.Important);
 
+            // Adding CompThermal to all applicable Things
+            List<ThingThermalProperties> ttpList;
+            foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where(def => CompThermal.ShouldApplyTo(def)))
+            {
+                def.comps.Add(new CompProperties(typeof(CompThermal)));
+                if ((ttpList = def.modExtensions.OfType<ThingThermalProperties>().ToList()).Count > 1)
+                    LogUtility.Log($"{def.defName} has {ttpList.Count} ThingThermalProperties extensions:\n{ttpList.Select(ttp => ttp.ToString()).ToLineList("- ")}", LogLevel.Warning);
+            }
+
+            if (Settings.DebugMode)
+                foreach (TerrainDef def in DefDatabase<TerrainDef>.AllDefs)
+                {
+                    if (def.Freezable() || def.Meltable())
+                        LogUtility.Log($"Terrain {def.defName}. Tags: {def.tags.ToCommaList()}.");
+                }
+
+            TemperatureUtility.SettingsChanged();
+        }
+
+        public static bool IsHarmonyPatched => harmony.GetPatchedMethods().Any();
+
+        public static void ApplyHarmonyPatches()
+        {
+            Type type = typeof(Setup);
+            RemoveHarmonyPatches();
             harmony.Patch(
                 AccessTools.Method("Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
-                prefix: new HarmonyMethod(type.GetMethod($"GenTemperature_TryGetDirectAirTemperatureForCell")));
+                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_TryGetDirectAirTemperatureForCell")));
             harmony.Patch(
                 AccessTools.PropertyGetter(typeof(Room), "Temperature"),
                 prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
@@ -72,27 +97,9 @@ namespace Celsius
                 harmony.Patch(
                     AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage"),
                     postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
-
-            LogUtility.Log($"Harmony initialization complete.", LogLevel.Important);
-
-            // Adding CompThermal to all applicable Things
-            List<ThingThermalProperties> ttpList;
-            foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where(def => CompThermal.ShouldApplyTo(def)))
-            {
-                def.comps.Add(new CompProperties(typeof(CompThermal)));
-                if ((ttpList = def.modExtensions.OfType<ThingThermalProperties>().ToList()).Count > 1)
-                    LogUtility.Log($"{def.defName} has {ttpList.Count} ThingThermalProperties extensions:\n{ttpList.Select(ttp => ttp.ToString()).ToLineList("- ")}", LogLevel.Warning);
-            }
-
-            if (Settings.DebugMode)
-                foreach (TerrainDef def in DefDatabase<TerrainDef>.AllDefs)
-                {
-                    if (def.Freezable() || def.Meltable())
-                        LogUtility.Log($"Terrain {def.defName}. Tags: {def.tags.ToCommaList()}.");
-                }
-
-            TemperatureUtility.SettingsChanged();
         }
+
+        public static void RemoveHarmonyPatches() => harmony.UnpatchAll("Garwel.Celsius");
 
         // Replaces GenTemperature.TryGetDirectAirTemperatureForCell by providing cell-specific temperature
         public static bool GenTemperature_TryGetDirectAirTemperatureForCell(ref bool __result, IntVec3 c, Map map, out float temperature)

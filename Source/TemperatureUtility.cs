@@ -95,7 +95,7 @@ namespace Celsius
 
         #region DIFFUSION
 
-        public static void CalculateHeatTransfer(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
+        public static void CalculateHeatTransferCells(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
         {
             // Air has heat capacity = 1 and conductivity = 1
             if (airflow == 1 && props.IsAir)
@@ -121,7 +121,7 @@ namespace Celsius
             heatFlow += props.HeatFlowNoConvection;
         }
 
-        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow, bool log = false)
+        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow)
         {
             if (props.IsAir && !roofed)
             {

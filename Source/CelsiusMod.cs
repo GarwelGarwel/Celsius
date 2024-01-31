@@ -60,11 +60,15 @@ namespace Celsius
 
             if (Settings.MountainTemperatureMode == MountainTemperatureMode.Manual)
             {
-                // Localization key: Celsius_Settings_ManualTemperature - Temperature: {MountainTemperature.ToStringTemperature("F0")}
-                content.Label("Celsius_Settings_ManualTemperature".Translate(MountainTemperature.ToStringTemperature(TemperatureDisplayFormatString)));
+                content.Label("Celsius_Settings_ManualTemperature".Translate(MountainTemperature.ToStringTemperature("F0")));
                 MountainTemperature = Mathf.Round(content.Slider(MountainTemperature, -100, 100));
             }
-
+            else if (Settings.MountainTemperatureMode != MountainTemperatureMode.Vanilla)
+            {
+                content.Label("Celsius_Settings_MountainTempOffset".Translate(MountainTemperatureOffset.ToStringTemperatureOffset("F0")));
+                MountainTemperatureOffset = Mathf.Round(content.Slider(MountainTemperatureOffset, -50, 50));
+            }
+    
             content.Gap();
             // Localization key: Celsius_Settings_TakeOwnRisk - Change the values below at your own risk.
             content.Label("Celsius_Settings_TakeOwnRisk".Translate().Colorize(Color.red));
