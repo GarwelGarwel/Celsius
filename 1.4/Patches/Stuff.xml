@@ -126,4 +126,56 @@
 		</value>
 	</Operation>
 
+	<!-- Stone chunks -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Sandstone"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>900</volumetricHeatCapacity>
+				<insulationFactor>1.05</insulationFactor>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Granite"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>1100</volumetricHeatCapacity>
+				<insulationFactor>0.9</insulationFactor>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Limestone"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>900</volumetricHeatCapacity>
+				<insulationFactor>1</insulationFactor>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Slate"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>650</volumetricHeatCapacity>
+				<insulationFactor>1</insulationFactor>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Marble"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>800</volumetricHeatCapacity>
+				<insulationFactor>0.95</insulationFactor>
+			</li>
+		</value>
+	</Operation>
+
 </Patch>
