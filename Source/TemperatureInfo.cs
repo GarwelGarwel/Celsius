@@ -110,6 +110,7 @@ namespace Celsius
             if (!Settings.FreezingAndMeltingEnabled)
                 return;
             LogUtility.Log($"Initializing terrain temperatures for {map}.");
+            float snowDepth = map.GetAverageSnowDepth();
             if (terrainTemperatures == null)
                 terrainTemperatures = new float[temperatures.Length];
             bool hasTerrainTemperatures = false;
@@ -122,7 +123,11 @@ namespace Celsius
                     hasTerrainTemperatures = true;
                     terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
                     if (terrain.ShouldFreeze(terrainTemperatures[i]))
+                    {
                         cell.FreezeTerrain(map);
+                        if (snowDepth > 0.0001f && !cell.Roofed(map))
+                            map.steadyEnvironmentEffects.AddFallenSnowAt(cell, snowDepth);
+                    }
                     else if (terrain.ShouldMelt(terrainTemperatures[i]))
                         cell.MeltTerrain(map);
                 }
