@@ -46,7 +46,7 @@ namespace Celsius
         public const float SnowMeltCoefficientRain_Default = SnowMeltCoefficient_Default * 2;
 
         public const float ConductivityPowerBase_Default = 0.5f;
-        public const float ConvectionConductivityEffect_Default = 10;
+        public const float ConvectionConductivityEffect_Default = 20;
         public const float EnvironmentDiffusionFactor_Default = 0.3f;
         public const float RoofInsulation_Default = 10;
         public const float HeatPushEffect_Base = 0.15f;
