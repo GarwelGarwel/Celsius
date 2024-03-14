@@ -136,7 +136,8 @@ namespace Celsius
             if (log)
                 Log($"Ice at {cell} melts into {meltedTerrain}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
-            map.snowGrid.SetDepth(cell, 0);
+            if (map.snowGrid.GetDepth(cell) > 0)
+                map.snowGrid.SetDepth(cell, 0);
 #if DEBUG
             LogStopwatch();
 #endif
