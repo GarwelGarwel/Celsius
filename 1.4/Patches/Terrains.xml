@@ -27,7 +27,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>240</heatCapacity>
-				<insulation>6</insulation>
+				<insulation>7</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -37,7 +37,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>220</heatCapacity>
-				<insulation>6</insulation>
+				<insulation>7</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -47,7 +47,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>220</heatCapacity>
-				<insulation>6</insulation>
+				<insulation>7</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -57,7 +57,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>200</heatCapacity>
-				<insulation>6</insulation>
+				<insulation>7</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -67,7 +67,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>360</heatCapacity>
-				<insulation>6</insulation>
+				<insulation>7</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -77,7 +77,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>300</heatCapacity>
-				<insulation>6</insulation>
+				<insulation>7</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -87,7 +87,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>150</heatCapacity>
-				<insulation>5.5</insulation>
+				<insulation>6.5</insulation>
 			</li>
 		</value>
 	</Operation>
@@ -97,7 +97,7 @@
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
 				<heatCapacity>100</heatCapacity>
-				<insulation>6.5</insulation>
+				<insulation>7.5</insulation>
 			</li>
 		</value>
 	</Operation>
