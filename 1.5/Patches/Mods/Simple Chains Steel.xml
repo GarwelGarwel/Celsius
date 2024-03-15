@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- SIMPLE CHAINS: STEEL -->
+	
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="Owl_Iron"]</xpath>
+		<value>
+			<li Class="Celsius.StuffThermalProperties">
+				<volumetricHeatCapacity>1100</volumetricHeatCapacity>
+				<insulationFactor>0.7</insulationFactor>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>

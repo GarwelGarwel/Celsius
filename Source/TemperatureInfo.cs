@@ -355,6 +355,7 @@ namespace Celsius
                 // Autoignition
                 if (temperature > MinIgnitionTemperature && Settings.AutoignitionEnabled)
                 {
+                    Fire existingFire = null;
                     float fireSize = 0;
                     List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
                     for (int k = 0; k < things.Count; k++)
@@ -367,6 +368,7 @@ namespace Celsius
                         if (things[k] is Fire fire)
                         {
                             fireSize -= fire.fireSize;
+                            existingFire = fire;
                             continue;
                         }
                         float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
@@ -375,10 +377,12 @@ namespace Celsius
                     }
 
                     if (fireSize > 0)
-                    {
-                        LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
-                        FireUtility.TryStartFireIn(cell, map, fireSize);
-                    }
+                        if (existingFire == null)
+                        {
+                            LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
+                            FireUtility.TryStartFireIn(cell, map, fireSize, null);
+                        }
+                        else existingFire.fireSize += fireSize;
                 }
 
                 if (!Settings.UseVanillaTemperatureColors)
