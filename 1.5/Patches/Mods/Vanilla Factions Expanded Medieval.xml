@@ -2,16 +2,16 @@
 
 <Patch>
 
-	<!-- VANILLA FURNITURE EXPANDED - MEDICAL MODULE -->
+	<!-- VANILLA FACTIONS EXPANDED - MEDIEVAL -->
 
 	<!-- Thermal data -->
 
 	<Operation Class="PatchOperationAddModExtension">
 		<success>Always</success>
-		<xpath>Defs/ThingDef[defName="VFEM_Wall_Sterile"]</xpath>
+		<xpath>Defs/ThingDef[defName="VFEM_CobblestoneWall"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>13</heatCapacity>
+				<heatCapacity>7</heatCapacity>
 				<volume>0.010</volume>
 				<insulation>5</insulation>
 			</li>

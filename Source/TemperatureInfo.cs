@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -109,6 +110,7 @@ namespace Celsius
             if (!Settings.FreezingAndMeltingEnabled)
                 return;
             LogUtility.Log($"Initializing terrain temperatures for {map}.");
+            float snowDepth = map.GetAverageSnowDepth();
             if (terrainTemperatures == null)
                 terrainTemperatures = new float[temperatures.Length];
             bool hasTerrainTemperatures = false;
@@ -121,7 +123,11 @@ namespace Celsius
                     hasTerrainTemperatures = true;
                     terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
                     if (terrain.ShouldFreeze(terrainTemperatures[i]))
+                    {
                         cell.FreezeTerrain(map);
+                        if (snowDepth > 0.0001f && !cell.Roofed(map))
+                            map.steadyEnvironmentEffects.AddFallenSnowAt(cell, snowDepth);
+                    }
                     else if (terrain.ShouldMelt(terrainTemperatures[i]))
                         cell.MeltTerrain(map);
                 }
@@ -317,7 +323,7 @@ namespace Celsius
                     if (neighbour.InBounds(map))
                     {
                         int index = map.cellIndices.CellToIndex(neighbour);
-                        TemperatureUtility.CalculateHeatTransfer(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
+                        TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
                     }
                 }
 
@@ -328,7 +334,7 @@ namespace Celsius
 
                 // Thermal exchange with the environment
                 RoofDef roof = cell.GetRoof(map);
-                TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow, log);
+                TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow);
 
                 // Applying heat transfer
                 float equilibriumDifference = energy / heatFlow;
@@ -349,25 +355,34 @@ namespace Celsius
                 // Autoignition
                 if (temperature > MinIgnitionTemperature && Settings.AutoignitionEnabled)
                 {
+                    Fire existingFire = null;
                     float fireSize = 0;
                     List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
                     for (int k = 0; k < things.Count; k++)
                     {
-                        if (things[k].FireBulwark || things[k] is Fire)
+                        if (things[k].FireBulwark)
                         {
                             fireSize = 0;
                             break;
                         }
+                        if (things[k] is Fire fire)
+                        {
+                            fireSize -= fire.fireSize;
+                            existingFire = fire;
+                            continue;
+                        }
                         float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
                         if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
-                        {
-                            LogUtility.Log($"{things[k]} spontaneously ignites at {temperature:F1}C! Autoignition temperature is {ignitionTemp:F0}C.");
-                            fireSize += 0.1f * things[k].GetStatValue(StatDefOf.Flammability);
-                        }
+                            fireSize += Fire.MinFireSize * things[k].GetStatValue(StatDefOf.Flammability);
                     }
 
                     if (fireSize > 0)
-                        FireUtility.TryStartFireIn(cell, map, fireSize);
+                        if (existingFire == null)
+                        {
+                            LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
+                            FireUtility.TryStartFireIn(cell, map, fireSize, null);
+                        }
+                        else existingFire.fireSize += fireSize;
                 }
 
                 if (!Settings.UseVanillaTemperatureColors)
@@ -405,13 +420,13 @@ namespace Celsius
                     return TemperatureTuning.DeepUndergroundTemperature;
 
                 case MountainTemperatureMode.AnnualAverage:
-                    return Find.WorldGrid[map.Tile].temperature;
+                    return Find.WorldGrid[map.Tile].temperature + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.SeasonAverage:
-                    return GenTemperature.AverageTemperatureAtTileForTwelfth(map.Tile, GenLocalDate.Twelfth(map).PreviousTwelfth());
+                    return GenTemperature.AverageTemperatureAtTileForTwelfth(map.Tile, GenLocalDate.Twelfth(map).PreviousTwelfth()) + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.AmbientAir:
-                    return map.mapTemperature.OutdoorTemp;
+                    return map.mapTemperature.OutdoorTemp + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.Manual:
                     return Settings.MountainTemperature;
