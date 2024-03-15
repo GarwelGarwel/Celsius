@@ -95,7 +95,7 @@ namespace Celsius
 
         #region DIFFUSION
 
-        public static void CalculateHeatTransfer(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
+        public static void CalculateHeatTransferCells(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
         {
             // Air has heat capacity = 1 and conductivity = 1
             if (airflow == 1 && props.IsAir)
@@ -121,7 +121,7 @@ namespace Celsius
             heatFlow += props.HeatFlowNoConvection;
         }
 
-        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow, bool log = false)
+        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow)
         {
             if (props.IsAir && !roofed)
             {
@@ -150,6 +150,33 @@ namespace Celsius
             }
             temperatureInfo.PushHeat(map.cellIndices.CellToIndex(cell), energy);
             return true;
+        }
+
+        public static float GetAverageSnowDepth(this Map map)
+        {
+            float snowDepth = map.snowGrid.TotalDepth;
+            if (snowDepth <= 0)
+                return 0;
+            int possibleSnowCells = 0;
+            for (int i = 0; i < map.Size.x * map.Size.z; i++)
+            {
+                TerrainDef terrain = map.terrainGrid.TerrainAt(i);
+                if (terrain != null && !terrain.holdSnow)
+                    continue;
+                Building building = map.edificeGrid[i];
+                if (building != null && !SnowGrid.CanCoexistWithSnow(building.def))
+                    continue;
+                if (map.roofGrid.Roofed(i))
+                    continue;
+                possibleSnowCells++;
+            }
+            if (possibleSnowCells > 0)
+            {
+                snowDepth /= possibleSnowCells;
+                LogUtility.Log($"Covering frozen terrain with average snow level of {snowDepth:F4}.");
+                return snowDepth;
+            }
+            return 0;
         }
 
         #endregion MISC UTILITIES
