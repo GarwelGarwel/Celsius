@@ -4,16 +4,22 @@ namespace Celsius
 {
     public class ThermalProps
     {
-        public static readonly ThermalProps Air = new ThermalProps(1, 1, 1);
+        static ThermalProps air;
+        public static ThermalProps Air => air;
+
+        static ThermalProps() => Init();
+
+        public static void Init() => air = new ThermalProps(1, 1, 1);
 
         public float heatCapacity;
-        public float insulation = 1;  // Effective insulation (taking into cosideration airflow)
+        public float insulation;  // Effective insulation (taking into cosideration airflow)
         public float airflow;
 
+        public float conductivity;
         public float heatflow;
         public float heatflowNoConvection;
 
-        public float Conductivity => Mathf.Pow(Settings.ConductivityPowerBase, insulation);
+        //public float Conductivity => Mathf.Pow(Settings.ConductivityPowerBase, insulation);
 
         public float HeatFlow => heatflow;
 
@@ -26,10 +32,11 @@ namespace Celsius
             this.heatCapacity = heatCapacity;
             this.insulation = TemperatureUtility.GetInsulationWithAirflow(insulation, airflow);
             this.airflow = airflow;
-            heatflow = heatCapacity * Conductivity;
+            conductivity = Mathf.Pow(Settings.ConductivityPowerBase, insulation);
+            heatflow = heatCapacity * conductivity;
             heatflowNoConvection = heatflow / Settings.ConvectionConductivityEffect;
         }
 
-        public override string ToString() => $"Heat capacity: {heatCapacity}. Insulation: {insulation}. Conductivity: {Conductivity:P1}. Airflow: {airflow:P0}.";
+        public override string ToString() => $"Heat capacity: {heatCapacity}. Insulation: {insulation}. Conductivity: {conductivity:P1}. Airflow: {airflow:P0}.";
     }
 }
