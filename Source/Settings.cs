@@ -106,6 +106,7 @@ namespace Celsius
             ConductivityPowerBase = Mathf.Pow(ConductivityPowerBase_Default, (float)TicksPerUpdate_Default / TicksPerUpdate);
             RoofDiffusionFactor = EnvironmentDiffusionFactor * Mathf.Pow(ConductivityPowerBase, RoofInsulation);
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
+            ThermalProps.Init();
         }
 
         public static void Print()

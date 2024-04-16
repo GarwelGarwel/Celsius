@@ -19,8 +19,6 @@ namespace Celsius
         public float heatflow;
         public float heatflowNoConvection;
 
-        //public float Conductivity => Mathf.Pow(Settings.ConductivityPowerBase, insulation);
-
         public float HeatFlow => heatflow;
 
         public float HeatFlowNoConvection => heatflowNoConvection;

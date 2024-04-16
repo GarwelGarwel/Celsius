@@ -1,5 +1,4 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -300,7 +299,7 @@ namespace Celsius
                             float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
                             if (log)
                                 LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
-                            terrainTemperature += terrainTempChange * terrainProps.Conductivity;
+                            terrainTemperature += terrainTempChange * terrainProps.conductivity;
 
                             // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
                             if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature))
@@ -341,7 +340,7 @@ namespace Celsius
                 if (log)
                     LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {temperature + equilibriumDifference:F1}C.");
 
-                temperature += equilibriumDifference * cellProps.Conductivity;
+                temperature += equilibriumDifference * cellProps.conductivity;
                 temperatures[i] = temperature;
 
                 // Snow melting

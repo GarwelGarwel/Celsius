@@ -41,7 +41,7 @@ namespace Celsius
                     if (temperatureInfo == null)
                         continue;
                     temperatureInfo.ResetAllThings();
-                    if (Settings.FreezingAndMeltingEnabled && !temperatureInfo.HasTerrainTemperatures)
+                    if (Settings.FreezingAndMeltingEnabled && temperatureInfo.HasTerrainTemperatures)
                         temperatureInfo.InitializeTerrainTemperatures();
                 }
         }
