@@ -72,7 +72,7 @@ namespace Celsius
             Scribe_Values.Look(ref TemperatureDisplayDigits, "TemperatureDisplayDigits", TemperatureDisplayDigits_Default);
             Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
-                RecalculateValues();
+                TemperatureUtility.SettingsChanged();
         }
 
         public static void Reset()
@@ -92,12 +92,11 @@ namespace Celsius
             MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
             MountainTemperatureOffset = 0;
             TemperatureDisplayDigits = TemperatureDisplayDigits_Default;
-            RecalculateValues();
-            Print();
             TemperatureUtility.SettingsChanged();
+            Print();
         }
 
-        public static void RecalculateValues()
+        internal static void RecalculateValues()
         {
             TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
             TicksPerSlice = TicksPerUpdate / SliceCount;
@@ -106,7 +105,6 @@ namespace Celsius
             ConductivityPowerBase = Mathf.Pow(ConductivityPowerBase_Default, (float)TicksPerUpdate_Default / TicksPerUpdate);
             RoofDiffusionFactor = EnvironmentDiffusionFactor * Mathf.Pow(ConductivityPowerBase, RoofInsulation);
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
-            ThermalProps.Init();
         }
 
         public static void Print()

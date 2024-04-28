@@ -90,11 +90,10 @@ namespace Celsius
 
         public override void WriteSettings()
         {
-            RecalculateValues();
+            TemperatureUtility.SettingsChanged();
             base.WriteSettings();
             LogUtility.Log("Settings changed.");
             Print();
-            TemperatureUtility.SettingsChanged();
         }
     }
 }

@@ -22,9 +22,11 @@ namespace Celsius
             return temperatureInfo;
         }
 
-        internal static void SettingsChanged()
+        public static void SettingsChanged()
         {
             LogUtility.Log("Mod settings have changed. Updating data.", LogLevel.Important);
+            Settings.RecalculateValues();
+            ThermalProps.Init();
             AccessTools.Field(typeof(SteadyEnvironmentEffects), "AutoIgnitionTemperatureRange").SetValue(null, Settings.AutoignitionEnabled
                 ? new FloatRange(10000, float.MaxValue)
                 : new FloatRange(240, 1000));
@@ -34,12 +36,9 @@ namespace Celsius
                 DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
 
             // Resetting maps' temperature info cache and re-initializing terrain temperatures
-            if (Find.Maps != null)
-                for (int m = 0; m < Find.Maps.Count; m++)
+            if (temperatureInfos != null)
+                foreach (TemperatureInfo temperatureInfo in temperatureInfos.Values)
                 {
-                    TemperatureInfo temperatureInfo = Find.Maps[m].TemperatureInfo();
-                    if (temperatureInfo == null)
-                        continue;
                     temperatureInfo.ResetAllThings();
                     if (Settings.FreezingAndMeltingEnabled && temperatureInfo.HasTerrainTemperatures)
                         temperatureInfo.InitializeTerrainTemperatures();

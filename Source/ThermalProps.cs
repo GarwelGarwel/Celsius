@@ -9,7 +9,7 @@ namespace Celsius
 
         static ThermalProps() => Init();
 
-        public static void Init() => air = new ThermalProps(1, 1, 1);
+        internal static void Init() => air = new ThermalProps(1, 1, 1);
 
         public float heatCapacity;
         public float insulation;  // Effective insulation (taking into cosideration airflow)
