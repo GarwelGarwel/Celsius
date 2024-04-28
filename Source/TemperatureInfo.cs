@@ -291,20 +291,21 @@ namespace Celsius
                     if (!float.IsNaN(terrainTemperature))
                     {
                         TerrainDef terrain = cell.GetTerrain(map);
-                        ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
+                        TerrainThermalProperties terrainProps = terrain?.GetTerrainThermalProperties();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
                             // Thermal exchange with terrain
-                            TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, terrainProps, ref energy, ref heatFlow);
+                            ThermalProps thermalProps = terrainProps.GetThermalProps();
+                            TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, thermalProps, ref energy, ref heatFlow);
                             float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
                             if (log)
-                                LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
-                            terrainTemperature += terrainTempChange * terrainProps.conductivity;
+                                LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {thermalProps.heatCapacity}. Terrain heatflow: {thermalProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
+                            terrainTemperature += terrainTempChange * thermalProps.conductivity;
 
                             // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
-                            if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature))
+                            if (terrainTemperatures[i] < terrainProps.transitionTemperature && terrainProps.MeltsAt(terrainTemperature))
                                 cell.MeltTerrain(map, log);
-                            else if (terrainTemperatures[i] > FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature))
+                            else if (terrainTemperatures[i] > terrainProps.transitionTemperature && terrainProps.FreezesAt(terrainTemperature))
                                 cell.FreezeTerrain(map, log);
 
                             terrainTemperatures[i] = terrainTemperature;
