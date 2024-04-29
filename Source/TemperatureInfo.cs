@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Noise;
 
 namespace Celsius
 {
@@ -108,7 +109,7 @@ namespace Celsius
         {
             if (!Settings.FreezingAndMeltingEnabled)
                 return;
-            LogUtility.Log($"Initializing terrain temperatures for {map}.");
+            LogUtility.Log($"Initializing terrainProps temperatures for {map}.");
             float snowDepth = map.GetAverageSnowDepth();
             if (terrainTemperatures == null)
                 terrainTemperatures = new float[temperatures.Length];
@@ -116,25 +117,30 @@ namespace Celsius
             for (int i = 0; i < terrainTemperatures.Length; i++)
             {
                 IntVec3 cell = map.cellIndices.IndexToCell(i);
-                TerrainDef terrain = cell.GetTerrain(map);
-                if (terrain.HasTemperature())
+                TerrainThermalProperties terrainProps = cell.GetTerrain(map)?.GetTerrainThermalProperties();
+                if (terrainProps != null)
                 {
-                    hasTerrainTemperatures = true;
-                    terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
-                    if (terrain.ShouldFreeze(terrainTemperatures[i]))
+                    if (terrainProps.ignoreCell)
+                        terrainTemperatures[i] = temperatures[i] = float.NaN;
+                    else
                     {
-                        cell.FreezeTerrain(map);
-                        if (snowDepth > 0.0001f && !cell.Roofed(map))
-                            map.steadyEnvironmentEffects.AddFallenSnowAt(cell, snowDepth);
+                        hasTerrainTemperatures = true;
+                        terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
+                        if (terrainProps.FreezesAt(terrainTemperatures[i]))
+                        {
+                            cell.FreezeTerrain(map);
+                            if (snowDepth > 0.0001f && !cell.Roofed(map))
+                                map.steadyEnvironmentEffects.AddFallenSnowAt(cell, snowDepth);
+                        }
+                        else if (terrainProps.MeltsAt(terrainTemperatures[i]))
+                            cell.MeltTerrain(map);
                     }
-                    else if (terrain.ShouldMelt(terrainTemperatures[i]))
-                        cell.MeltTerrain(map);
                 }
                 else terrainTemperatures[i] = float.NaN;
             }
             if (!hasTerrainTemperatures)
             {
-                LogUtility.Log("The map has no terrain temperatures.");
+                LogUtility.Log("The map has no terrainProps temperatures.");
                 terrainTemperatures = null;
             }
         }
@@ -184,14 +190,16 @@ namespace Celsius
 
         Color TemperatureColorForCell(int index)
         {
-            if (Settings.UseVanillaTemperatureColors)
+            if (Settings.UseVanillaTemperatureColors || temperatures == null)
                 return map.mapTemperature.GetCellExtraColor(index);
-            float temperature = GetTemperatureForCell(index);
+            float temperature = temperatures[index];
             if (temperature < minComfortableTemperature)
                 return Color.Lerp(minColor, minComfortableColor, (temperature - minTemperature) / (minComfortableTemperature - minTemperature));
             if (temperature < maxComfortableTemperature)
                 return Color.Lerp(minComfortableColor, maxComfortableColor, (temperature - minComfortableTemperature) / (maxComfortableTemperature - minComfortableTemperature));
-            return Color.Lerp(maxComfortableColor, maxColor, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
+            if (!float.IsNaN(temperature))
+                return Color.Lerp(maxComfortableColor, maxColor, (temperature - maxComfortableTemperature) / (maxTemperature - maxComfortableTemperature));
+            return Color.black;
         }
 
         public override void MapComponentUpdate()
@@ -216,12 +224,18 @@ namespace Celsius
             {
                 GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
-                string tooltip = "Celsius_MapTempOverlay_Cell".Translate(GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString));
-                if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
+                string tooltip;
+                if (!HasTemperature(cell))
+                    tooltip = $"No temperature ({cell.GetTerrain(map).label})";
+                else
                 {
-                    float terrainTemperature = GetTerrainTemperature(cell);
-                    if (!float.IsNaN(terrainTemperature))
-                        tooltip += "\n" + "Celsius_MapTempOverlay_Terrain".Translate(terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString));
+                    tooltip = "Celsius_MapTempOverlay_Cell".Translate(GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString));
+                    if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
+                    {
+                        float terrainTemperature = GetTerrainTemperature(cell);
+                        if (!float.IsNaN(terrainTemperature))
+                            tooltip += "\n" + "Celsius_MapTempOverlay_Terrain".Translate(terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString));
+                    }
                 }
 #if DEBUG
                 Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 150, 100), $"{tooltip}\n{GetThermalPropertiesAt(map.cellIndices.CellToIndex(cell))}");
@@ -280,6 +294,11 @@ namespace Celsius
                 int i = map.cellIndices.CellToIndex(cell);
                 log = i == mouseCell;
                 float temperature = temperatures[i];
+                if (float.IsNaN(temperature))
+                {
+                    LogUtility.Log($"Cell {cell} has {cell.GetTerrain(map).defName} terrain and should be ignored.");
+                    continue;
+                }
                 ThermalProps cellProps = GetThermalPropertiesAt(i);
                 float energy = 0;
                 float heatFlow = cellProps.HeatFlow;
@@ -292,9 +311,16 @@ namespace Celsius
                     {
                         TerrainDef terrain = cell.GetTerrain(map);
                         TerrainThermalProperties terrainProps = terrain?.GetTerrainThermalProperties();
-                        if (terrainProps != null && terrainProps.heatCapacity > 0)
+                        if (terrainProps != null)
                         {
-                            // Thermal exchange with terrain
+                            //if (terrainProps.ignoreCell)
+                            //{
+                            //    if (log)
+                            //        LogUtility.Log($"Cell's terrainProps is {terrain.defName} and it should be ignored.");
+                            //    continue;
+                            //}
+
+                            // Thermal exchange with terrainProps
                             ThermalProps thermalProps = terrainProps.GetThermalProps();
                             TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, thermalProps, ref energy, ref heatFlow);
                             float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
@@ -302,7 +328,7 @@ namespace Celsius
                                 LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {thermalProps.heatCapacity}. Terrain heatflow: {thermalProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
                             terrainTemperature += terrainTempChange * thermalProps.conductivity;
 
-                            // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
+                            // Melting or freezing if terrainProps temperature has crossed respective melt/freeze points (upwards or downwards)
                             if (terrainTemperatures[i] < terrainProps.transitionTemperature && terrainProps.MeltsAt(terrainTemperature))
                                 cell.MeltTerrain(map, log);
                             else if (terrainTemperatures[i] > terrainProps.transitionTemperature && terrainProps.FreezesAt(terrainTemperature))
@@ -312,7 +338,7 @@ namespace Celsius
                         }
                         else terrainTemperatures[i] = float.NaN;
                     }
-                    // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
+                    // Rarely checking if a cell now has terrainProps temperature (e.g. when a bridge has been removed)
                     else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature())
                         terrainTemperatures[i] = temperature;
                 }
@@ -323,7 +349,8 @@ namespace Celsius
                     if (neighbour.InBounds(map))
                     {
                         int index = map.cellIndices.CellToIndex(neighbour);
-                        TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
+                        if (HasTemperature(index))
+                            TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
                     }
                 }
 
@@ -436,7 +463,11 @@ namespace Celsius
 
         public float GetEnvironmentTemperature(RoofDef roof) => roof != null && roof.isThickRoof ? mountainTemperature : map.mapTemperature.OutdoorTemp;
 
-        public float GetTemperatureForCell(int index) => temperatures != null ? temperatures[index] : TemperatureTuning.DefaultTemperature;
+        public bool HasTemperature(int index) => !float.IsNaN(temperatures[index]);
+
+        public bool HasTemperature(IntVec3 cell) => HasTemperature(map.cellIndices.CellToIndex(cell));
+
+        public float GetTemperatureForCell(int index) => temperatures != null && HasTemperature(index) ? temperatures[index] : TemperatureTuning.DefaultTemperature;
 
         public float GetTemperatureForCell(IntVec3 cell) => GetTemperatureForCell(map.cellIndices.CellToIndex(cell));
 
@@ -475,8 +506,11 @@ namespace Celsius
             return thermalProperties[index] = ThermalProps.Air;
         }
 
-        public void PushHeat(int index, float energy) =>
-          SetTemperatureForCell(index, temperatures[index] + energy * Settings.HeatPushEffect / GetThermalPropertiesAt(index).heatCapacity);
+        public void PushHeat(int index, float energy)
+        {
+            if (HasTemperature(index))
+                SetTemperatureForCell(index, temperatures[index] + energy * Settings.HeatPushEffect / GetThermalPropertiesAt(index).heatCapacity);
+        }
 
         public void PushHeat(IntVec3 cell, float energy) => PushHeat(map.cellIndices.CellToIndex(cell), energy);
 

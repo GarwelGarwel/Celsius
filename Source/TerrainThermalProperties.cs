@@ -12,6 +12,8 @@ namespace Celsius
 
     public class TerrainThermalProperties : ThingThermalProperties
     {
+        public bool ignoreCell;
+
         public PhaseTransitionType phaseTransition;
 
         public float transitionTemperature = float.NaN;
@@ -20,10 +22,13 @@ namespace Celsius
 
         public override IEnumerable<string> ConfigErrors()
         {
-            if (phaseTransition == PhaseTransitionType.None)
-                yield return "phaseTransition not set.";
-            if (float.IsNaN(transitionTemperature))
-                yield return "transitionTemperature not set.";
+            if (phaseTransition != PhaseTransitionType.None)
+            {
+                if (float.IsNaN(transitionTemperature))
+                    yield return $"phaseTransition is {phaseTransition}, but transitionTemperature is not set.";
+            }
+            else if (!float.IsNaN(transitionTemperature))
+                yield return $"phaseTransition is null, but transitionTemperature is {transitionTemperature:F1}.";
         }
 
         public bool FreezesAt(float temperature) => phaseTransition == PhaseTransitionType.Freeze && temperature < transitionTemperature;

@@ -86,8 +86,8 @@ namespace Celsius
 
         public static bool HasTemperature(this TerrainDef terrain)
         {
-            ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
-            return terrainProps != null && terrainProps.heatCapacity > 0;
+            TerrainThermalProperties terrainProps = terrain?.GetTerrainThermalProperties();
+            return terrainProps != null && !terrainProps.ignoreCell;
         }
 
         #endregion TEMPERATURE
