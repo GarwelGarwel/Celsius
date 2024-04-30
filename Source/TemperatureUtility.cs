@@ -16,6 +16,14 @@ namespace Celsius
         {
             if (temperatureInfos.TryGetValue(map, out TemperatureInfo temperatureInfo))
                 return temperatureInfo;
+            BiomeProperties biomeProps = map.Biome.GetModExtension<BiomeProperties>();
+            if (biomeProps != null && !biomeProps.celsiusEnabled)
+            {
+                LogUtility.Log($"Celsius is disabled in {map.Biome.defName} biome.");
+                map.components.RemoveAll(comp => comp is TemperatureInfo);
+                temperatureInfos.Add(map, null);
+                return null;
+            }
             temperatureInfo = map.GetComponent<TemperatureInfo>();
             if (temperatureInfo != null)
                 temperatureInfos.Add(map, temperatureInfo);
@@ -75,10 +83,7 @@ namespace Celsius
             }
             TemperatureInfo temperatureInfo = room.Map?.TemperatureInfo();
             if (temperatureInfo == null)
-            {
-                LogUtility.Log($"TemperatureInfo unavailable for {room.Map}.", LogLevel.Error);
                 return room.Temperature;
-            }
             if (room.TouchesMapEdge)
                 return room.Map.mapTemperature.OutdoorTemp;
             return temperatureInfo.GetRoomAverageTemperature(room);
@@ -141,12 +146,14 @@ namespace Celsius
 
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
-            TemperatureInfo temperatureInfo = map.TemperatureInfo();
-            if (temperatureInfo == null || !cell.InBounds(map))
+            if (!cell.InBounds(map))
             {
                 LogUtility.Log($"TemperatureInfo for {map} unavailable or cell {cell} is outside map boundaries!", LogLevel.Warning);
                 return false;
             }
+            TemperatureInfo temperatureInfo = map.TemperatureInfo();
+            if (temperatureInfo == null)
+                return GenTemperature.PushHeat(cell, map, energy);
             temperatureInfo.PushHeat(map.cellIndices.CellToIndex(cell), energy);
             return true;
         }

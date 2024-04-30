@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- SAVE OUR SHIP 2 EXPERIMENTAL -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/BiomeDef[defName="OuterSpaceBiome"]</xpath>
+		<value>
+			<li Class="Celsius.BiomeProperties">
+				<celsiusEnabled>false</celsiusEnabled>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>

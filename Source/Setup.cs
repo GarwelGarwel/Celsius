@@ -126,13 +126,14 @@ namespace Celsius
         public static bool GenTemperature_PushHeat_Thing(Thing t, float energy)
         {
             if (t.def.Size.x == 1 && t.def.Size.z == 1)
-                return !TemperatureUtility.TryPushHeat(t.PositionHeld, t.MapHeld, energy);
+            {
+                //return !TemperatureUtility.TryPushHeat(t.PositionHeld, t.MapHeld, energy);
+                TemperatureUtility.TryPushHeat(t.PositionHeld, t.MapHeld, energy);
+                return false;
+            }
             TemperatureInfo temperatureInfo = t.MapHeld?.TemperatureInfo();
             if (temperatureInfo == null)
-            {
-                LogUtility.Log($"TemperatureInfo unavailable for map {t.MapHeld} where {t} is held!", LogLevel.Warning);
                 return true;
-            }
             CellRect cells = t.OccupiedRect();
             energy /= t.def.Size.Area;
             for (int x = cells.minX; x <= cells.maxX; x++)
@@ -217,7 +218,7 @@ namespace Celsius
         }
 
         // Disable MapTemperature.TemperatureUpdate, because vanilla temperature overlay is not used anymore
-        public static bool MapTemperature_TemperatureUpdate() => false;
+        public static bool MapTemperature_TemperatureUpdate(Map ___map) => ___map?.TemperatureInfo() == null;//false;
 
         // Replaces temperature display in the global controls view (bottom right)
         public static bool GlobalControls_TemperatureString(ref string __result)
