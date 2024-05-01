@@ -35,12 +35,12 @@ namespace Celsius
             for (int i = 0; i < DefDatabase<ThingDef>.AllDefsListForReading.Count; i++)
                 DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
 
-            // Resetting maps' temperature info cache and re-initializing terrain temperatures
+            // Resetting maps' temperature info cache and trying to re-initialize terrain temperatures
             if (temperatureInfos != null)
                 foreach (TemperatureInfo temperatureInfo in temperatureInfos.Values)
                 {
                     temperatureInfo.ResetAllThings();
-                    if (Settings.FreezingAndMeltingEnabled && temperatureInfo.HasTerrainTemperatures)
+                    if (Settings.FreezingAndMeltingEnabled && !temperatureInfo.HasTerrainTemperatures)
                         temperatureInfo.InitializeTerrainTemperatures();
                 }
         }

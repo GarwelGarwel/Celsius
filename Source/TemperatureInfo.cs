@@ -113,6 +113,7 @@ namespace Celsius
             if (terrainTemperatures == null)
                 terrainTemperatures = new float[temperatures.Length];
             bool hasTerrainTemperatures = false;
+            int freezes = 0, melts = 0;
             for (int i = 0; i < terrainTemperatures.Length; i++)
             {
                 IntVec3 cell = map.cellIndices.IndexToCell(i);
@@ -121,14 +122,18 @@ namespace Celsius
                 {
                     hasTerrainTemperatures = true;
                     terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
-                    if (terrain.ShouldFreeze(terrainTemperatures[i]))
+                    if (terrain.FreezesAt(terrainTemperatures[i]))
                     {
                         cell.FreezeTerrain(map);
+                        freezes++;
                         if (snowDepth > 0.0001f && !cell.Roofed(map))
                             map.steadyEnvironmentEffects.AddFallenSnowAt(cell, snowDepth);
                     }
-                    else if (terrain.ShouldMelt(terrainTemperatures[i]))
+                    else if (terrain.MeltsAt(terrainTemperatures[i]))
+                    {
                         cell.MeltTerrain(map);
+                        melts++;
+                    }
                 }
                 else terrainTemperatures[i] = float.NaN;
             }
@@ -137,6 +142,9 @@ namespace Celsius
                 LogUtility.Log("The map has no terrain temperatures.");
                 terrainTemperatures = null;
             }
+            else if (freezes > 0 || melts > 0)
+                LogUtility.Log($"Froze {freezes} and melted {melts} cells during map initialization.");
+
         }
 
         public override void ExposeData()

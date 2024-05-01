@@ -22,9 +22,9 @@ namespace Celsius
 
         public static bool Meltable(this TerrainDef terrain) => terrain.GetTerrainThermalProperties().phaseTransition == PhaseTransitionType.Melt;
 
-        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => terrain.GetTerrainThermalProperties().FreezesAt(temperature);
+        public static bool FreezesAt(this TerrainDef terrain, float temperature) => terrain.GetTerrainThermalProperties().FreezesAt(temperature);
 
-        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => terrain.GetTerrainThermalProperties().MeltsAt(temperature);
+        public static bool MeltsAt(this TerrainDef terrain, float temperature) => terrain.GetTerrainThermalProperties().MeltsAt(temperature);
 
         /// <summary>
         /// Returns best guess for what kind of water terrain should be placed in a cell (if Ice melts there)
