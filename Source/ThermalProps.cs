@@ -17,11 +17,8 @@ namespace Celsius
 
         public float conductivity;
         public float heatflow;
-        public float heatflowNoConvection;
 
         public float HeatFlow => heatflow;
-
-        public float HeatFlowNoConvection => heatflowNoConvection;
 
         public bool IsAir => this == Air;
 
@@ -31,10 +28,9 @@ namespace Celsius
             this.insulation = TemperatureUtility.GetInsulationWithAirflow(insulation, airflow);
             this.airflow = airflow;
             conductivity = Mathf.Pow(Settings.ConductivityPowerBase, insulation);
-            heatflow = heatCapacity * conductivity;
-            heatflowNoConvection = heatflow / Settings.ConvectionConductivityEffect;
+            heatflow = heatCapacity * conductivity / Settings.ConvectionConductivityEffect;
         }
 
-        public override string ToString() => $"Heat capacity: {heatCapacity}. Insulation: {insulation}. Conductivity: {conductivity:P1}. Airflow: {airflow:P0}.";
+        public override string ToString() => $"Heat capacity: {heatCapacity}. Insulation: {insulation}. Conductivity: {conductivity:P1}. Heat flow: {HeatFlow:F3}.";
     }
 }

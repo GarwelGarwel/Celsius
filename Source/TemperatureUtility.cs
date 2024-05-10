@@ -94,42 +94,42 @@ namespace Celsius
 
         #region DIFFUSION
 
-        public static void CalculateHeatTransferCells(float homeTemperature, float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
+        public static void CalculateHeatTransferCells(float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
         {
             // Air has heat capacity = 1 and conductivity = 1
             if (airflow == 1 && props.IsAir)
             {
-                energy += interactingTemperature - homeTemperature;
+                energy += interactingTemperature;
                 heatFlow++;
                 return;
             }
 
             // If one of the interacting cells is not air, need to take airflow into account
             float hf = airflow == 0 || props.airflow == 0
-                ? props.HeatFlowNoConvection
-                : props.HeatFlow * Mathf.Pow(Settings.ConvectionConductivityEffect, airflow * props.airflow - 1);
+                ? props.HeatFlow
+                : props.HeatFlow * Mathf.Pow(Settings.ConvectionConductivityEffect, airflow * props.airflow);
             if (log)
-                LogUtility.Log($"Interacting temperature: {interactingTemperature:F1}C. Mutual airflow: {airflow * props.airflow}. Heatflow: {hf}.");
-            energy += (interactingTemperature - homeTemperature) * hf;
+                LogUtility.Log($"Interacting temperature: {interactingTemperature:F1}C. Mutual airflow: {airflow * props.airflow}. Heatflow: {hf:F3}.");
+            energy += interactingTemperature * hf;
             heatFlow += hf;
         }
 
-        public static void CalculateHeatTransferTerrain(float cellTemperature, float terrainTemperature, ThermalProps props, ref float energy, ref float heatFlow)
+        public static void CalculateHeatTransferTerrain(float terrainTemperature, ThermalProps props, ref float energy, ref float heatFlow)
         {
-            energy += (terrainTemperature - cellTemperature) * props.HeatFlowNoConvection;
-            heatFlow += props.HeatFlowNoConvection;
+            energy += terrainTemperature * props.HeatFlow;
+            heatFlow += props.HeatFlow;
         }
 
-        public static void CalculateHeatTransferEnvironment(float cellTemperature, float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow)
+        public static void CalculateHeatTransferEnvironment(float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow)
         {
             if (props.IsAir && !roofed)
             {
-                energy += (environmentTemperature - cellTemperature) * Settings.EnvironmentDiffusionFactor;
-                heatFlow += Settings.EnvironmentDiffusionFactor;
+                energy += environmentTemperature * Settings.EnvironmentDiffusionFactor * Settings.ConvectionConductivityEffect;
+                heatFlow += Settings.EnvironmentDiffusionFactor * Settings.ConvectionConductivityEffect;
                 return;
             }
-            float hf = props.heatflowNoConvection * Settings.RoofDiffusionFactor;
-            energy += (environmentTemperature - cellTemperature) * hf;
+            float hf = props.heatflow * Settings.RoofDiffusionFactor;
+            energy += environmentTemperature * hf;
             heatFlow += hf;
         }
 

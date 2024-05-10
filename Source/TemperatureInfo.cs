@@ -216,7 +216,10 @@ namespace Celsius
                 totalStopwatch.Stop();
 #endif
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == DefOf.Celsius_SwitchTemperatureMap.MainKey && Find.MainTabsRoot.OpenTab == null)
+            {
                 Find.PlaySettings.showTemperatureOverlay = !Find.PlaySettings.showTemperatureOverlay;
+                Event.current.Use();
+            }
             if (!Find.PlaySettings.showTemperatureOverlay || !Settings.ShowTemperatureTooltip)
                 return;
             IntVec3 cell = UI.MouseCell();
@@ -289,8 +292,8 @@ namespace Celsius
                 log = i == mouseCell;
                 float temperature = temperatures[i];
                 ThermalProps cellProps = GetThermalPropertiesAt(i);
-                float energy = 0;
-                float heatFlow = cellProps.HeatFlow;
+                float energy = temperature * cellProps.HeatFlow;  // How much energy is added to the cell (temperature * capacity * conductivity)
+                float heatFlow = cellProps.HeatFlow;  // How quickly the system changes its temperature (capacity * conductivity)
 
                 // Terrain temperature
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
@@ -304,16 +307,16 @@ namespace Celsius
                         {
                             // Thermal exchange with terrain
                             ThermalProps thermalProps = terrainProps.GetThermalProps();
-                            TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, thermalProps, ref energy, ref heatFlow);
+                            TemperatureUtility.CalculateHeatTransferTerrain(terrainTemperature, thermalProps, ref energy, ref heatFlow);
                             float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
                             if (log)
                                 LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {thermalProps.heatCapacity}. Terrain heatflow: {thermalProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
                             terrainTemperature += terrainTempChange * thermalProps.conductivity;
 
                             // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
-                            if (terrainTemperatures[i] < terrainProps.transitionTemperature && terrainProps.MeltsAt(terrainTemperature))
+                            if (terrainProps.MeltsAt(terrainTemperature))
                                 cell.MeltTerrain(map, log);
-                            else if (terrainTemperatures[i] > terrainProps.transitionTemperature && terrainProps.FreezesAt(terrainTemperature))
+                            else if (terrainProps.FreezesAt(terrainTemperature))
                                 cell.FreezeTerrain(map, log);
 
                             terrainTemperatures[i] = terrainTemperature;
@@ -331,7 +334,7 @@ namespace Celsius
                     if (neighbour.InBounds(map))
                     {
                         int index = map.cellIndices.CellToIndex(neighbour);
-                        TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
+                        TemperatureUtility.CalculateHeatTransferCells(temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
                     }
                 }
 
@@ -342,14 +345,14 @@ namespace Celsius
 
                 // Thermal exchange with the environment
                 RoofDef roof = cell.GetRoof(map);
-                TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow);
+                TemperatureUtility.CalculateHeatTransferEnvironment(GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow);
 
                 // Applying heat transfer
-                float equilibriumDifference = energy / heatFlow;
+                float equilibriumTemp = energy / heatFlow;
                 if (log)
-                    LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {temperature + equilibriumDifference:F1}C.");
+                    LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {equilibriumTemp:F1}C.");
 
-                temperature += equilibriumDifference * cellProps.conductivity;
+                temperature += (equilibriumTemp - temperature) * cellProps.conductivity;
                 temperatures[i] = temperature;
 
                 // Snow melting
