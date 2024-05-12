@@ -23,7 +23,7 @@ namespace Celsius
 
         public StuffThermalProperties StuffThermalProperties =>
             ThingThermalProperties.volume > 0
-            ? parent.Stuff?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
+            ? parent.GetStuff()?.GetModExtension<StuffThermalProperties>() ?? parent.def.GetModExtension<StuffThermalProperties>()
             : null;
 
         public ThermalProps ThermalProperties => thermalProps ?? (thermalProps = ThingThermalProperties?.GetThermalProps(StuffThermalProperties, IsOpen));
