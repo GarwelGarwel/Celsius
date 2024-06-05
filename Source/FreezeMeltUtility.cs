@@ -102,6 +102,8 @@ namespace Celsius
             for (int i = things.Count - 1; i >= 0; i--)
             {
                 Thing thing = things[i];
+                if (!thing.def.destroyable)
+                    continue;
                 if (meltedTerrain.passability == Traversability.Impassable)
                     if (thing is Pawn pawn)
                     {
