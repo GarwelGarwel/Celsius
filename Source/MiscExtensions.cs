@@ -1,18 +1,14 @@
 ﻿using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace Celsius
 {
     public static class MiscExtensions
     {
-        public static ThingDef GetStuff(this Thing thing)
-        {
-            if (thing.def.IsStuff)
-                return thing.def;
-            if (thing.Stuff != null)
-                return thing.Stuff;
-            return GenStuff.DefaultStuffFor(thing.def) ?? thing.def;
-        }
+        public static float RoundWithPrecision(this float value, float precision = 1) => Mathf.Round(value / precision) * precision;
+
+        public static ThingDef GetStuff(this Thing thing) => thing.def.IsStuff ? thing.def : thing.Stuff ?? GenStuff.DefaultStuffFor(thing.def) ?? thing.def;
 
         public static float GetAverageSnowDepth(this Map map)
         {
@@ -32,13 +28,11 @@ namespace Celsius
                     continue;
                 possibleSnowCells++;
             }
-            if (possibleSnowCells > 0)
-            {
-                snowDepth /= possibleSnowCells;
-                LogUtility.Log($"Covering frozen terrain with average snow level of {snowDepth:F4}.");
-                return snowDepth;
-            }
-            return 0;
+            if (possibleSnowCells == 0)
+                return 0;
+            snowDepth /= possibleSnowCells;
+            LogUtility.Log($"Covering frozen terrain with average snow level of {snowDepth:F4}.");
+            return snowDepth;
         }
     }
 }

@@ -120,15 +120,25 @@ namespace Celsius
             heatFlow += props.HeatFlow;
         }
 
-        public static void CalculateHeatTransferEnvironment(float environmentTemperature, ThermalProps props, bool roofed, ref float energy, ref float heatFlow)
+        public static void CalculateHeatTransferEnvironment(float environmentTemperature, ThermalProps props, RoofDef roof, ref float energy, ref float heatFlow)
         {
-            if (props.IsAir && !roofed)
+            float hf;
+            if (roof == null)
             {
-                energy += environmentTemperature * Settings.EnvironmentDiffusionFactor * Settings.ConvectionConductivityEffect;
-                heatFlow += Settings.EnvironmentDiffusionFactor * Settings.ConvectionConductivityEffect;
-                return;
+                if (props.IsAir)  // Air-to-air exchange (most common way on most maps)
+                {
+                    energy += environmentTemperature * Settings.EnvironmentDiffusionFactor;
+                    heatFlow += Settings.EnvironmentDiffusionFactor;
+                    return;
+                }
+                // Buildings without a roof
+                hf = Settings.EnvironmentDiffusionFactor * props.HeatFlow;
+                if (props.airflow != 0)
+                    hf *= Mathf.Pow(Settings.ConvectionConductivityEffect, props.airflow);
             }
-            float hf = props.heatflow * Settings.RoofDiffusionFactor;
+            else if (!roof.isThickRoof)  // Thin roof: use insulation value from the settings (precomputed)
+                hf = props.HeatFlow * Settings.RoofDiffusionFactor;
+            else return;  // Thick roof: no heat exchange at all
             energy += environmentTemperature * hf;
             heatFlow += hf;
         }
