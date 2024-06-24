@@ -15,9 +15,6 @@ namespace Celsius
         // Minimum allowed temperature for autoignition
         const float MinIgnitionTemperature = 100;
 
-        // How quickly min & max temperatures for temperature overlay adjust
-        const float MinMaxTemperatureAdjustmentStep = 1;
-
         bool initialized;
         int tick;
         int slice;
@@ -35,10 +32,8 @@ namespace Celsius
         static readonly Color maxComfortableColor = new Color(0.5f, 1, 0);
         static readonly Color maxColor = Color.red;
 
-        float[] minTemperatures = new float[Settings.SliceCount];
-        float[] maxTemperatures = new float[Settings.SliceCount];
-        float minTemperature = minComfortableTemperature - 10;
-        float maxTemperature = maxComfortableTemperature + 10;
+        bool minMaxTemperaturesUpdated;
+        float minTemperature, maxTemperature;
         CellBoolDrawer overlayDrawer;
 
 #if DEBUG
@@ -57,11 +52,6 @@ namespace Celsius
             // Setting up min & max temperatures (for overlay)
             minComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
             maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
-            for (int i = 0; i < Settings.SliceCount; i++)
-            {
-                minTemperatures[i] = minComfortableTemperature - 10;
-                maxTemperatures[i] = maxComfortableTemperature + 10;
-            }
 
             // Initializing for the first run
             if (temperatures == null)
@@ -79,17 +69,8 @@ namespace Celsius
                         RoofDef roof = cell.GetRoof(map);
                         temperatures[i] = roof != null && roof.isThickRoof ? annualAverageTemperature : outdoorTemperature;
                     }
-                    if (temperatures[i] < minTemperature)
-                        minTemperature = temperatures[i];
-                    else if (temperatures[i] > maxTemperature)
-                        maxTemperature = temperatures[i];
                 }
                 InitializeTerrainTemperatures();
-            }
-            else
-            {
-                minTemperature = Mathf.Min(temperatures);
-                maxTemperature = Mathf.Max(temperatures);
             }
 
             overlayDrawer = new CellBoolDrawer(
@@ -206,7 +187,21 @@ namespace Celsius
         public override void MapComponentUpdate()
         {
             if (Find.PlaySettings.showTemperatureOverlay && Find.CurrentMap == map)
+            {
+                if (!minMaxTemperaturesUpdated && !Settings.UseVanillaTemperatureColors)
+                {
+                    minTemperature = minComfortableTemperature - 10;
+                    maxTemperature = maxComfortableTemperature + 10;
+                    for (int i = 0; i < temperatures.Length; i++)
+                        if (temperatures[i] < minTemperature)
+                            minTemperature = temperatures[i];
+                        else if (temperatures[i] > maxTemperature)
+                            maxTemperature = temperatures[i];
+                    LogUtility.Log($"Min temperature: {minTemperature.ToStringTemperature()}. Max temperature: {maxTemperature.ToStringTemperature()}.");
+                    minMaxTemperaturesUpdated = true;
+                }
                 overlayDrawer.MarkForDraw();
+            }
             overlayDrawer.CellBoolDrawerUpdate();
         }
 
@@ -266,6 +261,7 @@ namespace Celsius
             updateStopwatch.Start();
 #endif
 
+            float outdoorTemperature = map.mapTemperature.OutdoorTemp;
             int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             bool log;
 
@@ -279,12 +275,6 @@ namespace Celsius
                 }
             }
 
-            float outdoorTemperature = map.mapTemperature.OutdoorTemp;
-            if (minTemperatures[slice] < minComfortableTemperature + 10)
-                minTemperatures[slice] += MinMaxTemperatureAdjustmentStep;
-            if (maxTemperatures[slice] > maxComfortableTemperature - 10)
-                maxTemperatures[slice] -= MinMaxTemperatureAdjustmentStep;
-
             // Main loop
             for (int j = slice; j < temperatures.Length; j += Settings.SliceCount)
             {
@@ -293,8 +283,8 @@ namespace Celsius
                 log = i == mouseCell;
                 float temperature = temperatures[i];
                 ThermalProps cellProps = GetThermalPropertiesAt(i);
-                float energy = temperature * cellProps.HeatFlow;  // How much energy is added to the cell (temperature * capacity * conductivity)
                 float heatFlow = cellProps.HeatFlow;  // How quickly the system changes its temperature (capacity * conductivity)
+                float energy = temperature * heatFlow;  // How much energy is added to the cell (temperature * capacity * conductivity)
 
                 // Terrain temperature
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
@@ -396,20 +386,13 @@ namespace Celsius
                         }
                         else existingFire.fireSize += fireSize;
                 }
-
-                if (!Settings.UseVanillaTemperatureColors)
-                    if (temperature < minTemperatures[slice])
-                        minTemperatures[slice] = temperature;
-                    else if (temperature > maxTemperatures[slice])
-                        maxTemperatures[slice] = temperature;
             }
 
             tick = 0;
             if (slice == 0)
             {
                 rareUpdateCounter = (rareUpdateCounter + 1) % RareUpdateInterval;
-                minTemperature = Mathf.Min(minTemperatures);
-                maxTemperature = Mathf.Max(maxTemperatures);
+                minMaxTemperaturesUpdated = false;
                 overlayDrawer.SetDirty();
             }
             slice = (slice + 1) % Settings.SliceCount;

@@ -51,7 +51,7 @@ namespace Celsius
             if (terrain != null)
                 return terrain;
 
-            terrain = map.terrainGrid.TerrainAt(cell).GetTerrainThermalProperties()?.replaceWith;
+            terrain = map.terrainGrid.TerrainAt(cell).GetTerrainThermalProperties()?.turnsInto;
             if (terrain != null)
                 return terrain;
 
@@ -97,7 +97,7 @@ namespace Celsius
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
                 Log($"{terrain} freezes at {cell}.");
-            map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.replaceWith ?? TerrainDefOf.Ice);
+            map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
 #if DEBUG
             LogStopwatch();
