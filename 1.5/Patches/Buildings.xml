@@ -6,7 +6,7 @@
 		<xpath>Defs/ThingDef[thingClass="Mineable"]</xpath>
 		<value>
 			<li Class="Celsius.ThingThermalProperties">
-				<heatCapacity>100</heatCapacity>
+				<heatCapacity>500</heatCapacity>
 				<volume>0.5</volume>
 				<insulation>5</insulation>
 			</li>
