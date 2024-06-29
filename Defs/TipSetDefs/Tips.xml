@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<TipSetDef>
+		<defName>Celsius_Tips</defName>
+		<tips>
+			<li TKey="Celsius_Key">Press B to view temperature map. You can change the hotkey in the settings.</li>
+			<li TKey="Celsius_HeatCapacity">Heat capacity defines how much energy is needed to change an object's temperature and depends on the stuff it's made of.</li>
+			<li TKey="Celsius_Insulators">In cold biomes, build walls from good insulators, like wood or plasteel, to keep the heat. Steel insulates poorly.</li>
+			<li TKey="Celsius_Melting">Fires and heaters can melt ice. If ice melts under a building, it is usually destroyed. Pawns may also drown in deep water.</li>
+			<li TKey="Celsius_Roofs">Thin (e.g. constructed) roofs are not perfect insulators and will let some heat through.</li>
+			<li TKey="Celsius_Autoignition">Many flammable materials will spontaneously catch fire (autoignite) if exposed to high temperatures.</li>
+			<li TKey="Celsius_WeatherEffects">Pawns get cold easier when wet or under strong wind. Direct sunlight, on the contrary, helps pawns warm up.</li>
+		</tips>
+	</TipSetDef>
+
+</Defs>
