@@ -44,6 +44,15 @@ namespace Celsius
                     if (Settings.FreezingAndMeltingEnabled && !temperatureInfo.HasTerrainTemperatures)
                         temperatureInfo.InitializeTerrainTemperatures();
                 }
+            RefreshAllMaps();
+        }
+
+        public static void RefreshAllMaps()
+        {
+            foreach (var temperatureInfo in TemperatureUtility.temperatureInfos)
+            {
+                temperatureInfo.Value.SetupStrategy();
+            }
         }
 
         #region TEMPERATURE

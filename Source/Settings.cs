@@ -37,6 +37,10 @@ namespace Celsius
         public static float MountainTemperatureOffset;
         public static int TemperatureDisplayDigits;
         public static string TemperatureDisplayFormatString;
+        public static bool Threading;
+        public static bool UseComplexThreading;
+        public static int NumThreadsWorkers;
+        public static int NumThreadsBuffer;
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const int TicksPerUpdate_Default = 120;
@@ -71,6 +75,10 @@ namespace Celsius
             Scribe_Values.Look(ref MountainTemperatureOffset, "MountainTemperatureOffset");
             Scribe_Values.Look(ref TemperatureDisplayDigits, "TemperatureDisplayDigits", TemperatureDisplayDigits_Default);
             Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
+            Scribe_Values.Look(ref Threading, "Threading", true);
+            Scribe_Values.Look(ref UseComplexThreading, "ComplexThreading");
+            Scribe_Values.Look(ref NumThreadsWorkers, "NumThreadsWorkers", 16);
+            Scribe_Values.Look(ref NumThreadsBuffer, "NumThreadsBuffer", 16);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
                 RecalculateValues();
         }
@@ -92,6 +100,10 @@ namespace Celsius
             MountainTemperature = TemperatureTuning.DeepUndergroundTemperature;
             MountainTemperatureOffset = 0;
             TemperatureDisplayDigits = TemperatureDisplayDigits_Default;
+            Threading = true;
+            UseComplexThreading = true;
+            NumThreadsBuffer = 16;
+            NumThreadsWorkers = 16;
             RecalculateValues();
             Print();
             TemperatureUtility.SettingsChanged();

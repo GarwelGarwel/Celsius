@@ -39,6 +39,16 @@
 	<Celsius_Settings_RoofInsulation_tooltip>How well roofs (constructed and natural) preserve indoor temperature. Recommended value: {0}.</Celsius_Settings_RoofInsulation_tooltip>
 	<Celsius_Settings_HeatPush>Heat push: {0}</Celsius_Settings_HeatPush>
 	<Celsius_Settings_HeatPush_tooltip>Effect of things that produce or reduce heat (e.g. fires, heaters and coolers).</Celsius_Settings_HeatPush_tooltip>
+	<Celsius_Settings_Threading>Threading enabled</Celsius_Settings_Threading>
+	<Celsius_Settings_Threading_tooltip>Whether to use multithreading for parts of the main loop. Requires a good amount of cores (>4) to be faster than single threading.</Celsius_Settings_Threading_tooltip>
+	<Celsius_Settings_NumThreadWorkers>Worker Threads: {0}</Celsius_Settings_NumThreadWorkers>
+	<Celsius_Settings_NumThreadWorkers_tooltip>How many threads to use for the "big" parts of the map. The more the better, but higher values could lead to more frequent GC cylces. 16-48 is recommended</Celsius_Settings_NumThreadWorkers_tooltip>
+	<Celsius_Settings_ComplexThreading>Alternate threading</Celsius_Settings_ComplexThreading>
+	<Celsius_Settings_ComplexThreading_tooltip>Whether to use a different amount of threads to the "small" parts of the map. Could lead to better performance if said number is set correctly, but will absolutely trash your TPS if you mess it up</Celsius_Settings_ComplexThreading_tooltip>
+	<Celsius_Settings_NumThreadBuffer>Buffer Threads: {0}</Celsius_Settings_NumThreadBuffer>
+	<Celsius_Settings_NumThreadBuffer_tooltip>How many threads to use for the "small" parts of the map. Can degrade performance if set too high. WILL DEFINITELY DEGRADE PERFORMANCE IF IT DOESN'T EVENTLY DIVIDE THE AMOUNT OF WORKER THREADS! 16-48 is recommended</Celsius_Settings_NumThreadBuffer_tooltip>
+	
+	
 	<Celsius_Settings_DebugMode>Debug logging mode</Celsius_Settings_DebugMode>
 	<Celsius_Settings_DebugMode_tooltip>Verbose logging of Celsius' work. Required for bug reports.</Celsius_Settings_DebugMode_tooltip>
 	<Celsius_Settings_ResetDefault>Reset to default</Celsius_Settings_ResetDefault>
