@@ -76,6 +76,20 @@ namespace Celsius
             HeatPushMultiplier = (float)Math.Round(content.Slider(HeatPushMultiplier, 0, 2), 1);
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
 
+            content.CheckboxLabeled("Celsius_Settings_Threading".Translate(), ref Threading, "Celsius_Settings_Threading_tooltip".Translate());
+            if (Threading)
+            {
+                content.Label("Celsius_Settings_NumThreadWorkers".Translate(NumThreadsWorkers), tooltip: "Celsius_Settings_NumThreadWorkers_tooltip".Translate());
+                NumThreadsWorkers = (int)content.Slider(NumThreadsWorkers, 2, 64);
+            }
+
+            content.CheckboxLabeled("Celsius_Settings_ComplexThreading".Translate(), ref UseComplexThreading, "Celsius_Settings_ComplexThreading_tooltip".Translate());
+            if (UseComplexThreading)
+            {
+                content.Label("Celsius_Settings_NumThreadBuffer".Translate(NumThreadsBuffer), tooltip: "Celsius_Settings_NumThreadBuffer_tooltip".Translate());
+                NumThreadsBuffer = (int)content.Slider(NumThreadsBuffer, 2, 64);
+            }
+
             content.CheckboxLabeled("Celsius_Settings_DebugMode".Translate(), ref DebugMode, "Celsius_Settings_DebugMode_tooltip".Translate());
 
             if (content.ButtonText("Celsius_Settings_ResetDefault".Translate()))

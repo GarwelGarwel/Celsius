@@ -1,8 +1,8 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
@@ -19,7 +19,14 @@ namespace Celsius
         // How quickly min & max temperatures for temperature overlay adjust
         const float MinMaxTemperatureAdjustmentStep = 1;
 
-        bool initialized;
+        int zonesPerThread;
+        Task[] tasks, bufferTasks;
+
+        //Which ticking strategy to use
+        public Action TickStrategy;
+        //The thread columns for this map
+        Tuple<int, int>[] columnsRegular, columnsBuffer;
+
         int tick;
         int slice;
         int rareUpdateCounter;
@@ -54,6 +61,8 @@ namespace Celsius
 
         public override void FinalizeInit()
         {
+            SetupStrategy();
+
             thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
@@ -101,8 +110,24 @@ namespace Celsius
 
             tick = (Find.TickManager.TicksGame - map.generationTick) % Settings.TicksPerSlice;
             slice = (Find.TickManager.TicksGame - map.generationTick) / Settings.TicksPerSlice % Settings.SliceCount;
-            initialized = true;
             LogUtility.Log($"TemperatureInfo initialized for {map}.");
+        }
+
+        public void SetupStrategy()
+        {
+            if (Settings.Threading)
+            {
+                if (Settings.UseComplexThreading)
+                {
+                    SetupThreadZonesExperimental();
+                    TickStrategy = TickStrategyMultiThreadedExperimental;
+                    return;
+                }
+                SetupThreadZones();
+                TickStrategy = TickStrategyMultiThreaded;
+                return;
+            }
+            TickStrategy = TickStrategySingleThreaded;
         }
 
         public void InitializeTerrainTemperatures()
@@ -245,18 +270,11 @@ namespace Celsius
             }
 #endif
 
-            if (!initialized)
-                FinalizeInit();
-
             if (++tick < Settings.TicksPerSlice)
                 return;
-
 #if DEBUG
             updateStopwatch.Start();
 #endif
-
-            int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
-            bool log;
 
             if (slice == 0)
             {
@@ -275,6 +293,31 @@ namespace Celsius
                 maxTemperatures[slice] -= MinMaxTemperatureAdjustmentStep;
 
             // Main loop
+            TickStrategy();
+
+            tick = 0;
+            if (slice == 0)
+            {
+                rareUpdateCounter = (rareUpdateCounter + 1) % RareUpdateInterval;
+                minTemperature = Mathf.Min(minTemperatures);
+                maxTemperature = Mathf.Max(maxTemperatures);
+                overlayDrawer.SetDirty();
+            }
+            slice = (slice + 1) % Settings.SliceCount;
+#if DEBUG
+            if (Settings.DebugMode)
+            {
+                updateStopwatch.Stop();
+                if (slice == 0 && ++tickIterations % 10 == 0)
+                    LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / tickIterations:F1} ms.");
+            }
+#endif
+        }
+
+        public void TickStrategySingleThreaded()
+        {
+            bool log;
+            int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             for (int j = slice; j < temperatures.Length; j += Settings.SliceCount)
             {
                 IntVec3 cell = map.cellsInRandomOrder.Get(j);
@@ -391,25 +434,267 @@ namespace Celsius
                     else if (temperature > maxTemperatures[slice])
                         maxTemperatures[slice] = temperature;
             }
+        }
 
-            tick = 0;
-            if (slice == 0)
+        //Processes this map's x-columns from start to end
+        public void ProcessColumns(int start, int end)
+        {
+            for (int colIndex = start; colIndex <= end; colIndex++)
             {
-                rareUpdateCounter = (rareUpdateCounter + 1) % RareUpdateInterval;
-                minTemperature = Mathf.Min(minTemperatures);
-                maxTemperature = Mathf.Max(maxTemperatures);
-                overlayDrawer.SetDirty();
-            }
-            slice = (slice + 1) % Settings.SliceCount;
+                for (int rowIndex = 0; rowIndex < map.Size.z; rowIndex++)
+                {
+                    IntVec3 cell = new IntVec3(colIndex, 0, rowIndex);
+                    int i = map.cellIndices.CellToIndex(cell);
+                    float temperature = temperatures[i];
+                    ThermalProps cellProps = GetThermalPropertiesAt(i);
+                    float energy = 0;
+                    float heatFlow = cellProps.HeatFlow;
 
-#if DEBUG
-            if (Settings.DebugMode)
-            {
-                updateStopwatch.Stop();
-                if (slice == 0 && ++tickIterations % 10 == 0)
-                    LogUtility.Log($"Updated temperatures for {map} on tick {Find.TickManager.TicksGame} in {updateStopwatch.Elapsed.TotalMilliseconds / tickIterations:F1} ms.");
+                    // Terrain temperature
+                    if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
+                    {
+                        float terrainTemperature = terrainTemperatures[i];
+                        if (!float.IsNaN(terrainTemperature))
+                        {
+                            TerrainDef terrain = cell.GetTerrain(map);
+                            ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
+                            if (terrainProps != null && terrainProps.heatCapacity > 0)
+                            {
+                                // Thermal exchange with terrain
+                                TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, terrainProps, ref energy, ref heatFlow);
+                                float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
+                                terrainTemperature += terrainTempChange * terrainProps.Conductivity;
+
+                                // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
+                                if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature))
+                                    cell.MeltTerrain(map);
+                                else if (terrainTemperatures[i] > FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature))
+                                    cell.FreezeTerrain(map);
+
+                                terrainTemperatures[i] = terrainTemperature;
+                            }
+                            else terrainTemperatures[i] = float.NaN;
+                        }
+                        // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
+                        else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature())
+                            terrainTemperatures[i] = temperature;
+                    }
+
+                    // Diffusion & convection
+                    void ProcessNeighbour(IntVec3 neighbour)
+                    {
+                        if (neighbour.InBounds(map))
+                        {
+                            int index = map.cellIndices.CellToIndex(neighbour);
+                            TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow);
+                        }
+                    }
+
+                    ProcessNeighbour(cell + IntVec3.North);
+                    ProcessNeighbour(cell + IntVec3.East);
+                    ProcessNeighbour(cell + IntVec3.South);
+                    ProcessNeighbour(cell + IntVec3.West);
+
+                    // Thermal exchange with the environment
+                    RoofDef roof = cell.GetRoof(map);
+                    TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow);
+
+                    // Applying heat transfer
+                    float equilibriumDifference = energy / heatFlow;
+
+                    temperature += equilibriumDifference * cellProps.Conductivity;
+                    temperatures[i] = temperature;
+
+                    // Snow melting
+                    if (temperature > 0 && cell.GetSnowDepth(map) > 0)
+                    {
+                        map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
+                    }
+
+                    // Autoignition
+                    if (temperature > MinIgnitionTemperature && Settings.AutoignitionEnabled)
+                    {
+                        Fire existingFire = null;
+                        float fireSize = 0;
+                        List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                        for (int k = 0; k < things.Count; k++)
+                        {
+                            if (things[k].FireBulwark)
+                            {
+                                fireSize = 0;
+                                break;
+                            }
+                            if (things[k] is Fire fire)
+                            {
+                                fireSize -= fire.fireSize;
+                                existingFire = fire;
+                                continue;
+                            }
+                            float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
+                            if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
+                                fireSize += Fire.MinFireSize * things[k].GetStatValue(StatDefOf.Flammability);
+                        }
+
+                        if (fireSize > 0)
+                            if (existingFire == null)
+                            {
+                                LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
+                                FireUtility.TryStartFireIn(cell, map, fireSize, null);
+                            }
+                            else existingFire.fireSize += fireSize;
+                    }
+
+                    if (!Settings.UseVanillaTemperatureColors)
+                        if (temperature < minTemperatures[slice])
+                            minTemperatures[slice] = temperature;
+                        else if (temperature > maxTemperatures[slice])
+                            maxTemperatures[slice] = temperature;
+                }
             }
-#endif
+        }
+
+        //Calculates and prepares the thread zones for the simple multithreading function
+        public void SetupThreadZones()
+        {
+            
+            //We want to perform two disjoint passes to avoid synchronization issues, so we need two columns for every thread
+            int numCols = Settings.NumThreadsWorkers * 2;
+            if ((map.Size.x - numCols) / Settings.NumThreadsWorkers <= 1)
+            {
+                //A column of size 1 isn't enough to avoid synchronization issues. Tell the user that they fucked up and get out
+                Log.Message("Either your map is too small or you're using too many threads, switching to singlethreaded...");
+                TickStrategy = TickStrategySingleThreaded;
+                return;
+            }
+
+            tasks = new Task[Settings.NumThreadsWorkers];
+            columnsRegular = new Tuple<int, int>[numCols];
+            //How many columns we have left to distribute
+            int colsLeft = map.Size.x - numCols;
+            //Which column we're at
+            int columnIndex = 0;
+            //How many unallocated threads are left
+            int unallocatedThreads = Settings.NumThreadsWorkers;
+            for (int i = 0; i < numCols; i += 2) //Increment by 2 since we're allocating two values per iteration
+            {
+                //We round down if it's not an even result, worst case is that the last thread has to process a few extra columns
+                int colsToAllocate = colsLeft / unallocatedThreads;
+                //Allocate this slice
+                columnsRegular[i] = new Tuple<int, int>(columnIndex, columnIndex + colsToAllocate - 1);
+                columnIndex += colsToAllocate;
+                //Allocate the buffer
+                columnsRegular[i + 1] = new Tuple<int, int>(columnIndex, columnIndex + 1);
+                columnIndex += 2;
+                //We don't need to subtract the buffer because we already did that at the start
+                colsLeft -= colsToAllocate;
+                unallocatedThreads--;
+            }
+        }
+
+
+        
+
+        //Calculates and prepares the thread zones for the more complex multithreading function
+        public void SetupThreadZonesExperimental()
+        {
+            //We want to perform two disjoint passes to avoid synchronization issues, so we need two columns for every thread
+            int numCols = Settings.NumThreadsWorkers * 2;
+            if ((map.Size.x - numCols) / Settings.NumThreadsWorkers <= 1)
+            {
+                //A column of size 1 isn't enough to avoid synchronization issues. Tell the user that they fucked up and get out
+                LogUtility.Log("Either your map is too small or you're using too many threads, switching to single threaded...");
+                TickStrategy = TickStrategySingleThreaded;
+                return;
+            }
+
+            columnsRegular = new Tuple<int, int>[Settings.NumThreadsWorkers];
+            columnsBuffer = new Tuple<int, int>[Settings.NumThreadsWorkers];
+            //How many buffer zones we should merge and process per buffer thread.
+            //TODO allocate more zones to other threads if the last thread needs to process more than two extra zones
+            zonesPerThread = columnsBuffer.Length / Settings.NumThreadsBuffer;
+            bufferTasks = new Task[Settings.NumThreadsBuffer];
+            tasks = new Task[Settings.NumThreadsWorkers];
+            //How many work zones we have left to distribute
+            int colsLeft = map.Size.x - numCols;
+            //Which column we're at
+            int columnIndex = 0;
+            //How many unallocated threads are left
+            int unallocatedThreads = Settings.NumThreadsWorkers;
+            for (int i = 0; i < Settings.NumThreadsWorkers; i++)
+            {
+                //We round down if it's not an even result, worst case is that the last thread has to process a few extra zones
+                //TODO This is actually bad for buffer zones if there are too many. Performance tanks when bufferThreads can't divide workThreads
+                int colsToAllocate = colsLeft / unallocatedThreads;
+                //Allocate this work zone
+                columnsRegular[i] = new Tuple<int, int>(columnIndex, columnIndex + colsToAllocate - 1);
+                columnIndex += colsToAllocate;
+                //Allocate the buffer
+                columnsBuffer[i] = new Tuple<int, int>(columnIndex, columnIndex + 1);
+                columnIndex += 2;
+                //We don't need to subtract the buffer because we already did that at the start
+                colsLeft -= colsToAllocate;
+                unallocatedThreads--;
+            }
+        }
+        
+        //A simpler multithreading strategy that uses the same amount of threads for the buffer zones
+        public void TickStrategyMultiThreaded()
+        {
+            //Run first halves
+            int taskIndex = 0;
+            for (int i = 0; i < columnsRegular.Length; i+=2)
+            {
+                var tuple = columnsRegular[i];
+                tasks[taskIndex] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
+                taskIndex++;
+            }
+            Task.WaitAll(tasks);
+            taskIndex = 0;
+
+            //Run second halves
+            for (int i = 1; i < columnsRegular.Length; i += 2)
+            {
+                var tuple = columnsRegular[i];
+                tasks[taskIndex] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
+                taskIndex++;
+            }
+            Task.WaitAll(tasks);
+        }
+
+        //A more complex multithreading method that uses a different number of threads for the buffer zones
+        public void TickStrategyMultiThreadedExperimental()
+        {
+
+            //Run first halves
+            for (int i = columnsRegular.Length - 1; i >= 0; i--)
+            {
+                var tuple = columnsRegular[i];
+                tasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
+            }
+            Task.WaitAll(tasks);
+            
+            //Process the last buffer zone first since it might be larger
+            bufferTasks[bufferTasks.Length - 1] = Task.Run(() =>
+            {
+                for (int j = zonesPerThread * (Settings.NumThreadsBuffer - 1); j < columnsBuffer.Length; j++)
+                {
+                    var tuple = columnsBuffer[j];
+                    ProcessColumns(tuple.Item1, tuple.Item2);
+                }
+            });
+            for (int i = 0; i < Settings.NumThreadsBuffer - 1; i++)
+            {
+                bufferTasks[i] = Task.Run(() =>
+                {
+                    for (int j = i*zonesPerThread; j < zonesPerThread*(i+1); j++)
+                    {
+                        var tuple = columnsBuffer[j];
+                        ProcessColumns(tuple.Item1, tuple.Item2);
+                    }
+                });
+            }
+            
+            Task.WaitAll(bufferTasks);
         }
 
         public float GetMountainTemperatureFor(MountainTemperatureMode mode)
