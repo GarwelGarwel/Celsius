@@ -3,11 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HotSwap;
 using UnityEngine;
 using Verse;
+using Object = System.Object;
 
 namespace Celsius
 {
+    [HotSwappable]
     public class TemperatureInfo : MapComponent
     {
         // Normal full updates between rare updates
@@ -26,6 +29,7 @@ namespace Celsius
         public Action TickStrategy;
         //The thread columns for this map
         Tuple<int, int>[] columnsRegular, columnsBuffer;
+        private object mutex = new object();
 
         int tick;
         int slice;
@@ -530,16 +534,24 @@ namespace Celsius
                                 existingFire = fire;
                                 continue;
                             }
-                            float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
-                            if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
-                                fireSize += Fire.MinFireSize * things[k].GetStatValue(StatDefOf.Flammability);
+
+                            lock (mutex)
+                            {
+                                float ignitionTemp = things[k].GetStatValue(DefOf.Celsius_IgnitionTemperature);
+                                if (ignitionTemp >= MinIgnitionTemperature && temperature >= ignitionTemp)
+                                    fireSize += Fire.MinFireSize * things[k].GetStatValue(StatDefOf.Flammability);
+                            }
+                            
                         }
 
                         if (fireSize > 0)
                             if (existingFire == null)
                             {
                                 LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
-                                FireUtility.TryStartFireIn(cell, map, fireSize, null);
+                                lock (mutex)
+                                {
+                                    FireUtility.TryStartFireIn(cell, map, fireSize, null);
+                                }
                             }
                             else existingFire.fireSize += fireSize;
                     }
