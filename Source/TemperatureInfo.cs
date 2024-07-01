@@ -361,19 +361,18 @@ namespace Celsius
                 }
 
                 // Diffusion & convection
-                void ProcessNeighbour(IntVec3 neighbour)
+                void ProcessNeighbour(int index)
                 {
-                    if (neighbour.InBounds(map))
+                    if (index >= 0 && index < (map.Size.x * map.Size.z))
                     {
-                        int index = map.cellIndices.CellToIndex(neighbour);
-                        TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
+                        TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow);
                     }
                 }
 
-                ProcessNeighbour(cell + IntVec3.North);
-                ProcessNeighbour(cell + IntVec3.East);
-                ProcessNeighbour(cell + IntVec3.South);
-                ProcessNeighbour(cell + IntVec3.West);
+                ProcessNeighbour(i - map.Size.x);
+                ProcessNeighbour(i + 1);
+                ProcessNeighbour(i + map.Size.x);
+                ProcessNeighbour(i - 1);
 
                 // Thermal exchange with the environment
                 RoofDef roof = cell.GetRoof(map);
@@ -437,7 +436,7 @@ namespace Celsius
         }
 
         //Processes this map's x-columns from start to end
-        public void ProcessColumns(int start, int end)
+        public void ProcessColumns(int start, int end, int mouseCell)
         {
             for (int colIndex = start; colIndex <= end; colIndex++)
             {
@@ -445,6 +444,7 @@ namespace Celsius
                 {
                     IntVec3 cell = new IntVec3(colIndex, 0, rowIndex);
                     int i = map.cellIndices.CellToIndex(cell);
+                    bool log = i == mouseCell;
                     float temperature = temperatures[i];
                     ThermalProps cellProps = GetThermalPropertiesAt(i);
                     float energy = 0;
@@ -463,13 +463,15 @@ namespace Celsius
                                 // Thermal exchange with terrain
                                 TemperatureUtility.CalculateHeatTransferTerrain(temperature, terrainTemperature, terrainProps, ref energy, ref heatFlow);
                                 float terrainTempChange = (temperature - terrainTemperature) * cellProps.HeatFlow / heatFlow;
+                                if (log)
+                                    LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
                                 terrainTemperature += terrainTempChange * terrainProps.Conductivity;
 
                                 // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
                                 if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature))
-                                    cell.MeltTerrain(map);
+                                    cell.MeltTerrain(map, log);
                                 else if (terrainTemperatures[i] > FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature))
-                                    cell.FreezeTerrain(map);
+                                    cell.FreezeTerrain(map, log);
 
                                 terrainTemperatures[i] = terrainTemperature;
                             }
@@ -500,6 +502,8 @@ namespace Celsius
 
                     // Applying heat transfer
                     float equilibriumDifference = energy / heatFlow;
+                    if (log)
+                        LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {temperature + equilibriumDifference:F1}C.");
 
                     temperature += equilibriumDifference * cellProps.Conductivity;
                     temperatures[i] = temperature;
@@ -507,6 +511,8 @@ namespace Celsius
                     // Snow melting
                     if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                     {
+                        if (log)
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : Settings.SnowMeltCoefficientRain):F4}.");
                         map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
                     }
 
@@ -595,22 +601,24 @@ namespace Celsius
         //Uses Unity's job system instead of .NET's Tasks
         public void TickStrategyMultiThreadedJobsSplit()
         {
+            int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             //Run main workers
-            new ManagedJobParallelFor(new RegularWorkerReference(columnsRegular, this)).Schedule(columnsRegular.Length, 1).Complete(); //1 seems to perform the best
+            new ManagedJobParallelFor(new RegularWorkerReference(columnsRegular, this, mouseCell)).Schedule(columnsRegular.Length, 1).Complete(); //1 seems to perform the best
 
             //Run buffer workers
-            new ManagedJobParallelFor(new RegularWorkerReference((columnsBuffer), this)).Schedule(columnsBuffer.Length, 1).Complete();
+            new ManagedJobParallelFor(new RegularWorkerReference((columnsBuffer), this, mouseCell)).Schedule(columnsBuffer.Length, 1).Complete();
         }
 
         //Uses .NET's tasks, which were slower for me
         public void TickStrategyMultiThreadedSplit()
         {
+            int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             //Run main workers
             for (int i = 0; i < columnsRegular.Length; i++)
             {
                 var tuple = columnsRegular[i];
                 
-                tasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
+                tasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2, mouseCell));
             }
             Task.WaitAll(tasks);
 
@@ -618,7 +626,7 @@ namespace Celsius
             for (int i = 0; i < columnsBuffer.Length; i++)
             {
                 var tuple = columnsBuffer[i];
-                bufferTasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
+                bufferTasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2, mouseCell));
             }
             Task.WaitAll(bufferTasks);
         }
@@ -673,16 +681,20 @@ namespace Celsius
 
         public ThermalProps GetThermalPropertiesAt(int index)
         {
-            if (thermalProperties[index] != null)
-                return thermalProperties[index];
+            var prop = thermalProperties[index];
+            if (prop != null)
+                return prop;
             List<Thing> thingsList = map.thingGrid.ThingsListAtFast(index);
             for (int i = thingsList.Count - 1; i >= 0; i--)
-                if (CompThermal.ShouldApplyTo(thingsList[i].def))
+            {
+                var thing = thingsList[i];
+                if (CompThermal.ShouldApplyTo(thing.def))
                 {
-                    ThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
+                    ThermalProps thermalProps = thing.TryGetComp<CompThermal>()?.ThermalProperties;
                     if (thermalProps != null)
                         return thermalProperties[index] = thermalProps;
                 }
+            }
             return thermalProperties[index] = ThermalProps.Air;
         }
 

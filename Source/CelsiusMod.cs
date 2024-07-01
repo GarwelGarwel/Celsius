@@ -81,10 +81,9 @@ namespace Celsius
             {
                 content.Label("Celsius_Settings_NumThreadWorkers".Translate(NumThreadsWorkers), tooltip: "Celsius_Settings_NumThreadWorkers_tooltip".Translate());
                 NumThreadsWorkers = (int)content.Slider(NumThreadsWorkers, 2, 64);
+                content.CheckboxLabeled("Celsius_Settings_UnityJobs".Translate(), ref UseUnityJobs, "Celsius_Settings_UnityJobs_tooltip".Translate());
             }
 
-            content.CheckboxLabeled("Celsius_Settings_UnityJobs".Translate(), ref UseUnityJobs, "Celsius_Settings_UnityJobs_tooltip".Translate());
-            
             content.CheckboxLabeled("Celsius_Settings_DebugMode".Translate(), ref DebugMode, "Celsius_Settings_DebugMode_tooltip".Translate());
 
             if (content.ButtonText("Celsius_Settings_ResetDefault".Translate()))
