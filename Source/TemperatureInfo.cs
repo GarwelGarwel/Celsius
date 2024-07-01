@@ -2,8 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Gilzoide.ManagedJobs;
 using HotSwap;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 using Verse;
 using Object = System.Object;
@@ -29,7 +34,7 @@ namespace Celsius
         public Action TickStrategy;
         //The thread columns for this map
         Tuple<int, int>[] columnsRegular, columnsBuffer;
-        private object mutex = new object();
+        private object mutex = new object(), mutex2 = new object();
 
         int tick;
         int slice;
@@ -127,8 +132,9 @@ namespace Celsius
                     TickStrategy = TickStrategyMultiThreadedExperimental;
                     return;
                 }
-                SetupThreadZones();
-                TickStrategy = TickStrategyMultiThreaded;
+
+                SetupThreadZonesSplit();
+                TickStrategy = TickStrategyMultiThreadedJobsSplit;
                 return;
             }
             TickStrategy = TickStrategySingleThreaded;
@@ -480,24 +486,23 @@ namespace Celsius
                             else terrainTemperatures[i] = float.NaN;
                         }
                         // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
-                        else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature())
+                        else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature()) 
                             terrainTemperatures[i] = temperature;
                     }
 
                     // Diffusion & convection
-                    void ProcessNeighbour(IntVec3 neighbour)
+                    void ProcessNeighbour(int index)
                     {
-                        if (neighbour.InBounds(map))
+                        if (index >= 0 && index < (map.Size.x * map.Size.z))
                         {
-                            int index = map.cellIndices.CellToIndex(neighbour);
                             TemperatureUtility.CalculateHeatTransferCells(temperature, temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow);
                         }
                     }
 
-                    ProcessNeighbour(cell + IntVec3.North);
-                    ProcessNeighbour(cell + IntVec3.East);
-                    ProcessNeighbour(cell + IntVec3.South);
-                    ProcessNeighbour(cell + IntVec3.West);
+                    ProcessNeighbour(i - (map.Size.x));
+                    ProcessNeighbour(i + 1);
+                    ProcessNeighbour(i + (map.Size.x));
+                    ProcessNeighbour(i - 1);
 
                     // Thermal exchange with the environment
                     RoofDef roof = cell.GetRoof(map);
@@ -548,7 +553,7 @@ namespace Celsius
                             if (existingFire == null)
                             {
                                 LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
-                                lock (mutex)
+                                lock (mutex2)
                                 {
                                     FireUtility.TryStartFireIn(cell, map, fireSize, null);
                                 }
@@ -557,54 +562,48 @@ namespace Celsius
                     }
 
                     if (!Settings.UseVanillaTemperatureColors)
-                        if (temperature < minTemperatures[slice])
-                            minTemperatures[slice] = temperature;
+                        if (temperature < minTemperatures[slice]) 
+                            lock(mutex) {minTemperatures[slice] = temperature;}
                         else if (temperature > maxTemperatures[slice])
-                            maxTemperatures[slice] = temperature;
+                            lock (mutex) {maxTemperatures[slice] = temperature;}
+                    
+                        
                 }
             }
         }
 
-        //Calculates and prepares the thread zones for the simple multithreading function
-        public void SetupThreadZones()
+        //Sets up the two zone lists
+        public void SetupThreadZonesSplit()
         {
-            
-            //We want to perform two disjoint passes to avoid synchronization issues, so we need two columns for every thread
-            int numCols = Settings.NumThreadsWorkers * 2;
-            if ((map.Size.x - numCols) / Settings.NumThreadsWorkers <= 1)
-            {
-                //A column of size 1 isn't enough to avoid synchronization issues. Tell the user that they fucked up and get out
-                Log.Message("Either your map is too small or you're using too many threads, switching to singlethreaded...");
-                TickStrategy = TickStrategySingleThreaded;
-                return;
-            }
-
+            int buffersize = 2; //Doesn't really seem to affect much. Oh well.
             tasks = new Task[Settings.NumThreadsWorkers];
-            columnsRegular = new Tuple<int, int>[numCols];
-            //How many columns we have left to distribute
-            int colsLeft = map.Size.x - numCols;
+            bufferTasks = new Task[Settings.NumThreadsWorkers-1];
+            columnsRegular = new Tuple<int, int>[Settings.NumThreadsWorkers];
+            columnsBuffer = new Tuple<int, int>[Settings.NumThreadsWorkers-1];
+            //How many columns we have left to distribute. We subtract the buffers and account for the remaining columns
+            int colsLeft = map.Size.x - (Settings.NumThreadsWorkers - 1) * buffersize;
             //Which column we're at
-            int columnIndex = 0;
+            int columnIndex = map.Size.x-1;
             //How many unallocated threads are left
             int unallocatedThreads = Settings.NumThreadsWorkers;
-            for (int i = 0; i < numCols; i += 2) //Increment by 2 since we're allocating two values per iteration
+            for (int i = 0; i < Settings.NumThreadsWorkers; i++) //Allocation is done in reverse order so that the first zones are larger
             {
-                //We round down if it's not an even result, worst case is that the last thread has to process a few extra columns
+                int conjugateIndex = Settings.NumThreadsWorkers - i - 1;
+                //We round down if it's not an even result
                 int colsToAllocate = colsLeft / unallocatedThreads;
                 //Allocate this slice
-                columnsRegular[i] = new Tuple<int, int>(columnIndex, columnIndex + colsToAllocate - 1);
-                columnIndex += colsToAllocate;
-                //Allocate the buffer
-                columnsRegular[i + 1] = new Tuple<int, int>(columnIndex, columnIndex + 1);
-                columnIndex += 2;
-                //We don't need to subtract the buffer because we already did that at the start
+                columnsRegular[conjugateIndex] = new Tuple<int, int>(columnIndex - colsToAllocate + 1, columnIndex);
+                columnIndex -= colsToAllocate;
                 colsLeft -= colsToAllocate;
+                //Allocate the buffer
+                if (colsLeft == 0) break;
+                columnsBuffer[conjugateIndex - 1] = new Tuple<int, int>(columnIndex - buffersize + 1, columnIndex);
+                columnIndex -= buffersize;
+                //We don't need to subtract the buffer because we already did that at the start
                 unallocatedThreads--;
             }
         }
 
-
-        
 
         //Calculates and prepares the thread zones for the more complex multithreading function
         public void SetupThreadZonesExperimental()
@@ -619,7 +618,7 @@ namespace Celsius
                 return;
             }
 
-            columnsRegular = new Tuple<int, int>[Settings.NumThreadsWorkers];
+            columnsRegular = new Tuple<int ,int>[Settings.NumThreadsWorkers];
             columnsBuffer = new Tuple<int, int>[Settings.NumThreadsWorkers];
             //How many buffer zones we should merge and process per buffer thread.
             //TODO allocate more zones to other threads if the last thread needs to process more than two extra zones
@@ -635,7 +634,7 @@ namespace Celsius
             for (int i = 0; i < Settings.NumThreadsWorkers; i++)
             {
                 //We round down if it's not an even result, worst case is that the last thread has to process a few extra zones
-                //TODO This is actually bad for buffer zones if there are too many. Performance tanks when bufferThreads can't divide workThreads
+                //TODO This is actually bad for buffer zones if there are too many. Performance tanks when bufferThreads can't evenly divide workThreads
                 int colsToAllocate = colsLeft / unallocatedThreads;
                 //Allocate this work zone
                 columnsRegular[i] = new Tuple<int, int>(columnIndex, columnIndex + colsToAllocate - 1);
@@ -648,36 +647,43 @@ namespace Celsius
                 unallocatedThreads--;
             }
         }
-        
-        //A simpler multithreading strategy that uses the same amount of threads for the buffer zones
-        public void TickStrategyMultiThreaded()
-        {
-            //Run first halves
-            int taskIndex = 0;
-            for (int i = 0; i < columnsRegular.Length; i+=2)
-            {
-                var tuple = columnsRegular[i];
-                tasks[taskIndex] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
-                taskIndex++;
-            }
-            Task.WaitAll(tasks);
-            taskIndex = 0;
 
-            //Run second halves
-            for (int i = 1; i < columnsRegular.Length; i += 2)
+        //Uses Unity's job system instead of .NET's Tasks
+        public void TickStrategyMultiThreadedJobsSplit()
+        {
+            //Run main workers
+            new ManagedJobParallelFor(new RegularWorkerReference(columnsRegular, this)).Schedule(columnsRegular.Length, 1).Complete(); //1 seems to perform the best
+
+            //Run buffer workers
+            new ManagedJobParallelFor(new RegularWorkerReference((columnsBuffer), this)).Schedule(columnsBuffer.Length, 1).Complete();
+        }
+
+        //Uses .NET's tasks, which were slower for me
+        public void TickStrategyMultiThreadedSplit()
+        {
+            //Run main workers
+            for (int i = 0; i < columnsRegular.Length; i++)
             {
                 var tuple = columnsRegular[i];
-                tasks[taskIndex] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
-                taskIndex++;
+                
+                tasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
             }
             Task.WaitAll(tasks);
+
+            //Run buffer workers
+            for (int i = 0; i < columnsBuffer.Length; i++)
+            {
+                var tuple = columnsBuffer[i];
+                bufferTasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2));
+            }
+            Task.WaitAll(bufferTasks);
         }
 
         //A more complex multithreading method that uses a different number of threads for the buffer zones
         public void TickStrategyMultiThreadedExperimental()
         {
 
-            //Run first halves
+            //Run main workers
             for (int i = columnsRegular.Length - 1; i >= 0; i--)
             {
                 var tuple = columnsRegular[i];
