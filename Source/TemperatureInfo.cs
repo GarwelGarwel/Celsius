@@ -126,15 +126,14 @@ namespace Celsius
         {
             if (Settings.Threading)
             {
-                if (Settings.UseComplexThreading)
+                SetupThreadZonesSplit();
+                if (Settings.UseUnityJobs)
                 {
-                    SetupThreadZonesExperimental();
-                    TickStrategy = TickStrategyMultiThreadedExperimental;
+                    TickStrategy = TickStrategyMultiThreadedJobsSplit;
                     return;
                 }
 
-                SetupThreadZonesSplit();
-                TickStrategy = TickStrategyMultiThreadedJobsSplit;
+                TickStrategy = TickStrategyMultiThreadedSplit;
                 return;
             }
             TickStrategy = TickStrategySingleThreaded;
@@ -563,9 +562,9 @@ namespace Celsius
 
                     if (!Settings.UseVanillaTemperatureColors)
                         if (temperature < minTemperatures[slice]) 
-                            lock(mutex) {minTemperatures[slice] = temperature;}
+                            minTemperatures[slice] = temperature;
                         else if (temperature > maxTemperatures[slice])
-                            lock (mutex) {maxTemperatures[slice] = temperature;}
+                            maxTemperatures[slice] = temperature;
                     
                         
                 }
