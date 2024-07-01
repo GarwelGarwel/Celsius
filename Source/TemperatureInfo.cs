@@ -22,11 +22,12 @@ namespace Celsius
 
         Task[] tasks, bufferTasks;
         //Which ticking strategy to use
-        public Action TickStrategy;
+        Action TickStrategy;
         //The thread zones for this map
         Tuple<int, int>[] columnsRegular, columnsBuffer;
         //Mutexes for synchronization
-        private object mutex = new object(), mutex2 = new object();
+        object mutex = new object(), mutex2 = new object();
+        float cachedOutdoorMapTemp;
 
         int tick;
         int slice;
@@ -63,7 +64,7 @@ namespace Celsius
         public override void FinalizeInit()
         {
             SetupStrategy();
-
+            cachedOutdoorMapTemp = map.mapTemperature.OutdoorTemp;
             thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
             mountainTemperature = GetMountainTemperatureFor(Settings.MountainTemperatureMode);
 
@@ -81,7 +82,6 @@ namespace Celsius
             {
                 LogUtility.Log($"Initializing temperatures for {map} for the first time.", LogLevel.Important);
                 temperatures = new float[map.Size.x * map.Size.z];
-                float outdoorTemperature = map.mapTemperature.OutdoorTemp;
                 for (int i = 0; i < temperatures.Length; i++)
                 {
                     IntVec3 cell = map.cellIndices.IndexToCell(i);
@@ -292,7 +292,8 @@ namespace Celsius
             if (maxTemperatures[slice] > maxComfortableTemperature - 10)
                 maxTemperatures[slice] -= MinMaxTemperatureAdjustmentStep;
 
-            // Main loop
+            // Main loop, refresh outdoor temp
+            cachedOutdoorMapTemp = map.mapTemperature.OutdoorTemp;
             TickStrategy();
 
             tick = 0;
@@ -645,7 +646,7 @@ namespace Celsius
                     return GenTemperature.AverageTemperatureAtTileForTwelfth(map.Tile, GenLocalDate.Twelfth(map).PreviousTwelfth()) + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.AmbientAir:
-                    return map.mapTemperature.OutdoorTemp + Settings.MountainTemperatureOffset;
+                    return cachedOutdoorMapTemp + Settings.MountainTemperatureOffset;
 
                 case MountainTemperatureMode.Manual:
                     return Settings.MountainTemperature;
@@ -653,7 +654,7 @@ namespace Celsius
             return TemperatureTuning.DeepUndergroundTemperature;
         }
 
-        public float GetEnvironmentTemperature(RoofDef roof) => roof != null && roof.isThickRoof ? mountainTemperature : map.mapTemperature.OutdoorTemp;
+        public float GetEnvironmentTemperature(RoofDef roof) => roof != null && roof.isThickRoof ? mountainTemperature : cachedOutdoorMapTemp;
 
         public float GetTemperatureForCell(int index) => temperatures != null ? temperatures[index] : TemperatureTuning.DefaultTemperature;
 
@@ -664,7 +665,7 @@ namespace Celsius
             if (room.ID == -1 || roomTemperatures == null)
             {
                 LogUtility.Log($"Could not get temperature for room {room?.ToString() ?? "null"}.", LogLevel.Error);
-                return map.mapTemperature.OutdoorTemp;
+                return cachedOutdoorMapTemp;
             }
             if (roomTemperatures.TryGetValue(room.ID, out float temperature))
                 return temperature;
