@@ -38,6 +38,12 @@
 	<Celsius_Settings_RoofInsulation_tooltip>Stärke mit der Dächer (ob durch Bewohner gebaut oder bereits vorhanden) die Innentemperatur in Räumen erhalten. Empfohlener Wert: {0}.</Celsius_Settings_RoofInsulation_tooltip>
 	<Celsius_Settings_HeatPush>Wärmedruck: {0}</Celsius_Settings_HeatPush>
 	<Celsius_Settings_HeatPush_tooltip>Intensität mit der Objekte (zB: Feuer, Heizungen und Kühlungen) Wärme erzeugen oder reduzieren.</Celsius_Settings_HeatPush_tooltip>
+	<Celsius_Settings_Threading>Threading</Celsius_Settings_Threading>
+	<Celsius_Settings_Threading_tooltip>Ob Teile des Algorithmus parallel laufen können. Braucht einen Prozessor mit mehr als 4 Kernen um nützlich zu sein.</Celsius_Settings_Threading_tooltip>
+	<Celsius_Settings_NumThreadWorkers>Arbeiter Threads: {0}</Celsius_Settings_NumThreadWorkers>
+	<Celsius_Settings_NumThreadWorkers_tooltip>Wie viele Threads gleichzeitig laufen sollen. Mehr sind generell besser, aber zu viele können den .NET Garbage Collector belasten. 12-48 sind empfohlen.</Celsius_Settings_NumThreadWorkers_tooltip>
+	<Celsius_Settings_UnityJobs>Alternatives Threading</Celsius_Settings_UnityJobs>
+	<Celsius_Settings_UnityJobs_tooltip>Benutzt Unity Jobs anstatt .NET Tasks. Kann auf manchen Rechnern schneller sein.</Celsius_Settings_UnityJobs_tooltip>
 	<Celsius_Settings_DebugMode>Debug-Logging-Modus</Celsius_Settings_DebugMode>
 	<Celsius_Settings_DebugMode_tooltip>Ausfühliches Logging der Aktionen des Celsius-Mods. Voraussetzung für Fehlerberichte.</Celsius_Settings_DebugMode_tooltip>
 	<Celsius_Settings_ResetDefault>Auf Standardwerte zurücksetzen</Celsius_Settings_ResetDefault>

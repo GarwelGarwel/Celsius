@@ -83,13 +83,8 @@ namespace Celsius
                 NumThreadsWorkers = (int)content.Slider(NumThreadsWorkers, 2, 64);
             }
 
-            content.CheckboxLabeled("Celsius_Settings_ComplexThreading".Translate(), ref UseComplexThreading, "Celsius_Settings_ComplexThreading_tooltip".Translate());
-            if (UseComplexThreading)
-            {
-                content.Label("Celsius_Settings_NumThreadBuffer".Translate(NumThreadsBuffer), tooltip: "Celsius_Settings_NumThreadBuffer_tooltip".Translate());
-                NumThreadsBuffer = (int)content.Slider(NumThreadsBuffer, 2, 64);
-            }
-
+            content.CheckboxLabeled("Celsius_Settings_UnityJobs".Translate(), ref UseUnityJobs, "Celsius_Settings_UnityJobs_tooltip".Translate());
+            
             content.CheckboxLabeled("Celsius_Settings_DebugMode".Translate(), ref DebugMode, "Celsius_Settings_DebugMode_tooltip".Translate());
 
             if (content.ButtonText("Celsius_Settings_ResetDefault".Translate()))

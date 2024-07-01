@@ -38,7 +38,7 @@ namespace Celsius
         public static int TemperatureDisplayDigits;
         public static string TemperatureDisplayFormatString;
         public static bool Threading;
-        public static bool UseComplexThreading;
+        public static bool UseUnityJobs;
         public static int NumThreadsWorkers;
         public static int NumThreadsBuffer;
         public static bool DebugMode = Prefs.LogVerbose;
@@ -76,9 +76,8 @@ namespace Celsius
             Scribe_Values.Look(ref TemperatureDisplayDigits, "TemperatureDisplayDigits", TemperatureDisplayDigits_Default);
             Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
             Scribe_Values.Look(ref Threading, "Threading", true);
-            Scribe_Values.Look(ref UseComplexThreading, "ComplexThreading");
+            Scribe_Values.Look(ref UseUnityJobs, "UseUnityJobs", true);
             Scribe_Values.Look(ref NumThreadsWorkers, "NumThreadsWorkers", 16);
-            Scribe_Values.Look(ref NumThreadsBuffer, "NumThreadsBuffer", 16);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
                 RecalculateValues();
         }
@@ -101,7 +100,7 @@ namespace Celsius
             MountainTemperatureOffset = 0;
             TemperatureDisplayDigits = TemperatureDisplayDigits_Default;
             Threading = true;
-            UseComplexThreading = true;
+            UseUnityJobs = true;
             NumThreadsBuffer = 16;
             NumThreadsWorkers = 16;
             RecalculateValues();
