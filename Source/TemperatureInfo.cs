@@ -438,7 +438,6 @@ namespace Celsius
         //Processes this map's x-columns from start to end
         public void ProcessColumns(int start, int end, int mouseCell)
         {
-            int numFreezeMelt = 0;
             for (int colIndex = start; colIndex <= end; colIndex++)
             {
                 for (int rowIndex = 0; rowIndex < map.Size.z; rowIndex++)
@@ -475,8 +474,6 @@ namespace Celsius
                                     
                                 else if (terrainTemperatures[i] < FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature) && Interlocked.Increment(ref numFreezeMeltUpdates) < Settings.MaxFreezeMelt)
                                     cell.FreezeTerrain(map, i, mutex3, log);
-                                    
-                                    
 
                                 terrainTemperatures[i] = terrainTemperature;
                             }
