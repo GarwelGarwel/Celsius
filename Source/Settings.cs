@@ -40,7 +40,7 @@ namespace Celsius
         public static bool Threading;
         public static bool UseUnityJobs;
         public static int NumThreadsWorkers;
-        public static int NumThreadsBuffer;
+        public static int MaxFreezeMelt;
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const int TicksPerUpdate_Default = 120;
@@ -77,7 +77,8 @@ namespace Celsius
             Scribe_Values.Look(ref DebugMode, "DebugMode", forceSave: true);
             Scribe_Values.Look(ref Threading, "Threading", true);
             Scribe_Values.Look(ref UseUnityJobs, "UseUnityJobs", true);
-            Scribe_Values.Look(ref NumThreadsWorkers, "NumThreadsWorkers", 16);
+            Scribe_Values.Look(ref NumThreadsWorkers, "NumThreadsWorkers", 16, true);
+            Scribe_Values.Look(ref MaxFreezeMelt, "MaxFreezeMelt", 200, true);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
                 RecalculateValues();
         }
@@ -101,8 +102,8 @@ namespace Celsius
             TemperatureDisplayDigits = TemperatureDisplayDigits_Default;
             Threading = true;
             UseUnityJobs = true;
-            NumThreadsBuffer = 16;
             NumThreadsWorkers = 16;
+            MaxFreezeMelt = 200;
             RecalculateValues();
             Print();
             TemperatureUtility.SettingsChanged();

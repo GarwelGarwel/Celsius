@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Gilzoide.ManagedJobs;
 using UnityEngine;
@@ -26,8 +27,10 @@ namespace Celsius
         //The thread zones for this map
         Tuple<int, int>[] columnsRegular, columnsBuffer;
         //Mutexes for synchronization
-        object mutex = new object(), mutex2 = new object();
+        object mutex = new object(), mutex2 = new object(), mutex3 = new object();
         float cachedOutdoorMapTemp;
+        int numFreezeMeltUpdates;
+        int numWorkers = Settings.NumThreadsWorkers;
 
         int tick;
         int slice;
@@ -118,13 +121,8 @@ namespace Celsius
         {
             if (Settings.Threading)
             {
+                TickStrategy = Settings.UseUnityJobs ? TickStrategyMultiThreadedJobsSplit : TickStrategyMultiThreadedSplit;
                 SetupThreadZonesSplit();
-                if (Settings.UseUnityJobs)
-                {
-                    TickStrategy = TickStrategyMultiThreadedJobsSplit;
-                    return;
-                }
-                TickStrategy = TickStrategyMultiThreadedSplit;
                 return;
             }
             TickStrategy = TickStrategySingleThreaded;
@@ -142,19 +140,19 @@ namespace Celsius
             for (int i = 0; i < terrainTemperatures.Length; i++)
             {
                 IntVec3 cell = map.cellIndices.IndexToCell(i);
-                TerrainDef terrain = cell.GetTerrain(map);
+                TerrainDef terrain = map.terrainGrid.TerrainAt(i);
                 if (terrain.HasTemperature())
                 {
                     hasTerrainTemperatures = true;
                     terrainTemperatures[i] = map.mapTemperature.SeasonalTemp;
                     if (terrain.ShouldFreeze(terrainTemperatures[i]))
                     {
-                        cell.FreezeTerrain(map);
+                        cell.FreezeTerrain(map,i, mutex3);
                         if (snowDepth > 0.0001f && !cell.Roofed(map))
                             map.steadyEnvironmentEffects.AddFallenSnowAt(cell, snowDepth);
                     }
                     else if (terrain.ShouldMelt(terrainTemperatures[i]))
-                        cell.MeltTerrain(map);
+                        cell.MeltTerrain(map, i, mutex3);
                 }
                 else terrainTemperatures[i] = float.NaN;
             }
@@ -295,6 +293,7 @@ namespace Celsius
             // Main loop, refresh outdoor temp
             cachedOutdoorMapTemp = map.mapTemperature.OutdoorTemp;
             TickStrategy();
+            numFreezeMeltUpdates = 0;
 
             tick = 0;
             if (slice == 0)
@@ -335,7 +334,7 @@ namespace Celsius
                     float terrainTemperature = terrainTemperatures[i];
                     if (!float.IsNaN(terrainTemperature))
                     {
-                        TerrainDef terrain = cell.GetTerrain(map);
+                        TerrainDef terrain = map.terrainGrid.TerrainAt(i);
                         ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
                         if (terrainProps != null && terrainProps.heatCapacity > 0)
                         {
@@ -347,17 +346,17 @@ namespace Celsius
                             terrainTemperature += terrainTempChange * terrainProps.Conductivity;
 
                             // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
-                            if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature))
-                                cell.MeltTerrain(map, log);
-                            else if (terrainTemperatures[i] > FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature))
-                                cell.FreezeTerrain(map, log);
+                            if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature) && numFreezeMeltUpdates++ < Settings.MaxFreezeMelt)
+                                cell.MeltTerrain(map, i, mutex, log);
+                            else if (terrainTemperatures[i] > FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature) && numFreezeMeltUpdates++ < Settings.MaxFreezeMelt)
+                                cell.FreezeTerrain(map, i, mutex3, log);
 
                             terrainTemperatures[i] = terrainTemperature;
                         }
                         else terrainTemperatures[i] = float.NaN;
                     }
                     // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
-                    else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature())
+                    else if (rareUpdateCounter == 0 && map.terrainGrid.TerrainAt(i).HasTemperature())
                         terrainTemperatures[i] = temperature;
                 }
 
@@ -376,7 +375,7 @@ namespace Celsius
                 ProcessNeighbour(i - 1);
 
                 // Thermal exchange with the environment
-                RoofDef roof = cell.GetRoof(map);
+                RoofDef roof = map.roofGrid.RoofAt(i);
                 TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow);
 
                 // Applying heat transfer
@@ -391,8 +390,8 @@ namespace Celsius
                 if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                 {
                     if (log)
-                        LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : Settings.SnowMeltCoefficientRain):F4}.");
-                    map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
+                        LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (map.roofGrid.Roofed(i) ? Settings.SnowMeltCoefficient : Settings.SnowMeltCoefficientRain):F4}.");
+                    map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (map.roofGrid.Roofed(i) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
                 }
 
                 // Autoignition
@@ -400,7 +399,7 @@ namespace Celsius
                 {
                     Fire existingFire = null;
                     float fireSize = 0;
-                    List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                    List<Thing> things = map.thingGrid.ThingsListAtFast(i);
                     for (int k = 0; k < things.Count; k++)
                     {
                         if (things[k].FireBulwark)
@@ -439,6 +438,7 @@ namespace Celsius
         //Processes this map's x-columns from start to end
         public void ProcessColumns(int start, int end, int mouseCell)
         {
+            int numFreezeMelt = 0;
             for (int colIndex = start; colIndex <= end; colIndex++)
             {
                 for (int rowIndex = 0; rowIndex < map.Size.z; rowIndex++)
@@ -457,7 +457,7 @@ namespace Celsius
                         float terrainTemperature = terrainTemperatures[i];
                         if (!float.IsNaN(terrainTemperature))
                         {
-                            TerrainDef terrain = cell.GetTerrain(map);
+                            TerrainDef terrain = map.terrainGrid.TerrainAt(i);
                             ThermalProps terrainProps = terrain?.GetModExtension<ThingThermalProperties>()?.GetThermalProps();
                             if (terrainProps != null && terrainProps.heatCapacity > 0)
                             {
@@ -468,18 +468,22 @@ namespace Celsius
                                     LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {terrainProps.heatCapacity}. Terrain heatflow: {terrainProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
                                 terrainTemperature += terrainTempChange * terrainProps.Conductivity;
 
+                                
                                 // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
-                                if (terrainTemperatures[i] < FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature))
-                                    cell.MeltTerrain(map, log);
-                                else if (terrainTemperatures[i] > FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature))
-                                    cell.FreezeTerrain(map, log);
+                                if (terrainTemperatures[i] > FreezeMeltUtility.MeltTemperature && terrain.ShouldMelt(terrainTemperature) && Interlocked.Increment(ref numFreezeMeltUpdates) < Settings.MaxFreezeMelt)
+                                    cell.MeltTerrain(map, i, mutex3, log);
+                                    
+                                else if (terrainTemperatures[i] < FreezeMeltUtility.FreezeTemperature && terrain.ShouldFreeze(terrainTemperature) && Interlocked.Increment(ref numFreezeMeltUpdates) < Settings.MaxFreezeMelt)
+                                    cell.FreezeTerrain(map, i, mutex3, log);
+                                    
+                                    
 
                                 terrainTemperatures[i] = terrainTemperature;
                             }
                             else terrainTemperatures[i] = float.NaN;
                         }
                         // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
-                        else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature()) 
+                        else if (rareUpdateCounter == 0 && map.terrainGrid.TerrainAt(i).HasTemperature()) 
                             terrainTemperatures[i] = temperature;
                     }
 
@@ -498,7 +502,7 @@ namespace Celsius
                     ProcessNeighbour(i - 1);
 
                     // Thermal exchange with the environment
-                    RoofDef roof = cell.GetRoof(map);
+                    RoofDef roof = map.roofGrid.RoofAt(i);
                     TemperatureUtility.CalculateHeatTransferEnvironment(temperature, GetEnvironmentTemperature(roof), cellProps, roof != null, ref energy, ref heatFlow);
 
                     // Applying heat transfer
@@ -513,8 +517,8 @@ namespace Celsius
                     if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                     {
                         if (log)
-                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : Settings.SnowMeltCoefficientRain):F4}.");
-                        map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
+                            LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(map.roofGrid.Roofed(i) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (map.roofGrid.Roofed(i) ? Settings.SnowMeltCoefficient : Settings.SnowMeltCoefficientRain):F4}.");
+                        map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (map.roofGrid.Roofed(i) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
                     }
 
                     // Autoignition
@@ -522,7 +526,7 @@ namespace Celsius
                     {
                         Fire existingFire = null;
                         float fireSize = 0;
-                        List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                        List<Thing> things = map.thingGrid.ThingsListAtFast(i);
                         for (int k = 0; k < things.Count; k++)
                         {
                             if (things[k].FireBulwark)
@@ -570,20 +574,38 @@ namespace Celsius
         //Sets up the two zone lists
         public void SetupThreadZonesSplit()
         {
+            numWorkers = Settings.NumThreadsWorkers;
             int buffersize = 2; //Doesn't really seem to affect much. Oh well.
-            tasks = new Task[Settings.NumThreadsWorkers];
-            bufferTasks = new Task[Settings.NumThreadsWorkers - 1];
-            columnsRegular = new Tuple<int, int>[Settings.NumThreadsWorkers];
-            columnsBuffer = new Tuple<int, int>[Settings.NumThreadsWorkers - 1];
-            //How many columns we have left to distribute. We subtract the buffers and account for the remaining columns
-            int colsLeft = map.Size.x - (Settings.NumThreadsWorkers - 1) * buffersize;
+            //How many columns we have left to distribute
+            int colsLeft = map.Size.x - (numWorkers - 1) * buffersize;
+            //If we can't get at least 2 columns per thread, we try reducing the number of threads for this map
+            while (colsLeft / numWorkers < 2)
+            {
+                if (numWorkers == 2)
+                {
+                    LogUtility.Log("Tried allocating less than two columns to one zone. Please play on a bigger map. Falling back to single threaded approach");
+                    TickStrategy = TickStrategySingleThreaded;
+                    return;
+                }
+
+                numWorkers--;
+                colsLeft = map.Size.x - (numWorkers - 1) * buffersize;
+            }
+            if(numWorkers < Settings.NumThreadsWorkers) Log.Message($"Map {map.Index} was too small or too maps threads were allocated, reduced thread count to {numWorkers}");
+
+            tasks = new Task[numWorkers];
+            bufferTasks = new Task[numWorkers - 1];
+            
+            columnsRegular = new Tuple<int, int>[numWorkers];
+            columnsBuffer = new Tuple<int, int>[numWorkers - 1];
+            
             //Which column we're at
             int columnIndex = map.Size.x - 1;
             //How many unallocated threads are left
-            int unallocatedThreads = Settings.NumThreadsWorkers;
-            for (int i = 0; i < Settings.NumThreadsWorkers; i++) //Allocation is done in reverse order so that the first zones are larger
+            int unallocatedThreads = numWorkers;
+            for (int i = 0; i < numWorkers; i++) //Allocation is done in reverse order so that the first zones are larger
             {
-                int conjugateIndex = Settings.NumThreadsWorkers - i - 1;
+                int conjugateIndex = numWorkers - i - 1;
                 //We round down if it's not an even result
                 int colsToAllocate = colsLeft / unallocatedThreads;
                 //Allocate this slice
@@ -605,7 +627,6 @@ namespace Celsius
             int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             //Run main workers
             new ManagedJobParallelFor(new RegularWorkerReference(columnsRegular, this, mouseCell)).Schedule(columnsRegular.Length, 1).Complete(); //1 seems to perform the best
-
             //Run buffer workers
             new ManagedJobParallelFor(new RegularWorkerReference((columnsBuffer), this, mouseCell)).Schedule(columnsBuffer.Length, 1).Complete();
         }

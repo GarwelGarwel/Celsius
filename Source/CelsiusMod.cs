@@ -76,6 +76,9 @@ namespace Celsius
             HeatPushMultiplier = (float)Math.Round(content.Slider(HeatPushMultiplier, 0, 2), 1);
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
 
+            content.Label("Celsius_Settings_MaxFreezeMelt".Translate(MaxFreezeMelt), tooltip: "Celsius_Settings_MaxFreezeMelt_tooltip".Translate());
+            MaxFreezeMelt = (int)Math.Round(content.Slider(MaxFreezeMelt, 1, 500));
+
             content.CheckboxLabeled("Celsius_Settings_Threading".Translate(), ref Threading, "Celsius_Settings_Threading_tooltip".Translate());
             if (Threading)
             {
