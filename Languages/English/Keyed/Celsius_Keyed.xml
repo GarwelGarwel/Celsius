@@ -39,6 +39,8 @@
 	<Celsius_Settings_RoofInsulation_tooltip>How well roofs (constructed and natural) preserve indoor temperature. Recommended value: {0}.</Celsius_Settings_RoofInsulation_tooltip>
 	<Celsius_Settings_HeatPush>Heat push: {0}</Celsius_Settings_HeatPush>
 	<Celsius_Settings_HeatPush_tooltip>Effect of things that produce or reduce heat (e.g. fires, heaters and coolers).</Celsius_Settings_HeatPush_tooltip>
+	<Celsius_Settings_MaxFreezeMelt>Max Freeze/Melt: {0}</Celsius_Settings_MaxFreezeMelt>
+	<Celsius_Settings_MaxFreezeMelt_tooltip>How many tiles should be allowed to freeze/melt per cycle. Lower values sacrifice a bit of realism but won't freeze (hah) your game.</Celsius_Settings_MaxFreezeMelt_tooltip>
 	<Celsius_Settings_Threading>Threading enabled</Celsius_Settings_Threading>
 	<Celsius_Settings_Threading_tooltip>Whether to use multithreading for parts of the main loop. Requires a good amount of cores (>4) to be faster than single threading.</Celsius_Settings_Threading_tooltip>
 	<Celsius_Settings_NumThreadWorkers>Worker Threads: {0}</Celsius_Settings_NumThreadWorkers>

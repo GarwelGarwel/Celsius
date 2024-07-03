@@ -38,6 +38,8 @@
 	<Celsius_Settings_RoofInsulation_tooltip>Stärke mit der Dächer (ob durch Bewohner gebaut oder bereits vorhanden) die Innentemperatur in Räumen erhalten. Empfohlener Wert: {0}.</Celsius_Settings_RoofInsulation_tooltip>
 	<Celsius_Settings_HeatPush>Wärmedruck: {0}</Celsius_Settings_HeatPush>
 	<Celsius_Settings_HeatPush_tooltip>Intensität mit der Objekte (zB: Feuer, Heizungen und Kühlungen) Wärme erzeugen oder reduzieren.</Celsius_Settings_HeatPush_tooltip>
+	<Celsius_Settings_MaxFreezeMelt>Max Einfrieren/Schmelzen: {0}</Celsius_Settings_MaxFreezeMelt>
+	<Celsius_Settings_MaxFreezeMelt_tooltip>Wie viele Zellen pro Zyklus einfrieren/auftauen dürfen. Niedrigere Werte machen die Simulation weniger genau, frieren (hah) aber nicht das Spiel ein.</Celsius_Settings_MaxFreezeMelt_tooltip>
 	<Celsius_Settings_Threading>Threading</Celsius_Settings_Threading>
 	<Celsius_Settings_Threading_tooltip>Ob Teile des Algorithmus parallel laufen können. Braucht einen Prozessor mit mehr als 4 Kernen um nützlich zu sein.</Celsius_Settings_Threading_tooltip>
 	<Celsius_Settings_NumThreadWorkers>Arbeiter Threads: {0}</Celsius_Settings_NumThreadWorkers>
