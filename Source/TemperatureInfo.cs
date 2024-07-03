@@ -590,8 +590,9 @@ namespace Celsius
             }
             if(numWorkers < Settings.NumThreadsWorkers) Log.Message($"Map {map.Index} was too small or too maps threads were allocated, reduced thread count to {numWorkers}");
 
-            tasks = new Task[numWorkers];
-            bufferTasks = new Task[numWorkers - 1];
+            //Subtract the main thread's task
+            tasks = new Task[numWorkers - 1];
+            bufferTasks = new Task[numWorkers - 2];
             
             columnsRegular = new Tuple<int, int>[numWorkers];
             columnsBuffer = new Tuple<int, int>[numWorkers - 1];
@@ -623,9 +624,9 @@ namespace Celsius
         {
             int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             //Run main workers
-            new ManagedJobParallelFor(new RegularWorkerReference(columnsRegular, this, mouseCell)).Schedule(columnsRegular.Length, 1).Complete(); //1 seems to perform the best
+            new ManagedJobParallelFor(new GridWorker(columnsRegular, this, mouseCell)).Schedule(columnsRegular.Length, 1).Complete(); //1 seems to perform the best
             //Run buffer workers
-            new ManagedJobParallelFor(new RegularWorkerReference((columnsBuffer), this, mouseCell)).Schedule(columnsBuffer.Length, 1).Complete();
+            new ManagedJobParallelFor(new GridWorker((columnsBuffer), this, mouseCell)).Schedule(columnsBuffer.Length, 1).Complete();
         }
 
         //Uses .NET's tasks, which were slower for me
@@ -633,20 +634,25 @@ namespace Celsius
         {
             int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             //Run main workers
-            for (int i = 0; i < columnsRegular.Length; i++)
+            for (int i = 0; i < columnsRegular.Length - 1; i++)
             {
                 var tuple = columnsRegular[i];
                 
                 tasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2, mouseCell));
             }
+            //Process one zone on the main thread
+            var taskTuple = columnsRegular[columnsRegular.Length - 1];
+            ProcessColumns(taskTuple.Item1, taskTuple.Item2, mouseCell);
             Task.WaitAll(tasks);
 
             //Run buffer workers
-            for (int i = 0; i < columnsBuffer.Length; i++)
+            for (int i = 0; i < columnsBuffer.Length - 1; i++)
             {
                 var tuple = columnsBuffer[i];
                 bufferTasks[i] = Task.Run(() => ProcessColumns(tuple.Item1, tuple.Item2, mouseCell));
             }
+            taskTuple = columnsBuffer[columnsBuffer.Length - 1];
+            ProcessColumns(taskTuple.Item1, taskTuple.Item2, mouseCell);
             Task.WaitAll(bufferTasks);
         }
 
