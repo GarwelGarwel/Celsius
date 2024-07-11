@@ -11,23 +11,39 @@ namespace Celsius
 {
     static class FreezeMeltUtility
     {
-        public const float FreezeTemperature = -0.5f;
-        public const float MeltTemperature = 0.5f;
-
 #if DEBUG
         static Stopwatch stopwatch = new Stopwatch();
         static int iterations;
 #endif
-        public static bool Freezable(this TerrainDef terrain) => terrain.HasTag("Freezable");
 
-        public static bool Meltable(this TerrainDef terrain) => terrain.HasTag("Meltable");
+        public static TerrainThermalProperties GetTerrainThermalProperties(this TerrainDef terrain) => terrain.GetModExtension<TerrainThermalProperties>();
 
-        public static bool ShouldFreeze(this TerrainDef terrain, float temperature) => temperature < FreezeTemperature && terrain.Freezable();
+        public static bool Freezable(this TerrainDef terrain)
+        {
+            TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
+            return terrainProps != null && terrainProps.phaseTransition == PhaseTransitionType.Freeze;
+        }
 
-        public static bool ShouldMelt(this TerrainDef terrain, float temperature) => temperature > MeltTemperature && terrain.Meltable();
+        public static bool Meltable(this TerrainDef terrain)
+        {
+            TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
+            return terrainProps != null && terrainProps.phaseTransition == PhaseTransitionType.Melt;
+        }
+
+        public static bool FreezesAt(this TerrainDef terrain, float temperature)
+        {
+            TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
+            return terrainProps != null && terrainProps.FreezesAt(temperature);
+        }
+
+        public static bool MeltsAt(this TerrainDef terrain, float temperature)
+        {
+            TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
+            return terrainProps != null && terrainProps.MeltsAt(temperature);
+        }
 
         /// <summary>
-        /// Returns best guess for what kind of water terrain should be placed in a cell (if Ice melts there)
+        /// Returns best guess for what kind of water terrain should be placed in a cell (if ice melts there)
         /// </summary>
         public static TerrainDef BestUnderIceTerrain(this IntVec3 cell, Map map)
         {
@@ -35,9 +51,15 @@ namespace Celsius
             if (terrain != null)
                 return terrain;
 
+            terrain = map.terrainGrid.TerrainAt(cell).GetTerrainThermalProperties()?.turnsInto;
+            if (terrain != null)
+                return terrain;
+
             bool foundGround = false;
-            foreach (IntVec3 c in GenAdjFast.AdjacentCells8Way(cell))
+            List<IntVec3> adjacentCells = GenAdjFast.AdjacentCells8Way(cell);
+            for (int i = 0; i < 8; i++)
             {
+                IntVec3 c = adjacentCells[i];
                 if (!c.InBounds(map))
                     continue;
                 terrain = c.GetTerrain(map);
@@ -75,7 +97,7 @@ namespace Celsius
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
                 Log($"{terrain} freezes at {cell}.");
-            map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
+            map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
 #if DEBUG
             LogStopwatch();
@@ -96,6 +118,8 @@ namespace Celsius
             for (int i = things.Count - 1; i >= 0; i--)
             {
                 Thing thing = things[i];
+                if (!thing.def.destroyable)
+                    continue;
                 if (meltedTerrain.passability == Traversability.Impassable)
                     if (thing is Pawn pawn)
                     {
@@ -129,6 +153,8 @@ namespace Celsius
                     }
                 }
             }
+            if (map.snowGrid.GetDepth(cell) > 0)
+                map.snowGrid.SetDepth(cell, 0);
 
             // Changing terrain
             if (map.terrainGrid.UnderTerrainAt(cell) == null)
@@ -136,8 +162,6 @@ namespace Celsius
             if (log)
                 Log($"Ice at {cell} melts into {meltedTerrain}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
-            if (map.snowGrid.GetDepth(cell) > 0)
-                map.snowGrid.SetDepth(cell, 0);
 #if DEBUG
             LogStopwatch();
 #endif

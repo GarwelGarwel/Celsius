@@ -10,59 +10,15 @@
 		<li>1.4</li>
 		<li>1.5</li>
 	</supportedVersions>
-	<description>Celsius adds realistic simulation of thermodynamics to the game.
+	<description>Celsius adds realistic simulation of thermodynamics to the game:
 
-Main features:
+- Cell-accurate temperature simulation(as opposed to vanilla's room-level abstraction). Geysers and fires warm surrounding air, mountains and large bodies of water keep a more constant temperature etc.
 
-- Temperature is simulated for every map cell (as opposed to vanilla's room-level abstraction). It is hot near fires and geyzers. Various building materials have different isolation properties based on their real-world counterparts. Mountains provide more stable temperature (which you can adjust) as do large bodies of water.
+- Freezing and melting. Rivers, seas and marshes may turn into icy plains in the winter and melt again in the summer. Setting up fires on glaciers can uncover water or ground underneath. Be careful, so that your pawns don't drown in deep water.
 
-- Water can freeze, and ice can melt. Rivers, seas and marshes may turn into icy plains in the winter and melt again in the summer. Setting up fires on glaciers can uncover water or ground underneath. Be careful, so that your pawns don't drown in deep water. 
+- Autoignition of flammable things when it gets very hot.
 
-- Flammable things may spontaneously ignite when it gets extremely hot. Different materials have different ignition temperatures, and it can affect buildings, manufactured items, plants and more.
-
-- Tweaks to various related features, such as wind and wetness affecting pawns' comfortable temperature and snow melting faster under rain.
-
-Celsius opens up many new challenges and ways to play RimWorld. Forgo houses and warm colonists at campfires, melt ice sheets or unleash deadly firestorms on your enemies!
-
-Supported mods:
-- Alpha Animals
-- Insulation (Continued) (except walls)
-- Primitive Workbenches
-- Replace Stuff
-- Vanilla Furniture Extended: base mod, Architect, Medical, Security
-- Vanilla Vehicles Extended
-- Windows
-
-All DLCs are supported. Mod authors can provide patches on their side or submit PRs in Github.
-
-More mods are supported with the help of the third-party mod Celsius Patches: https://steamcommunity.com/sharedfiles/filedetails/?id=3072081544
-
-FAQ:
-
-- Can I install the mod in an existing save? Can I remove it?
-
-Celsius can be installed in an ongoing game. It may take a few seasons for all the temperatures to adjust.  Note that Celsius deeply changes temperature-related gameplay in RimWorld, so you will almost certainly need to adapt both your base and your play style. Removal mid-game should also be ok.
-
-- How does it affect performance?
-
-I worked hard to optimize the mod, and it shouldn't seriously slow down your game. In my tests on a rather ordinary laptop I haven't noticed any impact at all. The only remaining performance issue is stuttering or lag when large areas freeze or melt.
-
-- Any known incompatibilities?
-
-Heat Map, Proxy Heat and similar mods are not needed, because Celsius does everything these mods do (and much more). Other mods that also change temperature-related mechanics will also probably conflict.
-
-Some modded vents, coolers and the like may experience issues or be unbalanced. There have been reported problems with Vanilla Expanded reactors and Android Tiers cores overheating.
-
-In general, mods that add walls, doors and building stuff may need patches. Celsius will do its best to adapt to them, but can't magically tell what thermal properties these things should have.
-
-You may check out Celsius Patches mod, maintained by Albinogod, for compatibility with more mods: https://steamcommunity.com/sharedfiles/filedetails/?id=3072081544 Note that we are not affiliated with one another.
-
-- How do I report issues or share feedback?
-
-The best option is to use Github: https://github.com/GarwelGarwel/Celsius/issues
-
-You may also leave comments on the Steam page. If you are reporting a bug, make sure to enable Debug Logging in the settings and attach the Player.log file.
-</description>
+- Weather effects: wetness, wind and direct sunlight affect pawns' perceived temperature (i.e. comfortable temperature range); rain melts snow quicker.</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>

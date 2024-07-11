@@ -21,13 +21,17 @@ namespace Celsius
             StuffThermalProperties stuffThermalProperties = null;
             ThermalProps thermalProps = null;
             bool isOpen = false;
+            string label = null;
+            string stuffLabel = null;
 
             if (req.HasThing)
             {
                 CompThermal compThermal = req.Thing.TryGetComp<CompThermal>();
                 if (compThermal != null)
                 {
+                    label = req.Thing.Label;
                     thingThermalProperties = compThermal.ThingThermalProperties;
+                    stuffLabel = req.Thing.GetStuff().label;
                     stuffThermalProperties = compThermal.StuffThermalProperties;
                     thermalProps = compThermal.ThermalProperties;
                     isOpen = compThermal.IsOpen;
@@ -36,7 +40,9 @@ namespace Celsius
 
             else if (req.Def != null)
             {
+                label = req.Def.label;
                 thingThermalProperties = req.Def.GetModExtension<ThingThermalProperties>();
+                stuffLabel = req.StuffDef?.label;
                 stuffThermalProperties = req.StuffDef?.GetModExtension<StuffThermalProperties>();
                 thermalProps = thingThermalProperties?.GetThermalProps(stuffThermalProperties);
             }
@@ -45,15 +51,15 @@ namespace Celsius
                 return base.GetExplanationUnfinalized(req, numberSense);
 
             StringBuilder explanation = new StringBuilder("Celsius_Stat_Insulation_BaseInsulation"
-                .Translate(req.Def.label, thingThermalProperties.insulation.ToString("F1"))
+                .Translate(label, thingThermalProperties.insulation.ToString("F1"))
                 .CapitalizeFirst());
             if (stuffThermalProperties != null)
             {
-                explanation.AppendInNewLine("Celsius_Stat_Insulation_StuffInsulation".Translate(req.StuffDef.label).CapitalizeFirst());
+                explanation.AppendInNewLine("Celsius_Stat_Insulation_StuffInsulation".Translate(stuffLabel ?? "stuff").CapitalizeFirst());
                 explanation.Append($"x{stuffThermalProperties.insulationFactor.ToStringPercent()}");
             }
             if (isOpen && thingThermalProperties.airflow != thingThermalProperties.airflowWhenOpen)
-                explanation.AppendInNewLine("Celsius_Stat_Insulation_AirflowOpen".Translate(req.Def.label).Colorize(Color.yellow).CapitalizeFirst());
+                explanation.AppendInNewLine("Celsius_Stat_Insulation_AirflowOpen".Translate(label).Colorize(Color.yellow).CapitalizeFirst());
             if (thermalProps.airflow != 0)
                 explanation.AppendInNewLine("Celsius_Stat_Insulation_Airflow".Translate(thermalProps.airflow.ToStringPercent()));
 
