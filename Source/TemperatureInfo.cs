@@ -9,16 +9,17 @@ namespace Celsius
 {
     public class TemperatureInfo : MapComponent
     {
-        // Normal full updates between rare updates
+        // Number of full map temperature updates between rare updates and between resets of min/max temperature
         public const int RareUpdateInterval = 4;
+        public const int MinMaxTemperatureResetInterval = 20;
 
-        // Minimum allowed temperature for autoignition
+        // Minimum possible temperature of autoignition
         const float MinIgnitionTemperature = 100;
 
         bool initialized;
         int tick;
         int slice;
-        int rareUpdateCounter;
+        int updateCounter;
 
         float[] temperatures;
         float[] terrainTemperatures;
@@ -28,8 +29,8 @@ namespace Celsius
 
         static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
         static readonly Color minColor = Color.blue;
-        static readonly Color minComfortableColor = new Color(0, 1, 0.5f);
-        static readonly Color maxComfortableColor = new Color(0.5f, 1, 0);
+        static readonly Color minComfortableColor = new Color(0, 1, 0.25f);
+        static readonly Color maxComfortableColor = new Color(0.25f, 1, 0);
         static readonly Color maxColor = Color.red;
 
         bool minMaxTemperaturesUpdated;
@@ -48,10 +49,6 @@ namespace Celsius
         public override void FinalizeInit()
         {
             thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
-
-            // Setting up min & max temperatures (for overlay)
-            minComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
-            maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
 
             // Initializing for the first run
             if (temperatures == null)
@@ -72,6 +69,11 @@ namespace Celsius
                 }
                 InitializeTerrainTemperatures();
             }
+
+            ResetSnowMeltRate();
+            minComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
+            maxComfortableTemperature = ThingDefOf.Human.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
+            ResetMinMaxTemperature();
 
             overlayDrawer = new CellBoolDrawer(
                 index => !map.fogGrid.IsFogged(index),
@@ -172,6 +174,14 @@ namespace Celsius
                 things[i].TryGetComp<CompThermal>()?.Reset();
         }
 
+        public void ResetSnowMeltRate() => outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? Settings.SnowMeltCoefficientRain : Settings.SnowMeltCoefficient;
+
+        public void ResetMinMaxTemperature()
+        {
+            minTemperature = minComfortableTemperature - 10;
+            maxTemperature = maxComfortableTemperature + 10;
+        }
+
         Color TemperatureColorForCell(int index)
         {
             if (Settings.UseVanillaTemperatureColors)
@@ -190,14 +200,12 @@ namespace Celsius
             {
                 if (!minMaxTemperaturesUpdated && !Settings.UseVanillaTemperatureColors)
                 {
-                    minTemperature = minComfortableTemperature - 10;
-                    maxTemperature = maxComfortableTemperature + 10;
                     for (int i = 0; i < temperatures.Length; i++)
                         if (temperatures[i] < minTemperature)
                             minTemperature = temperatures[i];
                         else if (temperatures[i] > maxTemperature)
                             maxTemperature = temperatures[i];
-                    LogUtility.Log($"Min temperature: {minTemperature.ToStringTemperature()}. Max temperature: {maxTemperature.ToStringTemperature()}.");
+                    LogUtility.Log($"Color temperatures: {minTemperature.ToStringTemperature()}..{maxTemperature.ToStringTemperature()}");
                     minMaxTemperaturesUpdated = true;
                 }
                 overlayDrawer.MarkForDraw();
@@ -265,16 +273,6 @@ namespace Celsius
             int mouseCell = Prefs.DevMode && Settings.DebugMode && Find.PlaySettings.showTemperatureOverlay ? map.cellIndices.CellToIndex(UI.MouseCell()) : -1;
             bool log;
 
-            if (slice == 0)
-            {
-                roomTemperatures.Clear();
-                if (rareUpdateCounter == 0)
-                {
-                    outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? Settings.SnowMeltCoefficientRain : Settings.SnowMeltCoefficient;
-                    thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
-                }
-            }
-
             // Main loop
             for (int j = slice; j < temperatures.Length; j += Settings.SliceCount)
             {
@@ -315,7 +313,7 @@ namespace Celsius
                         else terrainTemperatures[i] = float.NaN;
                     }
                     // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
-                    else if (rareUpdateCounter == 0 && cell.GetTerrain(map).HasTemperature())
+                    else if (updateCounter == 0 && cell.GetTerrain(map).HasTemperature())
                         terrainTemperatures[i] = temperature;
                 }
 
@@ -389,13 +387,22 @@ namespace Celsius
             }
 
             tick = 0;
+            slice = (slice + 1) % Settings.SliceCount;
+
             if (slice == 0)
             {
-                rareUpdateCounter = (rareUpdateCounter + 1) % RareUpdateInterval;
+                updateCounter++;
+                roomTemperatures.Clear();
+                if (updateCounter % RareUpdateInterval == 0)
+                {
+                    thermalProperties = new ThermalProps[map.Size.x * map.Size.z];
+                    outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? Settings.SnowMeltCoefficientRain : Settings.SnowMeltCoefficient;
+                }
+                if (updateCounter % MinMaxTemperatureResetInterval == 0 && Find.PlaySettings.showTemperatureOverlay && Find.CurrentMap == map)
+                    ResetMinMaxTemperature();
                 minMaxTemperaturesUpdated = false;
                 overlayDrawer.SetDirty();
             }
-            slice = (slice + 1) % Settings.SliceCount;
 
 #if DEBUG
             if (Settings.DebugMode)

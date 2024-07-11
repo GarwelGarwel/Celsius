@@ -99,8 +99,8 @@ namespace Celsius
             // Air has heat capacity = 1 and conductivity = 1
             if (airflow == 1 && props.IsAir)
             {
-                energy += interactingTemperature;
                 heatFlow++;
+                energy += interactingTemperature;
                 return;
             }
 
@@ -110,14 +110,14 @@ namespace Celsius
                 : props.HeatFlow * Mathf.Pow(Settings.ConvectionConductivityEffect, airflow * props.airflow);
             if (log)
                 LogUtility.Log($"Interacting temperature: {interactingTemperature:F1}C. Mutual airflow: {airflow * props.airflow}. Heatflow: {hf:F3}.");
-            energy += interactingTemperature * hf;
             heatFlow += hf;
+            energy += interactingTemperature * hf;
         }
 
         public static void CalculateHeatTransferTerrain(float terrainTemperature, ThermalProps props, ref float energy, ref float heatFlow)
         {
-            energy += terrainTemperature * props.HeatFlow;
             heatFlow += props.HeatFlow;
+            energy += terrainTemperature * props.HeatFlow;
         }
 
         public static void CalculateHeatTransferEnvironment(float environmentTemperature, ThermalProps props, RoofDef roof, ref float energy, ref float heatFlow)
@@ -127,8 +127,8 @@ namespace Celsius
             {
                 if (props.IsAir)  // Air-to-air exchange (most common way on most maps)
                 {
-                    energy += environmentTemperature * Settings.EnvironmentDiffusionFactor;
                     heatFlow += Settings.EnvironmentDiffusionFactor;
+                    energy += environmentTemperature * Settings.EnvironmentDiffusionFactor;
                     return;
                 }
                 // Buildings without a roof
@@ -139,8 +139,8 @@ namespace Celsius
             else if (!roof.isThickRoof)  // Thin roof: use insulation value from the settings (precomputed)
                 hf = props.HeatFlow * Settings.RoofDiffusionFactor;
             else return;  // Thick roof: no heat exchange at all
-            energy += environmentTemperature * hf;
             heatFlow += hf;
+            energy += environmentTemperature * hf;
         }
 
         #endregion DIFFUSION
