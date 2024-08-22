@@ -32,7 +32,7 @@ namespace Celsius
         float[] terrainTemperatures;
         ThermalProps[] thermalProperties;
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
-        float outdoorSnowMeltRate;
+        int outdoorSnowMeltRate;
 
         static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
         static readonly Color minColor = Color.blue;
@@ -181,7 +181,7 @@ namespace Celsius
                 things[i].TryGetComp<CompThermal>()?.Reset();
         }
 
-        public void ResetSnowMeltRate() => outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? Settings.SnowMeltCoefficientRain : Settings.SnowMeltCoefficient;
+        public void ResetSnowMeltRate() => outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? 2 * Settings.TicksPerUpdate : Settings.TicksPerUpdate;
 
         public void ResetMinMaxTemperature()
         {
@@ -272,8 +272,7 @@ namespace Celsius
                 {
                     for (int i = range.Item1; i < range.Item2; i++)
                     {
-                        IntVec3 cell = map.cellIndices.IndexToCell(i);//map.cellsInRandomOrder.Get(i);
-                        //int i = map.cellIndices.CellToIndex(cell);
+                        IntVec3 cell = map.cellIndices.IndexToCell(i);
                         log = i == mouseCell;
                         float temperature = temperatures[i];
                         ThermalProps cellProps = GetThermalPropertiesAt(i);
@@ -344,8 +343,10 @@ namespace Celsius
                         if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                         {
                             if (log)
-                                LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : Settings.SnowMeltCoefficientRain):F4}.");
-                            map.snowGrid.AddDepth(cell, -FreezeMeltUtility.SnowMeltAmountAt(temperature) * (cell.Roofed(map) ? Settings.SnowMeltCoefficient : outdoorSnowMeltRate));
+                                LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowChangeAmountAt(temperature) * (cell.Roofed(map) ? Settings.TicksPerUpdate : outdoorSnowMeltRate):F4}/update.");
+                            if (cell.Roofed(map))
+                                map.snowGrid.AddDepth(cell, FreezeMeltUtility.SnowChangeAmountAt(temperature) * Settings.TicksPerUpdate);
+                            else map.snowGrid.AddDepth(cell, FreezeMeltUtility.SnowChangeAmountAt(temperature) * outdoorSnowMeltRate);
                         }
 
                         // Autoignition
@@ -388,9 +389,8 @@ namespace Celsius
                 // This should immediately exit anyway, but it's good to check to make sure
                 while (!parallelLoopResult.IsCompleted) ;
 
-                // Copy working set over to the temperatures
-                // This makes sure that a temperature change from one cell to another can't propagate across the whole map in a single tick
-                Array.Copy(worksetTemperatures, temperatures, worksetTemperatures.Length);
+                // Workset becomes the active temperatures array, and the old temperatures array will be the workset at the next update
+                Gen.Swap(ref temperatures, ref worksetTemperatures);
 
                 if (updateStopwatch.IsRunning)
                 {
@@ -413,8 +413,8 @@ namespace Celsius
 
             if (Settings.DebugMode && timerUpdates % 10 == 1)
                 LogUtility.Log($"Updated temperatures for {map} {timerUpdates} times at {(float)updateStopwatch.ElapsedMilliseconds / timerUpdates:F1} ms per update.");
-            
-            outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? Settings.SnowMeltCoefficientRain : Settings.SnowMeltCoefficient;
+
+            ResetSnowMeltRate();
             updateCounter++;
             
             // On every whole-map update (which happens every TicksPerUpdate now) clear the room temperatures and set the temperature overlay to be dirty
