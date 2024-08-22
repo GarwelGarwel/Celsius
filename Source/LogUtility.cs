@@ -16,8 +16,12 @@
             switch (logLevel)
             {
                 case LogLevel.Message:
-                    if (Settings.DebugMode || logLevel == LogLevel.Important)
+                    if (Settings.DebugMode)
                         Verse.Log.Message(message);
+                    break;
+
+                case LogLevel.Important:
+                    Verse.Log.Message(message);
                     break;
 
                 case LogLevel.Warning:
