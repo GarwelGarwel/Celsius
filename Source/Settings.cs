@@ -13,7 +13,6 @@ namespace Celsius
         public static bool AutoignitionEnabled;
         public static bool PawnWeatherEffects;
         public static int TicksPerUpdate;
-        public static int TicksPerSlice;
         public static float SnowMeltCoefficient;
         public static float SnowMeltCoefficientRain;
         public static float ConductivityPowerBase;
@@ -28,8 +27,6 @@ namespace Celsius
         public static bool DebugMode = Prefs.LogVerbose;
 
         public const int TicksPerUpdate_Default = 120;
-        public const int SliceCount = 4;
-        public const int TicksPerSlice_Default = TicksPerUpdate_Default / SliceCount;
         public const float SnowMeltCoefficient_Default = TicksPerUpdate_Default * 0.0006f;
         public const float SnowMeltCoefficientRain_Default = SnowMeltCoefficient_Default * 2;
 
@@ -81,7 +78,6 @@ namespace Celsius
         internal static void RecalculateValues()
         {
             TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
-            TicksPerSlice = TicksPerUpdate / SliceCount;
             SnowMeltCoefficient = TicksPerUpdate * 0.00006f;
             SnowMeltCoefficientRain = SnowMeltCoefficient * 2;
             ConductivityPowerBase = Mathf.Pow(ConductivityPowerBase_Default, (float)TicksPerUpdate_Default / TicksPerUpdate);
