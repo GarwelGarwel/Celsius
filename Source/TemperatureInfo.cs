@@ -23,6 +23,7 @@ namespace Celsius
         bool initialized;
         int tick;
         int updateCounter;
+
         EventWaitHandle temperatureUpdateHandle = new ManualResetEvent(false);
         bool updated = true;
         Thread temperatureUpdateThread;
@@ -45,7 +46,6 @@ namespace Celsius
         CellBoolDrawer overlayDrawer;
 
         Stopwatch updateStopwatch = new Stopwatch();
-        int timerUpdates;
 
         public TemperatureInfo(Map map)
             : base(map)
@@ -179,6 +179,7 @@ namespace Celsius
             List<Thing> things = map.listerThings.AllThings;
             for (int i = 0; i < things.Count; i++)
                 things[i].TryGetComp<CompThermal>()?.Reset();
+            Array.Clear(thermalProperties, 0, thermalProperties.Length);
         }
 
         public void ResetSnowMeltRate() => outdoorSnowMeltRate = map.weatherManager.RainRate > 0 ? 2 * Settings.TicksPerUpdate : Settings.TicksPerUpdate;
@@ -308,7 +309,7 @@ namespace Celsius
                                 else terrainTemperatures[i] = float.NaN;
                             }
                             // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
-                            else if (updateCounter == 0 && cell.GetTerrain(map).HasTemperature())
+                            else if (updateCounter % RareUpdateInterval == 2 && cell.GetTerrain(map).HasTemperature())
                                 terrainTemperatures[i] = temperature;
                         }
 
@@ -389,14 +390,11 @@ namespace Celsius
                 // This should immediately exit anyway, but it's good to check to make sure
                 while (!parallelLoopResult.IsCompleted) ;
 
-                // Workset becomes the active temperatures array, and the old temperatures array will be the workset at the next update
+                // Workset becomes the active temperatures array, and the old temperatures array will be used as the workset at the next update
                 Gen.Swap(ref temperatures, ref worksetTemperatures);
 
                 if (updateStopwatch.IsRunning)
-                {
                     updateStopwatch.Stop();
-                    timerUpdates++;
-                }
 
                 temperatureUpdateHandle.Reset();
                 updated = true;
@@ -411,24 +409,22 @@ namespace Celsius
             if (++tick < Settings.TicksPerUpdate)
                 return;
 
-            if (Settings.DebugMode && timerUpdates % 10 == 1)
-                LogUtility.Log($"Updated temperatures for {map} {timerUpdates} times at {(float)updateStopwatch.ElapsedMilliseconds / timerUpdates:F1} ms per update.");
+            if (Settings.DebugMode && updateCounter % 10 == 1)
+                LogUtility.Log($"Updated temperatures for {map} {updateCounter} times at {(float)updateStopwatch.ElapsedMilliseconds / updateCounter:F1} ms per update.");
 
             ResetSnowMeltRate();
             updateCounter++;
             
-            // On every whole-map update (which happens every TicksPerUpdate now) clear the room temperatures and set the temperature overlay to be dirty
+            // On every update clear the room temperatures and set the temperature overlay to be dirty
             roomTemperatures.Clear();
             minMaxTemperaturesUpdated = false;
             overlayDrawer.SetDirty();
             
-            // Every 4 (RareUpdateInterval) whole-map updates the thermal properties (items at position) are cleared.
-            // By default every iteration 100% of the map is calculated and every iteration happens every 120 ticks (normal speed once every two seconds)
-            // Which means room temperatures are reset every 480 ticks or 8 seconds on normal speed.
-            // NOTE: This may need to be updated more often. Maybe the whole RareUpdateInterval can be removed and everything done on every update?
+            // Rarely (every 4 updates) clearing the thermal properties cache, to take into account new & destroyed buildings
             if (updateCounter % RareUpdateInterval == 0)
                 Array.Clear(thermalProperties, 0, thermalProperties.Length);
             
+            // Very rarely (every 20 updates) resetting min & max temperatures used in temperature overlay; this is done to prevent flickering when min/max change too often
             if (updateCounter % MinMaxTemperatureResetInterval == 0 && Find.PlaySettings.showTemperatureOverlay && Find.CurrentMap == map)
                 ResetMinMaxTemperature();
 
@@ -439,26 +435,12 @@ namespace Celsius
             }
             else
             {
-                LogUtility.Log("Skipped update of temperatures because previous was still running", LogLevel.Warning);
+                LogUtility.Log("Skipped update of temperatures because previous was still running.", LogLevel.Warning);
                 updated = true;
                 temperatureUpdateHandle.Reset();
             }
 
             tick = 0;
-            // Slice is counted up essentially from 0 to 3 over and over
-            // This is probably to reduce the computation per tick (only every 4th cell is updated), prevent runaway temperatures being propagated in the same tick
-            // It's a very roundabout way to do this tho.
-            // Additionally RareUpdateInterval is 4, and is executed when UpdateCounter is divisible by 4, which is every 16th slice.
-            // So in essence
-            //  every iteration (throttled with TicksPerSlice) 1/4th of the map is updated in a striped pattern
-            //  every 16th iteration the whole map is updated overall by deleting a large array.
-            // That's neither very memory efficient nor CPU efficient. Maybe it prevents some issue? Seems like it's for handling buildings placed and such.
-            // TicksPerSlice is weird as well, since it's TicksPerUpdate divided by SliceCount. So if TicksPerUpdate is 120, then TicksPerSlice is only 30
-            // meaning every 30 ticks 1/4th of the map is updated.
-            // That's such a roundabout way of doing this
-            // NOTE: Before: ~1,2ms per-tick average (though a single call takes ~10ms every 2 seconds), whole-map rare update takes 150ms
-            // NOTE: After (simple parallelization): ~1,1ms per-tick average, whole-map rare update takes 130ms
-            // NOTE: After (background update of whole map): ~0ms per-tick average, Update Thread takes ~8ms for whole-map update
         }
 
         public float GetTemperatureForCell(int index) => temperatures != null ? temperatures[index] : TemperatureTuning.DefaultTemperature;
@@ -507,12 +489,12 @@ namespace Celsius
 
         public float GetIgnitionTemperatureForCell(IntVec3 cell)
         {
-            float min = 10000;
+            float min = 9999;
             List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
             for (int i = 0; i < things.Count; i++)
             {
                 if (things[i].FireBulwark)
-                    return 10000;
+                    return 9999;
                 if (things[i].GetStatValue(StatDefOf.Flammability) > 0)
                 {
                     float ignitionTemperature = things[i].GetStatValue(DefOf.Celsius_IgnitionTemperature);
