@@ -125,13 +125,16 @@ namespace Celsius
         // Replaces GenTemperature.PushHeat(Thing, float) to push heat evenly from big things (e.g. geysers)
         public static bool GenTemperature_PushHeat_Thing(Thing t, float energy)
         {
-            if (t.def.Size.x == 1 && t.def.Size.z == 1)
-                return !TemperatureUtility.TryPushHeat(t.PositionHeld, t.MapHeld, energy);
             TemperatureInfo temperatureInfo = t.MapHeld?.TemperatureInfo();
             if (temperatureInfo == null)
             {
                 LogUtility.Log($"TemperatureInfo unavailable for map {t.MapHeld} where {t} is held!", LogLevel.Warning);
                 return true;
+            }
+            if (t.def.Size == IntVec2.One)
+            {
+                temperatureInfo.PushHeat(t.PositionHeld, energy);
+                return false;
             }
             CellRect cells = t.OccupiedRect();
             energy /= t.def.Size.Area;
