@@ -167,6 +167,7 @@ namespace Celsius
 #endif
         }
 
-        public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
+        // Based on vanilla formula: 0.0058 * T * [T / 10] for 0.06% of cells every tick
+        public static float SnowChangeAmountAt(float temperature) => -0.00058f * 0.0006f * temperature * Mathf.Clamp(temperature, 0, 10);
     }
 }
