@@ -19,7 +19,7 @@ namespace Celsius
 
         public float HeatFlowNoConvection => heatflowNoConvection;
 
-        public bool IsAir => this == Air;
+        public bool IsAir = false;
 
         public ThermalProps(float heatCapacity, float insulation, float airflow)
         {
@@ -28,6 +28,7 @@ namespace Celsius
             this.airflow = airflow;
             heatflow = heatCapacity * Conductivity;
             heatflowNoConvection = heatflow / Settings.ConvectionConductivityEffect;
+            if (heatCapacity == 1 && insulation == 1 && airflow == 1) IsAir = true;
         }
 
         public override string ToString() => $"Heat capacity: {heatCapacity}. Insulation: {insulation}. Conductivity: {Conductivity:P1}. Airflow: {airflow:P0}.";
