@@ -84,7 +84,7 @@ namespace Celsius
         /// <summary>
         /// Turns the given cell into ice
         /// </summary>
-        public static void FreezeTerrain(this IntVec3 cell, Map map, int cellIndex, object mutex, bool log = false)
+        public static void FreezeTerrain(this IntVec3 cell, Map map, int cellIndex, bool log = false)
         {
 #if DEBUG
             stopwatch.Start();
@@ -92,11 +92,9 @@ namespace Celsius
             TerrainDef terrain = map.terrainGrid.TerrainAt(cellIndex);
             if (log)
                 Log($"{terrain} freezes at {map.cellIndices.IndexToCell(cellIndex)}.");
-            lock (mutex)
-            {
-                map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
-                map.terrainGrid.SetUnderTerrain(cell, terrain);
-            }
+
+            map.terrainGrid.SetTerrain(cell, TerrainDefOf.Ice);
+            map.terrainGrid.SetUnderTerrain(cell, terrain);
 #if DEBUG
             LogStopwatch();
 #endif
@@ -105,7 +103,7 @@ namespace Celsius
         /// <summary>
         /// Turns the given cell into the appropriate kind of water terrain; 
         /// </summary>
-        public static void MeltTerrain(this IntVec3 cell, Map map, int index, object mutex, bool log = false)
+        public static void MeltTerrain(this IntVec3 cell, Map map, int index, bool log = false)
         {
 #if DEBUG
             stopwatch.Start();
@@ -113,8 +111,7 @@ namespace Celsius
             TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map, index);
             // Removing things that can't stay on the melted terrain
             List<Thing> things = map.thingGrid.ThingsListAtFast(index);
-            lock (mutex)
-            {
+
                 for (int i = things.Count - 1; i >= 0; i--)
                 {
                     Thing thing = things[i];
@@ -157,16 +154,20 @@ namespace Celsius
                     map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
                 if (log)
                     Log($"Ice at {cell} melts into {meltedTerrain}.");
-                map.terrainGrid.RemoveTopLayer(cell, false);
+                map.terrainGrid.RemoveTopLayer(cell);
                 if (map.snowGrid.GetDepth(cell) > 0)
                     map.snowGrid.SetDepth(cell, 0);
-            }
             
 #if DEBUG
             LogStopwatch();
 #endif
         }
 
-        public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature / 10);
+        public static float SnowMeltAmountAt(float temperature) => temperature * Mathf.Lerp(0, 0.0058f, temperature * 0.1F);
+
+        public static float GetSnowDepthFast(Map map, int index)
+        {
+            return map.snowGrid.depthGrid[index];
+        }
     }
 }

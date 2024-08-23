@@ -1,24 +1,22 @@
 ﻿using System;
 using Unity.Jobs;
+using Verse;
 
 namespace Celsius
 {
     internal class GridWorker : IJobParallelFor
     {
-        public readonly Tuple<int, int>[] arr;
         public readonly TemperatureInfo info;
-        public readonly int cell;
+        public readonly int[][] arr;
 
-        public GridWorker(Tuple<int, int>[] arr, TemperatureInfo info, int cell)
+        public GridWorker(int[][] arr, TemperatureInfo info)
         {
-            this.arr = arr;
             this.info = info;
-            this.cell = cell;
+            this.arr = arr;
         }
         public void Execute(int index)
         {
-            var tuple = arr[index];
-            info.ProcessColumns(tuple.Item1, tuple.Item2, cell);
+            info.ProcessZone(arr[index], info.mouseCell);
         }
     }
 }

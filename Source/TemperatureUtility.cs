@@ -44,6 +44,7 @@ namespace Celsius
                     if (Settings.FreezingAndMeltingEnabled && !temperatureInfo.HasTerrainTemperatures)
                         temperatureInfo.InitializeTerrainTemperatures();
                 }
+
             RefreshAllMaps();
         }
 
