@@ -1,6 +1,5 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -11,11 +10,6 @@ namespace Celsius
 {
     static class FreezeMeltUtility
     {
-#if DEBUG
-        static Stopwatch stopwatch = new Stopwatch();
-        static int iterations;
-#endif
-
         public static TerrainThermalProperties GetTerrainThermalProperties(this TerrainDef terrain) => terrain.GetModExtension<TerrainThermalProperties>();
 
         public static bool Freezable(this TerrainDef terrain)
@@ -77,31 +71,16 @@ namespace Celsius
             return map.Biome == BiomeDefOf.SeaIce ? TerrainDefOf.WaterOceanDeep : TerrainDefOf.WaterDeep;
         }
 
-#if DEBUG
-        static void LogStopwatch()
-        {
-            stopwatch.Stop();
-            if (++iterations == 0)
-                Log($"{iterations} freeze/melt cycles @ {stopwatch.Elapsed.TotalMilliseconds / iterations:F3} ms.");
-        }
-#endif
-
         /// <summary>
         /// Turns the given cell into ice
         /// </summary>
         public static void FreezeTerrain(this IntVec3 cell, Map map, bool log = false)
         {
-#if DEBUG
-            stopwatch.Start();
-#endif
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
                 Log($"{terrain} freezes at {cell}.");
             map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
-#if DEBUG
-            LogStopwatch();
-#endif
         }
 
         /// <summary>
@@ -109,12 +88,10 @@ namespace Celsius
         /// </summary>
         public static void MeltTerrain(this IntVec3 cell, Map map, bool log = false)
         {
-#if DEBUG
-            stopwatch.Start();
-#endif
+            int index = map.cellIndices.CellToIndex(cell);
             TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
             // Removing things that can't stay on the melted terrain
-            List<Thing> things = cell.GetThingList(map);
+            List<Thing> things = map.thingGrid.ThingsListAtFast(index);
             for (int i = things.Count - 1; i >= 0; i--)
             {
                 Thing thing = things[i];
@@ -157,14 +134,11 @@ namespace Celsius
                 map.snowGrid.SetDepth(cell, 0);
 
             // Changing terrain
-            if (map.terrainGrid.UnderTerrainAt(cell) == null)
+            if (map.terrainGrid.UnderTerrainAt(index) == null)
                 map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
             if (log)
                 Log($"Ice at {cell} melts into {meltedTerrain}.");
             map.terrainGrid.RemoveTopLayer(cell, false);
-#if DEBUG
-            LogStopwatch();
-#endif
         }
 
         // Based on vanilla formula: 0.0058 * T * [T / 10] for 0.06% of cells every tick

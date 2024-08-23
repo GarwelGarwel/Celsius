@@ -25,8 +25,8 @@ namespace Celsius
         int updateCounter;
 
         EventWaitHandle temperatureUpdateHandle = new ManualResetEvent(false);
-        bool updated = true;
         Thread temperatureUpdateThread;
+        bool updated = true;
 
         float[] temperatures;
         float[] worksetTemperatures;
@@ -69,7 +69,7 @@ namespace Celsius
                     if (room != null)
                         roomTemperatures[room.ID] = temperatures[i] = room.TempTracker.Temperature;
                     {
-                        RoofDef roof = cell.GetRoof(map);
+                        RoofDef roof = map.roofGrid.RoofAt(i);
                         temperatures[i] = roof != null && roof.isThickRoof ? annualAverageTemperature : outdoorTemperature;
                     }
                 }
@@ -107,7 +107,7 @@ namespace Celsius
             for (int i = 0; i < terrainTemperatures.Length; i++)
             {
                 IntVec3 cell = map.cellIndices.IndexToCell(i);
-                TerrainDef terrain = cell.GetTerrain(map);
+                TerrainDef terrain = map.terrainGrid.TerrainAt(i);
                 if (terrain.HasTemperature())
                 {
                     cellsWithTerrainTemperature++;
@@ -230,21 +230,21 @@ namespace Celsius
             }
             if (!Find.PlaySettings.showTemperatureOverlay || !Settings.ShowTemperatureTooltip)
                 return;
-            IntVec3 cell = UI.MouseCell();
-            if (cell.InBounds(map) && (!cell.Fogged(map) || Prefs.DevMode))
+            int index = map.cellIndices.CellToIndex(UI.MouseCell());
+            if (InBounds(index) && (!map.fogGrid.IsFogged(index) || Prefs.DevMode))
             {
                 GameFont font = Text.Font;
                 Text.Font = GameFont.Tiny;
-                string tooltip = "Celsius_MapTempOverlay_Cell".Translate(GetTemperatureForCell(cell).ToStringTemperature(Settings.TemperatureDisplayFormatString));
+                string tooltip = "Celsius_MapTempOverlay_Cell".Translate(GetTemperatureForCell(index).ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 if (Settings.FreezingAndMeltingEnabled && HasTerrainTemperatures)
                 {
-                    float terrainTemperature = GetTerrainTemperature(cell);
+                    float terrainTemperature = terrainTemperatures[index];
                     if (!float.IsNaN(terrainTemperature))
                         tooltip += "\n" + "Celsius_MapTempOverlay_Terrain".Translate(terrainTemperature.ToStringTemperature(Settings.TemperatureDisplayFormatString));
                 }
 
                 if (Settings.DebugMode)
-                    Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 150, 100), $"{tooltip}\n{GetThermalPropertiesAt(map.cellIndices.CellToIndex(cell))}");
+                    Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 150, 100), $"{tooltip}\n{GetThermalPropertiesAt(index)}");
                 else Widgets.Label(new Rect(UI.MousePositionOnUIInverted.x + 20, UI.MousePositionOnUIInverted.y + 20, 100, 40), tooltip);
 
                 Text.Font = font;
@@ -286,7 +286,7 @@ namespace Celsius
                             float terrainTemperature = terrainTemperatures[i];
                             if (!float.IsNaN(terrainTemperature))
                             {
-                                TerrainDef terrain = cell.GetTerrain(map);
+                                TerrainDef terrain = map.terrainGrid.TerrainAt(i);
                                 TerrainThermalProperties terrainProps = terrain?.GetTerrainThermalProperties();
                                 if (terrainProps != null && terrainProps.heatCapacity > 0)
                                 {
@@ -309,27 +309,24 @@ namespace Celsius
                                 else terrainTemperatures[i] = float.NaN;
                             }
                             // Rarely checking if a cell now has terrain temperature (e.g. when a bridge has been removed)
-                            else if (updateCounter % RareUpdateInterval == 2 && cell.GetTerrain(map).HasTemperature())
+                            else if (updateCounter % RareUpdateInterval == 2 && map.terrainGrid.TerrainAt(i).HasTemperature())
                                 terrainTemperatures[i] = temperature;
                         }
 
                         // Diffusion & convection
-                        void ProcessNeighbour(IntVec3 neighbour)
-                        {
-                            if (neighbour.InBounds(map))
-                            {
-                                int index = map.cellIndices.CellToIndex(neighbour);
-                                TemperatureUtility.CalculateHeatTransferCells(temperatures[index], GetThermalPropertiesAt(index), cellProps.airflow, ref energy, ref heatFlow, log);
-                            }
-                        }
+                        void ProcessNeighbour(int neighbourIndex) => TemperatureUtility.CalculateHeatTransferCells(temperatures[neighbourIndex], GetThermalPropertiesAt(neighbourIndex), cellProps.airflow, ref energy, ref heatFlow, log);
 
-                        ProcessNeighbour(cell + IntVec3.North);
-                        ProcessNeighbour(cell + IntVec3.East);
-                        ProcessNeighbour(cell + IntVec3.South);
-                        ProcessNeighbour(cell + IntVec3.West);
+                        if (cell.z > 0)
+                            ProcessNeighbour(i - map.Size.x);
+                        if (cell.z < map.Size.z - 1)
+                            ProcessNeighbour(i + map.Size.x);
+                        if (cell.x > 0)
+                            ProcessNeighbour(i - 1);
+                        if (cell.x < map.Size.x - 1)
+                            ProcessNeighbour(i + 1);
 
                         // Thermal exchange with the environment
-                        RoofDef roof = cell.GetRoof(map);
+                        RoofDef roof = map.roofGrid.RoofAt(i);
                         TemperatureUtility.CalculateHeatTransferEnvironment(outdoorTemperature, cellProps, roof, ref energy, ref heatFlow);
 
                         // Applying heat transfer
@@ -344,8 +341,8 @@ namespace Celsius
                         if (temperature > 0 && cell.GetSnowDepth(map) > 0)
                         {
                             if (log)
-                                LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(cell.Roofed(map) ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowChangeAmountAt(temperature) * (cell.Roofed(map) ? Settings.TicksPerUpdate : outdoorSnowMeltRate):F4}/update.");
-                            if (cell.Roofed(map))
+                                LogUtility.Log($"Snow: {cell.GetSnowDepth(map):F4}. {(roof != null ? "Roofed." : "Unroofed.")} Melting: {FreezeMeltUtility.SnowChangeAmountAt(temperature) * (roof != null ? Settings.TicksPerUpdate : outdoorSnowMeltRate):F4}/update.");
+                            if (roof != null)
                                 map.snowGrid.AddDepth(cell, FreezeMeltUtility.SnowChangeAmountAt(temperature) * Settings.TicksPerUpdate);
                             else map.snowGrid.AddDepth(cell, FreezeMeltUtility.SnowChangeAmountAt(temperature) * outdoorSnowMeltRate);
                         }
@@ -355,7 +352,7 @@ namespace Celsius
                         {
                             Fire existingFire = null;
                             float fireSize = 0;
-                            List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                            List<Thing> things = map.thingGrid.ThingsListAtFast(i);
                             for (int k = 0; k < things.Count; k++)
                             {
                                 if (things[k].FireBulwark)
@@ -443,6 +440,8 @@ namespace Celsius
             tick = 0;
         }
 
+        public bool InBounds(int index) => index >= 0 && index < temperatures.Length;
+
         public float GetTemperatureForCell(int index) => temperatures != null ? temperatures[index] : TemperatureTuning.DefaultTemperature;
 
         public float GetTemperatureForCell(IntVec3 cell) => GetTemperatureForCell(map.cellIndices.CellToIndex(cell));
@@ -461,7 +460,7 @@ namespace Celsius
 
         public bool HasTerrainTemperatures => terrainTemperatures != null;
 
-        public float GetTerrainTemperature(IntVec3 cell) => terrainTemperatures[map.cellIndices.CellToIndex(cell)];
+        public float GetTerrainTemperature(int index) => terrainTemperatures[index];
 
         public void SetTemperatureForCell(int index, float temperature) => temperatures[index] = Mathf.Max(temperature, -273);
 
@@ -487,10 +486,10 @@ namespace Celsius
 
         public void PushHeat(IntVec3 cell, float energy) => PushHeat(map.cellIndices.CellToIndex(cell), energy);
 
-        public float GetIgnitionTemperatureForCell(IntVec3 cell)
+        public float GetIgnitionTemperatureForCell(int index)
         {
             float min = 9999;
-            List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+            List<Thing> things = map.thingGrid.ThingsListAtFast(index);
             for (int i = 0; i < things.Count; i++)
             {
                 if (things[i].FireBulwark)

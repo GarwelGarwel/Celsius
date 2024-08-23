@@ -152,12 +152,13 @@ namespace Celsius
         public static bool TryPushHeat(IntVec3 cell, Map map, float energy)
         {
             TemperatureInfo temperatureInfo = map.TemperatureInfo();
-            if (temperatureInfo == null || !cell.InBounds(map))
+            int index = map.cellIndices.CellToIndex(cell);
+            if (temperatureInfo == null || !temperatureInfo.InBounds(index))
             {
                 LogUtility.Log($"TemperatureInfo for {map} unavailable or cell {cell} is outside map boundaries!", LogLevel.Warning);
                 return false;
             }
-            temperatureInfo.PushHeat(map.cellIndices.CellToIndex(cell), energy);
+            temperatureInfo.PushHeat(index, energy);
             return true;
         }
 
