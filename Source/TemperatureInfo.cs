@@ -348,7 +348,7 @@ namespace Celsius
                         }
 
                         // Autoignition
-                        if (Settings.AutoignitionEnabled && temperature > MinIgnitionTemperature)
+                        if (Settings.AutoignitionEnabled && temperature > MinIgnitionTemperature && map.terrainGrid.TerrainAt(i).Flammable())
                         {
                             Fire existingFire = null;
                             float fireSize = 0;
@@ -377,7 +377,14 @@ namespace Celsius
                                 if (existingFire == null)
                                 {
                                     LogUtility.Log($"{things[0]} (total {things.Count.ToStringCached()} things in the cell) spontaneously ignites at {temperature:F1}C! Fire size: {fireSize:F2}.");
-                                    FireUtility.TryStartFireIn(cell, map, fireSize, null);
+                                    try
+                                    {
+                                        FireUtility.TryStartFireIn(cell, map, fireSize, null);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        LogUtility.Log(e.Message, LogLevel.Error);
+                                    }
                                 }
                                 else existingFire.fireSize += fireSize;
                         }

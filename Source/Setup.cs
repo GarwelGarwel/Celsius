@@ -167,7 +167,7 @@ namespace Celsius
         // Disables vanilla snow melting
         public static float SteadyEnvironmentEffects_MeltAmountAt(float result, float temperature) => 0;
 
-        // Attaches to AttachableThing.Destroy to reduce temperature when a Fire is destroyed to the ignition temperature
+        // Attaches to AttachableThing.Destroy to reduce temperature to just below the ignition temperature, when a Fire is destroyed
         public static void AttachableThing_Destroy(AttachableThing __instance)
         {
             if (Settings.AutoignitionEnabled && __instance is Fire)
@@ -176,7 +176,7 @@ namespace Celsius
                 if (temperatureInfo != null)
                 {
                     int index = __instance.Map.cellIndices.CellToIndex(__instance.Position);
-                    float temperature = temperatureInfo.GetIgnitionTemperatureForCell(index);
+                    float temperature = temperatureInfo.GetIgnitionTemperatureForCell(index) - 1;
                     if (temperature < temperatureInfo.GetTemperatureForCell(index))
                     {
                         LogUtility.Log($"Setting temperature at {__instance.Position} to {temperature:F0}C...");
