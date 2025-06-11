@@ -12,24 +12,36 @@ namespace Celsius
     {
         public static TerrainThermalProperties GetTerrainThermalProperties(this TerrainDef terrain) => terrain.GetModExtension<TerrainThermalProperties>();
 
+        /// <summary>
+        /// Checks if the terrain can freeze
+        /// </summary>
         public static bool Freezable(this TerrainDef terrain)
         {
             TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
             return terrainProps != null && terrainProps.phaseTransition == PhaseTransitionType.Freeze;
         }
 
+        /// <summary>
+        /// Checks if the terrain can melt
+        /// </summary>
         public static bool Meltable(this TerrainDef terrain)
         {
             TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
             return terrainProps != null && terrainProps.phaseTransition == PhaseTransitionType.Melt;
         }
 
+        /// <summary>
+        /// Checks if the terrain freezes at the given temperature
+        /// </summary>
         public static bool FreezesAt(this TerrainDef terrain, float temperature)
         {
             TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
             return terrainProps != null && terrainProps.FreezesAt(temperature);
         }
 
+        /// <summary>
+        /// Checks if the terrain melts at the given temperature
+        /// </summary>
         public static bool MeltsAt(this TerrainDef terrain, float temperature)
         {
             TerrainThermalProperties terrainProps = terrain.GetTerrainThermalProperties();
@@ -39,7 +51,7 @@ namespace Celsius
         /// <summary>
         /// Returns best guess for what kind of water terrain should be placed in a cell (if ice melts there)
         /// </summary>
-        public static TerrainDef BestUnderIceTerrain(this IntVec3 cell, Map map)
+       public static TerrainDef BestUnderIceTerrain(this IntVec3 cell, Map map)
         {
             TerrainDef terrain = map.terrainGrid.UnderTerrainAt(cell), underTerrain;
             if (terrain != null)
@@ -79,12 +91,17 @@ namespace Celsius
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
                 Log($"{terrain} freezes at {cell}.");
-            map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
-            map.terrainGrid.SetUnderTerrain(cell, terrain);
+            try
+            {
+                map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
+                map.terrainGrid.SetUnderTerrain(cell, terrain);
+            }
+            catch (System.Exception e)
+            { Log($"Failed to freeze {terrain} at {cell}: {e.Message}", LogLevel.Error); }
         }
 
         /// <summary>
-        /// Turns the given cell into the appropriate kind of water terrain; 
+        /// Turns the given cell into the appropriate kind of water terrain
         /// </summary>
         public static void MeltTerrain(this IntVec3 cell, Map map, bool log = false)
         {
@@ -100,17 +117,17 @@ namespace Celsius
                 if (meltedTerrain.passability == Traversability.Impassable)
                     if (thing is Pawn pawn)
                     {
-                        Log($"{pawn.LabelCap} drowns in {meltedTerrain.label}.");
+                        Log($"{pawn.LabelCap} drowns in {meltedTerrain}.");
                         pawn.health?.AddHediff(DefOf.Celsius_Hediff_Drown, dinfo: new DamageInfo(DefOf.Celsius_Damage_Drown, 1));
                         pawn.Corpse?.Destroy();
                     }
                     else
                     {
-                        Log($"{thing.LabelCap} sinks in {meltedTerrain.label}.");
+                        Log($"{thing.LabelCap} sinks in {meltedTerrain}.");
                         CompDissolution compDissolution = thing.TryGetComp<CompDissolution>();
                         if (compDissolution != null)
                         {
-                            Log($"Applying dissolution effects of {thing.def}.");
+                            Log($"Applying dissolution effects of {thing}.");
                             compDissolution.TriggerDissolutionEvent(thing.stackCount);
                         }
                         else thing.Destroy();
@@ -120,7 +137,7 @@ namespace Celsius
                     TerrainAffordanceDef terrainAffordance = thing.TerrainAffordanceNeeded;
                     if (terrainAffordance != null && !meltedTerrain.affordances.Contains(terrainAffordance))
                     {
-                        Log($"{thing.def}'s terrain affordance: {terrainAffordance}. {meltedTerrain.LabelCap} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing.LabelCap} can't stand on {meltedTerrain.label} and is destroyed.");
+                        Log($"{thing.def}'s terrain affordance: {terrainAffordance}. {meltedTerrain} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing} can't stand on {meltedTerrain} and is destroyed.");
                         if (thing is Building_Grave grave && grave.HasAnyContents)
                         {
                             Log($"Grave with {grave.ContainedThing?.LabelShort} is uncovered due to melting.");
@@ -138,7 +155,12 @@ namespace Celsius
                 map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
             if (log)
                 Log($"Ice at {cell} melts into {meltedTerrain}.");
-            map.terrainGrid.RemoveTopLayer(cell, false);
+            try
+            {
+                map.terrainGrid.RemoveTopLayer(cell, false);
+            }
+            catch (System.Exception e)
+            { Log($"Failed to remove top layer at {cell} to {meltedTerrain}: {e.Message}", LogLevel.Error); }
         }
 
         // Based on vanilla formula: 0.0058 * T * [T / 10] for 0.06% of cells every tick

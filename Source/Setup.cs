@@ -23,8 +23,8 @@ namespace Celsius
             LogUtility.Log($"Initializing Celsius {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}...", LogLevel.Important);
 
             harmony = new Harmony("Garwel.Celsius");
-            ApplyHarmonyPatches();
-            LogUtility.Log($"Harmony initialization complete.", LogLevel.Important);
+            if (!ApplyHarmonyPatches())
+                LogUtility.Log($"Failed to apply Harmony patches!", LogLevel.Error);
 
             // Adding CompThermal to all applicable Things
             List<ThingThermalProperties> ttpList;
@@ -48,56 +48,62 @@ namespace Celsius
 
         public static bool IsHarmonyPatched => harmony.GetPatchedMethods().Any();
 
-        public static void ApplyHarmonyPatches()
+        public static bool ApplyHarmonyPatches()
         {
             Type type = typeof(Setup);
-            RemoveHarmonyPatches();
-            harmony.Patch(
-                AccessTools.Method("Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
-                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_TryGetDirectAirTemperatureForCell")));
-            harmony.Patch(
-                AccessTools.PropertyGetter(typeof(Room), "Temperature"),
-                prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
-            harmony.Patch(
-                AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
-                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat_IntVec3")));
-            harmony.Patch(
-                AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(Thing), typeof(float) }),
-                prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat_Thing")));
-            harmony.Patch(
-                AccessTools.Method("Verse.GenTemperature:ControlTemperatureTempChange"),
-                postfix: new HarmonyMethod(type.GetMethod("GenTemperature_ControlTemperatureTempChange")));
-            harmony.Patch(
-                AccessTools.Method("RimWorld.SteadyEnvironmentEffects:MeltAmountAt"),
-                postfix: new HarmonyMethod(type.GetMethod("SteadyEnvironmentEffects_MeltAmountAt")));
-            harmony.Patch(
-                AccessTools.Method("Verse.AttachableThing:Destroy"),
-                prefix: new HarmonyMethod(type.GetMethod("AttachableThing_Destroy")));
-            harmony.Patch(
-                AccessTools.Method("RimWorld.JobGiver_SeekSafeTemperature:ClosestRegionWithinTemperatureRange"),
-                prefix: new HarmonyMethod(type.GetMethod("JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange")));
-            harmony.Patch(
-                AccessTools.Method("Verse.DangerUtility:GetDangerFor"),
-                postfix: new HarmonyMethod(type.GetMethod("DangerUtility_GetDangerFor")));
-            harmony.Patch(
-                AccessTools.Method("Verse.MapTemperature:TemperatureUpdate"),
-                prefix: new HarmonyMethod(type.GetMethod("MapTemperature_TemperatureUpdate")));
-            harmony.Patch(
-                AccessTools.Method("RimWorld.GlobalControls:TemperatureString"),
-                prefix: new HarmonyMethod(type.GetMethod("GlobalControls_TemperatureString")));
-            harmony.Patch(
-                AccessTools.Method("RimWorld.Building_Door:DoorOpen"),
-                postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorOpen")));
-            harmony.Patch(
-                AccessTools.Method("RimWorld.Building_Door:DoorTryClose"),
-                postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorTryClose")));
-            harmony.Patch(
-                AccessTools.Method("RimWorld.CompRitualFireOverlay:CompTick"),
-                postfix: new HarmonyMethod(type.GetMethod("CompRitualFireOverlay_CompTick")));
-            if (AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage") != null)
+            try
+            {
+                RemoveHarmonyPatches();
                 harmony.Patch(
-                    AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage"),
-                    postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
+                    AccessTools.Method("Verse.GenTemperature:TryGetDirectAirTemperatureForCell"),
+                    prefix: new HarmonyMethod(type.GetMethod("GenTemperature_TryGetDirectAirTemperatureForCell")));
+                harmony.Patch(
+                    AccessTools.PropertyGetter(typeof(Room), "Temperature"),
+                    prefix: new HarmonyMethod(type.GetMethod("Room_Temperature_get")));
+                harmony.Patch(
+                    AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) }),
+                    prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat_IntVec3")));
+                harmony.Patch(
+                    AccessTools.Method("Verse.GenTemperature:PushHeat", new Type[] { typeof(Thing), typeof(float) }),
+                    prefix: new HarmonyMethod(type.GetMethod("GenTemperature_PushHeat_Thing")));
+                harmony.Patch(
+                    AccessTools.Method("Verse.GenTemperature:ControlTemperatureTempChange"),
+                    postfix: new HarmonyMethod(type.GetMethod("GenTemperature_ControlTemperatureTempChange")));
+                harmony.Patch(
+                    AccessTools.Method("RimWorld.SteadyEnvironmentEffects:MeltAmountAt"),
+                    postfix: new HarmonyMethod(type.GetMethod("SteadyEnvironmentEffects_MeltAmountAt")));
+                harmony.Patch(
+                    AccessTools.Method("Verse.AttachableThing:Destroy"),
+                    prefix: new HarmonyMethod(type.GetMethod("AttachableThing_Destroy")));
+                harmony.Patch(
+                    AccessTools.Method("RimWorld.JobGiver_SeekSafeTemperature:ClosestRegionWithinTemperatureRange"),
+                    prefix: new HarmonyMethod(type.GetMethod("JobGiver_SeekSafeTemperature_ClosestRegionWithinTemperatureRange")));
+                harmony.Patch(
+                    AccessTools.Method("Verse.DangerUtility:GetDangerFor"),
+                    postfix: new HarmonyMethod(type.GetMethod("DangerUtility_GetDangerFor")));
+                harmony.Patch(
+                    AccessTools.Method("Verse.MapTemperature:TemperatureUpdate"),
+                    prefix: new HarmonyMethod(type.GetMethod("MapTemperature_TemperatureUpdate")));
+                harmony.Patch(
+                    AccessTools.Method("RimWorld.GlobalControls:TemperatureString"),
+                    prefix: new HarmonyMethod(type.GetMethod("GlobalControls_TemperatureString")));
+                harmony.Patch(
+                    AccessTools.Method("RimWorld.Building_Door:DoorOpen"),
+                    postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorOpen")));
+                harmony.Patch(
+                    AccessTools.Method("RimWorld.Building_Door:DoorTryClose"),
+                    postfix: new HarmonyMethod(type.GetMethod("Building_Door_DoorTryClose")));
+                harmony.Patch(
+                    AccessTools.Method("RimWorld.CompRitualFireOverlay:CompTick"),
+                    postfix: new HarmonyMethod(type.GetMethod("CompRitualFireOverlay_CompTick")));
+                if (AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage") != null)
+                    harmony.Patch(
+                        AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage"),
+                        postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
+            }
+            catch (Exception e)
+            { return false; }
+            return IsHarmonyPatched;
         }
 
         public static void RemoveHarmonyPatches() => harmony.UnpatchAll("Garwel.Celsius");
@@ -214,6 +220,8 @@ namespace Celsius
         // Attaches to DangerUtility.GetDangerFor to mark specific (too hot or too cold) cells as dangerous
         public static Danger DangerUtility_GetDangerFor(Danger result, IntVec3 c, Pawn p, Map map)
         {
+            if (map == null || p == null)
+                return result;
             float temperature = c.GetTemperatureForCell(map);
             FloatRange range = p.SafeTemperatureRange();
             Danger danger = range.Includes(temperature) ? Danger.None : (range.ExpandedBy(80).Includes(temperature) ? Danger.Some : Danger.Deadly);
