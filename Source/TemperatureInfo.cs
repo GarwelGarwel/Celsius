@@ -176,7 +176,12 @@ namespace Celsius
 
         public void ResetAllThings()
         {
-            List<Thing> things = map.listerThings.AllThings;
+            List<Thing> things = map?.listerThings?.AllThings;
+            if (things == null)
+            { 
+                LogUtility.Log($"ResetAllThings: Couldn't get all things for map {map}.", LogLevel.Error);
+                return;
+            }
             for (int i = 0; i < things.Count; i++)
                 things[i].TryGetComp<CompThermal>()?.Reset();
             Array.Clear(thermalProperties, 0, thermalProperties.Length);
