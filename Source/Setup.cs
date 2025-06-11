@@ -220,6 +220,8 @@ namespace Celsius
         // Attaches to DangerUtility.GetDangerFor to mark specific (too hot or too cold) cells as dangerous
         public static Danger DangerUtility_GetDangerFor(Danger result, IntVec3 c, Pawn p, Map map)
         {
+            if (map == null || p == null)
+                return result;
             float temperature = c.GetTemperatureForCell(map);
             FloatRange range = p.SafeTemperatureRange();
             Danger danger = range.Includes(temperature) ? Danger.None : (range.ExpandedBy(80).Includes(temperature) ? Danger.Some : Danger.Deadly);
