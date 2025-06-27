@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>120</heatCapacity>
+				<insulation>5</insulation>
+				<phaseTransition>Freeze</phaseTransition>
+				<transitionTemperature>-2</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>110</heatCapacity>
+				<insulation>5</insulation>
+				<phaseTransition>Freeze</phaseTransition>
+				<transitionTemperature>-5</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>110</heatCapacity>
+				<insulation>5</insulation>
+				<phaseTransition>Freeze</phaseTransition>
+				<transitionTemperature>-1</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterOceanShallow"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>100</heatCapacity>
+				<insulation>5</insulation>
+				<phaseTransition>Freeze</phaseTransition>
+				<transitionTemperature>-3</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterMovingChestDeep"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>180</heatCapacity>
+				<insulation>5</insulation>
+				<phaseTransition>Freeze</phaseTransition>
+				<transitionTemperature>-4</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="WaterMovingShallow"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>150</heatCapacity>
+				<insulation>5</insulation>
+				<phaseTransition>Freeze</phaseTransition>
+				<transitionTemperature>-3</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="Marsh"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>75</heatCapacity>
+				<insulation>4.5</insulation>
+				<phaseTransition>Freeze</phaseTransition>
+				<transitionTemperature>-1</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/TerrainDef[defName="Ice"]</xpath>
+		<value>
+			<li Class="Celsius.TerrainThermalProperties">
+				<heatCapacity>100</heatCapacity>
+				<insulation>5.5</insulation>
+				<phaseTransition>Melt</phaseTransition>
+				<transitionTemperature>0</transitionTemperature>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>

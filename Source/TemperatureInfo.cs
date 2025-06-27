@@ -218,7 +218,6 @@ namespace Celsius
                             minTemperature = temperatures[i];
                         else if (temperatures[i] > maxTemperature)
                             maxTemperature = temperatures[i];
-                    LogUtility.Log($"Color temperatures: {minTemperature.ToStringTemperature()}..{maxTemperature.ToStringTemperature()}");
                     minMaxTemperaturesUpdated = true;
                 }
                 overlayDrawer.MarkForDraw();

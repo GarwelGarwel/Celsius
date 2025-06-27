@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<!-- DUB'S BAD HYGIENE -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[defName="FreezerUnit"]</xpath>
+		<value>
+			<li Class="Celsius.ThingThermalProperties">
+				<heatCapacity>6</heatCapacity>
+				<insulation>4</insulation>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>

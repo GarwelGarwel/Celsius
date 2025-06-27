@@ -19,7 +19,7 @@ namespace Celsius
             for (int i = 0; i < map.Size.x * map.Size.z; i++)
             {
                 TerrainDef terrain = map.terrainGrid.TerrainAt(i);
-                if (terrain != null && !terrain.holdSnow)
+                if (terrain != null && !terrain.holdSnowOrSand)
                     continue;
                 Building building = map.edificeGrid[i];
                 if (building != null && !SnowGrid.CanCoexistWithSnow(building.def))
