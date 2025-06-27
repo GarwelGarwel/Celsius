@@ -147,8 +147,13 @@ namespace Celsius
                     }
                 }
             }
-            if (map.snowGrid.GetDepth(cell) > 0)
-                map.snowGrid.SetDepth(cell, 0);
+            if (!meltedTerrain.holdSnowOrSand)
+            {
+                if (map.snowGrid.GetDepth(cell) > 0)
+                    map.snowGrid.SetDepth(cell, 0);
+                if (map.sandGrid.GetDepth(cell) > 0)
+                    map.sandGrid.SetDepth(cell, 0);
+            }
 
             // Changing terrain
             if (map.terrainGrid.UnderTerrainAt(index) == null)
