@@ -35,6 +35,8 @@ namespace Celsius
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
         int outdoorSnowMeltRate;
 
+        internal bool isPathfinderUpdating = false;
+
         static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
         static readonly Color minColor = Color.blue;
         static readonly Color minComfortableColor = new Color(0, 1, 0.25f);

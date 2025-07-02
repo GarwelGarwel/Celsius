@@ -48,6 +48,16 @@ namespace Celsius
             return terrainProps != null && terrainProps.MeltsAt(temperature);
         }
 
+        static void WaitForPathfinder(Map map)
+        {
+            TemperatureInfo temperatureInfo = map.TemperatureInfo();
+            if (temperatureInfo != null && temperatureInfo.isPathfinderUpdating)
+            {
+                Log("Waiting for pathfinder to finish updating.");
+                while (temperatureInfo.isPathfinderUpdating) ;
+            }
+        }
+
         /// <summary>
         /// Returns best guess for what kind of water terrain should be placed in a cell (if ice melts there)
         /// </summary>
@@ -91,13 +101,9 @@ namespace Celsius
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
                 Log($"{terrain} freezes at {cell}.");
-            try
-            {
-                map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
-                map.terrainGrid.SetUnderTerrain(cell, terrain);
-            }
-            catch (System.Exception e)
-            { Log($"Failed to freeze {terrain} at {cell}: {e.Message}", LogLevel.Error); }
+            WaitForPathfinder(map);
+            map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
+            map.terrainGrid.SetUnderTerrain(cell, terrain);
         }
 
         /// <summary>
@@ -107,6 +113,8 @@ namespace Celsius
         {
             int index = map.cellIndices.CellToIndex(cell);
             TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
+            WaitForPathfinder(map);
+
             // Removing things that can't stay on the melted terrain
             List<Thing> things = map.thingGrid.ThingsListAtFast(index);
             for (int i = things.Count - 1; i >= 0; i--)
@@ -117,13 +125,13 @@ namespace Celsius
                 if (meltedTerrain.passability == Traversability.Impassable)
                     if (thing is Pawn pawn)
                     {
-                        Log($"{pawn.LabelCap} drowns in {meltedTerrain}.");
+                        Log($"{pawn.LabelShortCap} drowns in {meltedTerrain}.");
                         pawn.health?.AddHediff(DefOf.Celsius_Hediff_Drown, dinfo: new DamageInfo(DefOf.Celsius_Damage_Drown, 1));
                         pawn.Corpse?.Destroy();
                     }
                     else
                     {
-                        Log($"{thing.LabelCap} sinks in {meltedTerrain}.");
+                        Log($"{thing} sinks in {meltedTerrain}.");
                         CompDissolution compDissolution = thing.TryGetComp<CompDissolution>();
                         if (compDissolution != null)
                         {
@@ -137,7 +145,7 @@ namespace Celsius
                     TerrainAffordanceDef terrainAffordance = thing.TerrainAffordanceNeeded;
                     if (terrainAffordance != null && !meltedTerrain.affordances.Contains(terrainAffordance))
                     {
-                        Log($"{thing.def}'s terrain affordance: {terrainAffordance}. {meltedTerrain} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing} can't stand on {meltedTerrain} and is destroyed.");
+                        Log($"{thing}'s terrain affordance: {terrainAffordance}. {meltedTerrain} provides: {meltedTerrain.affordances.Select(def => def.defName).ToCommaList()}. {thing} can't stand on {meltedTerrain} and is destroyed.");
                         if (thing is Building_Grave grave && grave.HasAnyContents)
                         {
                             Log($"Grave with {grave.ContainedThing?.LabelShort} is uncovered due to melting.");
@@ -151,7 +159,7 @@ namespace Celsius
             {
                 if (map.snowGrid.GetDepth(cell) > 0)
                     map.snowGrid.SetDepth(cell, 0);
-                if (map.sandGrid.GetDepth(cell) > 0)
+                if (map.sandGrid != null && map.sandGrid.GetDepth(cell) > 0)
                     map.sandGrid.SetDepth(cell, 0);
             }
 
@@ -160,12 +168,7 @@ namespace Celsius
                 map.terrainGrid.SetUnderTerrain(cell, meltedTerrain);
             if (log)
                 Log($"Ice at {cell} melts into {meltedTerrain}.");
-            try
-            {
-                map.terrainGrid.RemoveTopLayer(cell, false);
-            }
-            catch (System.Exception e)
-            { Log($"Failed to remove top layer at {cell} to {meltedTerrain}: {e.Message}", LogLevel.Error); }
+            map.terrainGrid.RemoveTopLayer(cell, false);
         }
 
         // Based on vanilla formula: 0.0058 * T * [T / 10] for 0.06% of cells every tick
