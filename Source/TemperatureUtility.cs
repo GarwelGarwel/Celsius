@@ -97,7 +97,7 @@ namespace Celsius
         public static void CalculateHeatTransferCells(float interactingTemperature, ThermalProps props, float airflow, ref float energy, ref float heatFlow, bool log = false)
         {
             // Air has heat capacity = 1 and conductivity = 1
-            if (airflow == 1 && props.IsAir)
+            if (airflow == 1 && props.isAir)
             {
                 heatFlow++;
                 energy += interactingTemperature;
@@ -125,7 +125,7 @@ namespace Celsius
             float hf;
             if (roof == null)
             {
-                if (props.IsAir)  // Air-to-air exchange (most common way on most maps)
+                if (props.isAir)  // Air-to-air exchange (most common way on most maps)
                 {
                     heatFlow += Settings.EnvironmentDiffusionFactor;
                     energy += environmentTemperature * Settings.EnvironmentDiffusionFactor;

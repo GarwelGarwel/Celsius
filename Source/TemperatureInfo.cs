@@ -35,6 +35,8 @@ namespace Celsius
         Dictionary<int, float> roomTemperatures = new Dictionary<int, float>();
         int outdoorSnowMeltRate;
 
+        internal bool isPathfinderUpdating = false;
+
         static float minComfortableTemperature = TemperatureTuning.DefaultTemperature - 5, maxComfortableTemperature = TemperatureTuning.DefaultTemperature + 5;
         static readonly Color minColor = Color.blue;
         static readonly Color minComfortableColor = new Color(0, 1, 0.25f);
@@ -218,7 +220,6 @@ namespace Celsius
                             minTemperature = temperatures[i];
                         else if (temperatures[i] > maxTemperature)
                             maxTemperature = temperatures[i];
-                    LogUtility.Log($"Color temperatures: {minTemperature.ToStringTemperature()}..{maxTemperature.ToStringTemperature()}");
                     minMaxTemperaturesUpdated = true;
                 }
                 overlayDrawer.MarkForDraw();
@@ -284,6 +285,7 @@ namespace Celsius
                         ThermalProps cellProps = GetThermalPropertiesAt(i);
                         float heatFlow = cellProps.HeatFlow; // How quickly the system changes its temperature (capacity * conductivity)
                         float energy = temperature * heatFlow; // How much energy is added to the cell (temperature * capacity * conductivity)
+                        TerrainDef terrain = map.terrainGrid.TerrainAt(i);
 
                         // Terrain temperature
                         if (updateTerrainTemperature)
@@ -291,7 +293,6 @@ namespace Celsius
                             float terrainTemperature = terrainTemperatures[i];
                             if (!float.IsNaN(terrainTemperature))
                             {
-                                TerrainDef terrain = map.terrainGrid.TerrainAt(i);
                                 TerrainThermalProperties terrainProps = terrain?.GetTerrainThermalProperties();
                                 if (terrainProps != null && terrainProps.heatCapacity > 0)
                                 {
@@ -302,6 +303,18 @@ namespace Celsius
                                     if (log)
                                         LogUtility.Log($"Terrain temperature: {terrainTemperature:F1}C. Terrain heat capacity: {thermalProps.heatCapacity}. Terrain heatflow: {thermalProps.HeatFlow:P0}. Equilibrium temperature: {terrainTemperature + terrainTempChange:F1}C.");
                                     terrainTemperature += terrainTempChange * thermalProps.conductivity;
+
+                                    // Make sure that terrains that push or pull heat are at least as hot or cold as the air in the cell (maybe will add a more accurate calculation later)
+                                    if (terrain.heatPerTick > 0)
+                                    {
+                                        if (terrainTemperature < temperature)
+                                            terrainTemperature = temperature;
+                                    }
+                                    else if (terrain.heatPerTick < 0)
+                                    {
+                                        if (terrainTemperature > temperature)
+                                            terrainTemperature = temperature;
+                                    }
 
                                     // Melting or freezing if terrain temperature has crossed respective melt/freeze points (upwards or downwards)
                                     if (terrainProps.MeltsAt(terrainTemperature))
@@ -340,6 +353,23 @@ namespace Celsius
                             LogUtility.Log($"Total cell + neighbours energy: {energy:F4}. Total heat flow rate: {heatFlow:F4}. Equilibrium temperature: {equilibriumTemp:F1}C.");
 
                         temperature += (equilibriumTemp - temperature) * cellProps.conductivity;
+
+                        // Terrain heat push (only when SteadyEnvironmentEffects.DoCellSteadyEffects hasn't done it yet)
+                        bool shouldPushHeat = terrain.heatPerTick > 0;
+                        if (shouldPushHeat)
+                        {
+                            Room room = cell.GetRoom(map);
+                            if (room != null && !room.UsesOutdoorTemperature)
+                                shouldPushHeat = false;
+                        }
+                        else shouldPushHeat = terrain.heatPerTick < 0;
+                        if (shouldPushHeat)
+                        {
+                            if (log)
+                                LogUtility.Log($"Terrain {terrain} at {cell} pushes {terrain.heatPerTick:F4} heat.");
+                            temperature += terrain.heatPerTick * Settings.TicksPerUpdate * Settings.HeatPushEffect / cellProps.heatCapacity;
+                        }
+
                         worksetTemperatures[i] = temperature;
 
                         // Snow melting
@@ -480,16 +510,20 @@ namespace Celsius
 
         public ThermalProps GetThermalPropertiesAt(int index)
         {
-            if (thermalProperties[index] != null)
-                return thermalProperties[index];
+            ThermalProps props = thermalProperties[index];
+            if (props != null)
+                return props;
             List<Thing> thingsList = map.thingGrid.ThingsListAtFast(index);
             for (int i = thingsList.Count - 1; i >= 0; i--)
-                if (CompThermal.ShouldApplyTo(thingsList[i].def))
+            {
+                Thing thing = thingsList[i];
+                if (CompThermal.ShouldApplyTo(thing.def))
                 {
-                    ThermalProps thermalProps = thingsList[i].TryGetComp<CompThermal>()?.ThermalProperties;
-                    if (thermalProps != null)
-                        return thermalProperties[index] = thermalProps;
+                    props = thing.TryGetComp<CompThermal>()?.ThermalProperties;
+                    if (props != null)
+                        return thermalProperties[index] = props;
                 }
+            }
             return thermalProperties[index] = ThermalProps.Air;
         }
 

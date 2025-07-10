@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Verse;
 
 namespace Celsius
@@ -96,9 +97,15 @@ namespace Celsius
                 harmony.Patch(
                     AccessTools.Method("RimWorld.CompRitualFireOverlay:CompTick"),
                     postfix: new HarmonyMethod(type.GetMethod("CompRitualFireOverlay_CompTick")));
-                if (AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage") != null)
+                harmony.Patch(
+                    AccessTools.Method("Verse.PathFinder:PathFinderTick"),
+                    prefix: new HarmonyMethod(type.GetMethod("PathFinder_PathFinderTick_Prefix")),
+                    postfix: new HarmonyMethod(type.GetMethod("PathFinder_PathFinderTick_Postfix")));
+
+                MethodInfo method = AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage");
+                if (method != null)
                     harmony.Patch(
-                        AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage"),
+                        method,
                         postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
             }
             catch (Exception e)
@@ -212,7 +219,9 @@ namespace Celsius
                 return false;
             };
             RegionTraverser.BreadthFirstTraverse(region, (Region from, Region r) => r.Allows(traverseParms, false), regionProcessor);
-            LogUtility.Log($"Safe region found: {foundReg}");
+            if (foundReg != null)
+                LogUtility.Log($"Safe region found: {foundReg.DebugString}");
+            else LogUtility.Log($"No safe region found for {root.GetFirstPawn(map)} at {root} (t = {root.GetTemperatureForCell(map):F1}C)");
             __result = foundReg;
             return false;
         }
@@ -278,6 +287,21 @@ namespace Celsius
         {
             if (GenTicks.TicksAbs % 60 == 0 && __instance.FireSize > 0)
                 TemperatureUtility.TryPushHeat(__instance.parent.Position, __instance.parent.Map, __instance.FireSize * HeatPushPerFireSize);
+        }
+
+        // Mark the map as being updated by the pathfinder, to prevent freezing/melting of terrain during pathfinding
+        public static void PathFinder_PathFinderTick_Prefix(Map ___map)
+        {
+            TemperatureInfo temperatureInfo = ___map.TemperatureInfo();
+            if (temperatureInfo != null)
+                temperatureInfo.isPathfinderUpdating = true;
+        }
+
+        public static void PathFinder_PathFinderTick_Postfix(Map ___map)
+        {
+            TemperatureInfo temperatureInfo = ___map.TemperatureInfo();
+            if (temperatureInfo != null)
+                temperatureInfo.isPathfinderUpdating = false;
         }
 
         // Vanilla Vehicles Expanded: When opening or closing a garage door, update its state and thermal values
