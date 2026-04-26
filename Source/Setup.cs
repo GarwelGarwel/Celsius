@@ -108,7 +108,7 @@ namespace Celsius
                         method,
                         postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
             }
-            catch (Exception e)
+            catch (Exception)
             { return false; }
             return IsHarmonyPatched;
         }
