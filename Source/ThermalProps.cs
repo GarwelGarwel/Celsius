@@ -26,7 +26,7 @@ namespace Celsius
             this.heatCapacity = heatCapacity;
             this.insulation = TemperatureUtility.GetInsulationWithAirflow(insulation, airflow);
             this.airflow = airflow;
-            conductivity = Mathf.Pow(Settings.ConductivityPowerBase, insulation);
+            conductivity = Mathf.Pow(Settings.ConductivityPowerBase, this.insulation);
             heatflow = heatCapacity * conductivity / Settings.ConvectionConductivityEffect;
             this.isAir = isAir;
         }

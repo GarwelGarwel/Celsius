@@ -48,16 +48,6 @@ namespace Celsius
             return terrainProps != null && terrainProps.MeltsAt(temperature);
         }
 
-        static void WaitForPathfinder(Map map)
-        {
-            TemperatureInfo temperatureInfo = map.TemperatureInfo();
-            if (temperatureInfo != null && temperatureInfo.isPathfinderUpdating)
-            {
-                Log("Waiting for pathfinder to finish updating.");
-                while (temperatureInfo.isPathfinderUpdating) ;
-            }
-        }
-
         /// <summary>
         /// Returns best guess for what kind of water terrain should be placed in a cell (if ice melts there)
         /// </summary>
@@ -101,7 +91,7 @@ namespace Celsius
             TerrainDef terrain = cell.GetTerrain(map);
             if (log)
                 Log($"{terrain} freezes at {cell}.");
-            WaitForPathfinder(map);
+            if (map.TemperatureInfo()?.isPathfinderUpdating == true) return;
             map.terrainGrid.SetTerrain(cell, terrain.GetTerrainThermalProperties()?.turnsInto ?? TerrainDefOf.Ice);
             map.terrainGrid.SetUnderTerrain(cell, terrain);
         }
@@ -113,7 +103,7 @@ namespace Celsius
         {
             int index = map.cellIndices.CellToIndex(cell);
             TerrainDef meltedTerrain = cell.BestUnderIceTerrain(map);
-            WaitForPathfinder(map);
+            if (map.TemperatureInfo()?.isPathfinderUpdating == true) return;
 
             // Removing things that can't stay on the melted terrain
             List<Thing> things = map.thingGrid.ThingsListAtFast(index);

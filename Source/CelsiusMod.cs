@@ -37,7 +37,9 @@ namespace Celsius
             content.Label("Celsius_Settings_TakeOwnRisk".Translate().Colorize(Color.red));
 
             content.Label("Celsius_Settings_UpdateInterval".Translate(TicksPerUpdate), tooltip: "Celsius_Settings_UpdateInterval_tooltip".Translate(TicksPerUpdate_Default));
-            TicksPerUpdate = (int)content.Slider(TicksPerUpdate, 60, 1000).RoundWithPrecision(20);
+            TicksPerUpdate = Mathf.RoundToInt(content.Slider(TicksPerUpdate, 1, 12));
+            content.Label("Celsius_Settings_Workers".Translate(WorkerThreads), tooltip: "Celsius_Settings_Workers_tooltip".Translate());
+            WorkerThreads = Mathf.RoundToInt(content.Slider(WorkerThreads, 1, 8));
 
             content.Label($"{"Celsius_Settings_ConvectionConductivityEffect".Translate()} x{ConvectionConductivityEffect}", tooltip: "Celsius_Settings_ConvectionConductivityEffect_tooltip".Translate(ConvectionConductivityEffect_Default));
             ConvectionConductivityEffect = Mathf.Round(content.Slider(ConvectionConductivityEffect, 1, 50));

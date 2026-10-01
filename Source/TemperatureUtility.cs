@@ -14,11 +14,14 @@ namespace Celsius
 
         public static TemperatureInfo TemperatureInfo(this Map map)
         {
+            if (map == null) return null;
             if (temperatureInfos.TryGetValue(map, out TemperatureInfo temperatureInfo))
                 return temperatureInfo;
             temperatureInfo = map.GetComponent<TemperatureInfo>();
-            if (temperatureInfo != null)
-                temperatureInfos.Add(map, temperatureInfo);
+            // During loading Map constructs components before Scribe replaces them. Never cache that
+            // temporary object from an early roof/thing notification.
+            if (temperatureInfo == null || !temperatureInfo.IsInitialized) return null;
+            temperatureInfos[map] = temperatureInfo;
             return temperatureInfo;
         }
 
@@ -34,6 +37,8 @@ namespace Celsius
             // Resetting thermal props for all ThingDefs & Things
             for (int i = 0; i < DefDatabase<ThingDef>.AllDefsListForReading.Count; i++)
                 DefDatabase<ThingDef>.AllDefsListForReading[i].GetModExtension<ThingThermalProperties>()?.Reset();
+            foreach (TerrainDef terrain in DefDatabase<TerrainDef>.AllDefsListForReading)
+                terrain.GetTerrainThermalProperties()?.Reset();
 
             // Resetting maps' temperature info cache and trying to re-initialize terrain temperatures
             if (temperatureInfos != null)

@@ -60,4 +60,6 @@
 	<Celsius_StatPart_WindSpeed_Explanation>Wind x{0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
 	<Celsius_StatPart_DirectSunlight_Explanation>In der Sonne: {0}</Celsius_StatPart_DirectSunlight_Explanation>
 
+	<Celsius_Settings_Workers>Temperatur-Worker: {0}</Celsius_Settings_Workers>
+	<Celsius_Settings_Workers_tooltip>Anzahl dauerhafter Worker pro Karte (1–8, einschließlich Koordinator). Mehr Worker können den Rückstand der Temperatursimulation verringern. Vergleiche Spielgeschwindigkeit und Bildzeiten auf deinem System.</Celsius_Settings_Workers_tooltip>
 </LanguageData>

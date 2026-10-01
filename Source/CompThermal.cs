@@ -14,6 +14,7 @@ namespace Celsius
             get => isOpen;
             set
             {
+                if (isOpen == value && thermalProps != null) return;
                 isOpen = value;
                 Reset();
             }
@@ -30,7 +31,13 @@ namespace Celsius
 
         internal static bool ShouldApplyTo(ThingDef thingDef) => thingDef.category == ThingCategory.Building && thingDef.HasModExtension<ThingThermalProperties>();
 
-        internal void Reset() => thermalProps = ThingThermalProperties.GetThermalProps(StuffThermalProperties, IsOpen);
+        internal void Reset()
+        {
+            thermalProps = ThingThermalProperties.GetThermalProps(StuffThermalProperties, IsOpen);
+            Map map = parent.Map;
+            if (map != null && parent.Spawned)
+                foreach (IntVec3 cell in parent.OccupiedRect()) map.TemperatureInfo()?.InvalidateCell(cell);
+        }
 
         public override void Initialize(CompProperties props)
         {
