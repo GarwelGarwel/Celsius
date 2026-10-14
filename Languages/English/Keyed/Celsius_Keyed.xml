@@ -70,4 +70,6 @@
 	<Celsius_StatPart_WindSpeed_Explanation>Wind {0}: {1}</Celsius_StatPart_WindSpeed_Explanation>
 	<Celsius_StatPart_DirectSunlight_Explanation>Direct sunlight: {0}</Celsius_StatPart_DirectSunlight_Explanation>
 
+	<Celsius_Settings_Workers>Thermal workers: {0}</Celsius_Settings_Workers>
+	<Celsius_Settings_Workers_tooltip>Number of persistent workers per map (1–8, including the coordinator). More workers may reduce thermal backlog; compare simulation speed and frame pacing on your system.</Celsius_Settings_Workers_tooltip>
 </LanguageData>

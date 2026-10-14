@@ -13,6 +13,7 @@ namespace Celsius
         public static bool AutoignitionEnabled;
         public static bool PawnWeatherEffects;
         public static int TicksPerUpdate;
+        public static int WorkerThreads = 8;
         public static float ConductivityPowerBase;
         public static float ConvectionConductivityEffect;
         public static float EnvironmentDiffusionFactor;
@@ -24,7 +25,8 @@ namespace Celsius
         public static string TemperatureDisplayFormatString;
         public static bool DebugMode = Prefs.LogVerbose;
 
-        public const int TicksPerUpdate_Default = 120;
+        public const int TicksPerUpdate_Default = 6;
+        public const int ThermalReferenceTicks = 120;
         public const float ConductivityPowerBase_Default = 0.5f;
         public const float ConvectionConductivityEffect_Default = 10;
         public const float EnvironmentDiffusionFactor_Default = 0.10f;
@@ -42,6 +44,7 @@ namespace Celsius
             Scribe_Values.Look(ref AutoignitionEnabled, "AutoignitionEnabled", true);
             Scribe_Values.Look(ref PawnWeatherEffects, "PawnWeatherEffects", true);
             Scribe_Values.Look(ref TicksPerUpdate, "TicksPerUpdate", TicksPerUpdate_Default);
+            Scribe_Values.Look(ref WorkerThreads, "WorkerThreads", 8);
             Scribe_Values.Look(ref ConvectionConductivityEffect, "ConvectionConductivityEffect", ConvectionConductivityEffect_Default);
             Scribe_Values.Look(ref EnvironmentDiffusionFactor, "EnvironmentDiffusionFactor", EnvironmentDiffusionFactor_Default);
             Scribe_Values.Look(ref RoofInsulation, "RoofInsulation", RoofInsulation_Default);
@@ -61,6 +64,7 @@ namespace Celsius
             AutoignitionEnabled = true;
             PawnWeatherEffects = true;
             TicksPerUpdate = TicksPerUpdate_Default;
+            WorkerThreads = 8;
             ConvectionConductivityEffect = ConvectionConductivityEffect_Default;
             EnvironmentDiffusionFactor = EnvironmentDiffusionFactor_Default;
             RoofInsulation = RoofInsulation_Default;
@@ -72,8 +76,11 @@ namespace Celsius
 
         internal static void RecalculateValues()
         {
+            TicksPerUpdate = Mathf.Clamp(TicksPerUpdate, 1, 12);
+            WorkerThreads = Mathf.Clamp(WorkerThreads, 1, 8);
+            ConvectionConductivityEffect = Mathf.Max(1, ConvectionConductivityEffect);
             TemperatureDisplayFormatString = $"F{TemperatureDisplayDigits}";
-            ConductivityPowerBase = Mathf.Pow(ConductivityPowerBase_Default, (float)TicksPerUpdate_Default / TicksPerUpdate);
+            ConductivityPowerBase = ConductivityPowerBase_Default;
             RoofDiffusionFactor = EnvironmentDiffusionFactor * Mathf.Pow(ConductivityPowerBase, RoofInsulation);
             HeatPushEffect = HeatPushEffect_Base * HeatPushMultiplier;
         }
