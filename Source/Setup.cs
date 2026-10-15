@@ -100,7 +100,9 @@ namespace Celsius
                 harmony.Patch(
                     AccessTools.Method("Verse.PathFinder:PathFinderTick"),
                     prefix: new HarmonyMethod(type.GetMethod("PathFinder_PathFinderTick_Prefix")),
-                    postfix: new HarmonyMethod(type.GetMethod("PathFinder_PathFinderTick_Postfix")));
+                    finalizer: new HarmonyMethod(type.GetMethod("PathFinder_PathFinderTick_Postfix")));
+
+                ThermalInvalidation.Install(harmony);
 
                 MethodInfo method = AccessTools.Method("VanillaVehiclesExpanded.GarageDoor:SpawnGarage");
                 if (method != null)
@@ -109,7 +111,7 @@ namespace Celsius
                         postfix: new HarmonyMethod(type.GetMethod("VVE_GarageDoor_SpawnGarage")));
             }
             catch (Exception e)
-            { return false; }
+            { Log.Error("[Celsius] Patch installation failed: " + e); return false; }
             return IsHarmonyPatched;
         }
 
@@ -133,7 +135,12 @@ namespace Celsius
         }
 
         // Replaces GenTemperature.PushHeat(IntVec3, Map, float) to change temperature at the specific cell instead of the whole room
-        public static bool GenTemperature_PushHeat_IntVec3(ref bool __result, IntVec3 c, Map map, float energy) => __result = TemperatureUtility.TryPushHeat(c, map, energy);
+        public static bool GenTemperature_PushHeat_IntVec3(ref bool __result, IntVec3 c, Map map, float energy)
+        {
+            if (!TemperatureUtility.TryPushHeat(c, map, energy)) return true;
+            __result = true;
+            return false;
+        }
 
         // Replaces GenTemperature.PushHeat(Thing, float) to push heat evenly from big things (e.g. geysers)
         public static bool GenTemperature_PushHeat_Thing(Thing t, float energy)
@@ -165,14 +172,16 @@ namespace Celsius
             if (energyLimit > 0)
                 if (roomTemp < targetTemperature - TemperatureUtility.TemperatureChangePrecision)
                 {
+                    float before = cell.GetTemperatureForCell(map);
                     TemperatureUtility.TryPushHeat(cell, map, energyLimit);
-                    return energyLimit;
+                    return cell.GetTemperatureForCell(map) - before;
                 }
                 else return 0;
             else if (roomTemp > targetTemperature + TemperatureUtility.TemperatureChangePrecision)
             {
+                float before = cell.GetTemperatureForCell(map);
                 TemperatureUtility.TryPushHeat(cell, map, energyLimit);
-                return energyLimit;
+                return cell.GetTemperatureForCell(map) - before;
             }
             else return 0;
         }
