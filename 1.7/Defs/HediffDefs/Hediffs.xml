@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<HediffDef>
+		<defName>Celsius_Hediff_Drown</defName>
+		<label>drowning</label>
+		<description>The pawn suddenly fell in deep water and drowned.</description>
+		<initialSeverity>1</initialSeverity>
+		<lethalSeverity>1</lethalSeverity>
+	</HediffDef>
+
+</Defs>
